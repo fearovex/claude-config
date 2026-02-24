@@ -170,7 +170,7 @@ auth/
   "status": "ok|warning|blocked",
   "resumen": "Design for [change-name]: [N] affected files, approach [brief description], risk [level].",
   "artefactos": ["openspec/changes/<name>/design.md"],
-  "siguiente_recomendado": ["sdd-tasks (requires spec + design completed)"],
+  "next_recommended": ["sdd-tasks (requires spec + design completed)"],
   "riesgos": ["[technical risk if found]"]
 }
 ```

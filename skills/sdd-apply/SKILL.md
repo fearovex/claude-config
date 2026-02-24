@@ -96,7 +96,7 @@ If I am implementing in a specific stack, I load the corresponding skill:
   "desviaciones": [
     "DEVIATION in task 2.1: [description and reason]"
   ],
-  "siguiente_recomendado": ["sdd-apply (Phase 2)"],
+  "next_recommended": ["sdd-apply (Phase 2)"],
   "riesgos": []
 }
 ```

@@ -154,7 +154,7 @@ docs/ai-context/ with the decisions from this cycle.
     "openspec/specs/<domain>/spec.md — updated",
     "openspec/changes/archive/YYYY-MM-DD-<name>/ — created"
   ],
-  "siguiente_recomendado": ["memory:update"],
+  "next_recommended": ["memory:update"],
   "riesgos": []
 }
 ```

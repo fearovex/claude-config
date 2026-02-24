@@ -127,7 +127,7 @@ Design: openspec/changes/[name]/design.md
   "status": "ok|warning|blocked",
   "resumen": "Plan for [change-name]: [N] phases, [M] total tasks. Estimate: [Low/Medium/High].",
   "artefactos": ["openspec/changes/<name>/tasks.md"],
-  "siguiente_recomendado": ["sdd-apply"],
+  "next_recommended": ["sdd-apply"],
   "riesgos": ["[blocker if any]"]
 }
 ```

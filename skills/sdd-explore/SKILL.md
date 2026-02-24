@@ -102,7 +102,7 @@ If invoked as `/sdd:explore <change-name>`, I save to:
   "status": "ok|warning|blocked",
   "resumen": "Analysis of [topic]: [2-3 lines of the main finding]",
   "artefactos": ["openspec/changes/<name>/exploration.md"],
-  "siguiente_recomendado": ["sdd-propose"],
+  "next_recommended": ["sdd-propose"],
   "riesgos": ["[risk if found]"]
 }
 ```

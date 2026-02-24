@@ -174,7 +174,7 @@ Verifier: sdd-verify
   "status": "ok|warning|failed",
   "resumen": "Verification [change-name]: [verdict]. [N] critical, [M] warnings.",
   "artefactos": ["openspec/changes/<name>/verify-report.md"],
-  "siguiente_recomendado": ["sdd-archive (if PASS or PASS WITH WARNINGS)"],
+  "next_recommended": ["sdd-archive (if PASS or PASS WITH WARNINGS)"],
   "riesgos": ["CRITICAL: [description if any]"]
 }
 ```

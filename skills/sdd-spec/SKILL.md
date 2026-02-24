@@ -155,7 +155,7 @@ For each requirement I include:
     "openspec/changes/<name>/specs/<domain1>/spec.md",
     "openspec/changes/<name>/specs/<domain2>/spec.md"
   ],
-  "siguiente_recomendado": ["sdd-tasks (after sdd-design)"],
+  "next_recommended": ["sdd-tasks (after sdd-design)"],
   "riesgos": []
 }
 ```

@@ -114,7 +114,7 @@ Next step: specs + design (can run in parallel)
   "status": "ok|warning|blocked",
   "resumen": "Proposal [name]: [intent in one line]. Risk [level].",
   "artefactos": ["openspec/changes/<name>/proposal.md"],
-  "siguiente_recomendado": ["sdd-spec", "sdd-design"],
+  "next_recommended": ["sdd-spec", "sdd-design"],
   "riesgos": ["[main risk if any]"]
 }
 ```

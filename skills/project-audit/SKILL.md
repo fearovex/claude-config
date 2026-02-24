@@ -42,11 +42,22 @@ Ejecuto todas las dimensiones de forma sistemática, leyendo archivos reales. Nu
 
 **Objetivo**: Verificar que el CLAUDE.md del proyecto es completo, preciso y habilita SDD.
 
+**Project type detection (run before checks):**
+
+Check if the project is a `global-config` repo:
+- Condition A: `install.sh` + `sync.sh` exist at project root, OR
+- Condition B: `openspec/config.yaml` contains `framework: "Claude Code SDD meta-system"`
+
+If detected as global-config:
+- Accept `CLAUDE.md` at root as equivalent to `.claude/CLAUDE.md`
+- Note in report header: `Project Type: global-config`
+- The CLAUDE.md path check passes without penalty
+
 **Checks a ejecutar:**
 
 | Check | Cómo verifico | Severidad si falla |
 |-------|--------------|-------------------|
-| Existe `.claude/CLAUDE.md` | Intento leerlo | ❌ CRÍTICO |
+| Existe `.claude/CLAUDE.md` (or root `CLAUDE.md` for global-config repos) | Intento leerlo | ❌ CRÍTICO |
 | No está vacío (>50 líneas) | Contar líneas | ❌ CRÍTICO |
 | Tiene sección Stack | Buscar `## Tech Stack` o `## Stack` | ⚠️ ALTO |
 | Stack coincide con package.json/pyproject.toml | Leer ambos, comparar versiones clave | ⚠️ ALTO |
@@ -357,7 +368,7 @@ violations:
 
 | Check | Estado | Detalle |
 |-------|--------|---------|
-| Existe `.claude/CLAUDE.md` | ✅/❌ | |
+| Existe `.claude/CLAUDE.md` (or root `CLAUDE.md` for global-config repos) | ✅/❌ | |
 | Tiene >50 líneas | ✅/❌ | [X] líneas |
 | Stack documentado | ✅/⚠️/❌ | |
 | Stack vs package.json | ✅/⚠️/❌ | [discrepancias específicas] |

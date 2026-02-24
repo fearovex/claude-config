@@ -200,6 +200,45 @@ Para cada referencia rota: reporto el archivo fuente, la línea aproximada, y el
 
 ---
 
+### Dimensión 8 — Testing & Verification Integrity
+
+**Objetivo**: Verificar que el proyecto exige y evidencia pruebas reales antes de archivar cambios SDD.
+
+**Checks:**
+
+#### 8a. openspec/config.yaml tiene sección de testing
+| Check | Severidad |
+|-------|-----------|
+| `config.yaml` tiene bloque `testing:` | ⚠️ ALTO |
+| Define `minimum_score_to_archive` | ⚠️ ALTO |
+| Define `required_artifacts_per_change` | ⚠️ MEDIO |
+| Define `verify_report_requirements` | ⚠️ MEDIO |
+| Tiene `test_project` o estrategia de prueba documentada | ℹ️ BAJO |
+
+#### 8b. Cambios archivados tienen verify-report.md
+Para cada carpeta en `openspec/changes/archive/`:
+- ¿Existe `verify-report.md`? Si no → ⚠️ ALTO
+- ¿Tiene al menos un ítem `[x]` en su checklist? Si no → ⚠️ ALTO
+- ¿Menciona qué proyecto/contexto fue usado para verificar? Si no → ℹ️ BAJO
+
+Reporto:
+```
+Cambios archivados sin verify-report.md: [lista]
+Cambios con verify-report.md vacío o sin [x]: [lista]
+```
+
+#### 8c. Cambios activos tienen criterios de verificación definidos
+Para cada carpeta activa en `openspec/changes/` (no archivadas):
+- Si tiene `tasks.md` → ¿incluye sección de criterios de verificación?
+- Si tiene `design.md` → ¿define cómo se probará el cambio?
+
+#### 8d. Reglas de verify en config.yaml son ejecutables
+Leo el bloque `rules.verify` del `openspec/config.yaml` y evalúo:
+- ¿Son verificables objetivamente o son frases vacías como "asegurarse de que funciona"?
+- ¿Al menos una regla menciona `/project:audit` o una métrica concreta?
+
+---
+
 ### Dimensión 7 — Architecture Compliance (sampling)
 
 **Objetivo**: Verificar con muestras reales que el código sigue la arquitectura documentada.
@@ -299,11 +338,12 @@ violations:
 | CLAUDE.md completo y preciso | [X] | 20 | ✅/⚠️/❌ |
 | Memoria inicializada | [X] | 15 | ✅/⚠️/❌ |
 | Memoria con contenido sustancial | [X] | 10 | ✅/⚠️/❌ |
-| SDD Orchestrator operativo | [X] | 25 | ✅/⚠️/❌ |
+| SDD Orchestrator operativo | [X] | 20 | ✅/⚠️/❌ |
 | Skills registry íntegro y funcional | [X] | 10 | ✅/⚠️/❌ |
 | Commands registry íntegro y funcional | [X] | 10 | ✅/⚠️/❌ |
 | Cross-references válidas | [X] | 5 | ✅/⚠️/❌ |
 | Architecture compliance | [X] | 5 | ✅/⚠️/❌ |
+| Testing & Verification integrity | [X] | 5 | ✅/⚠️/❌ |
 | **TOTAL** | **[X]** | **100** | |
 
 **SDD Readiness**: [FULL / PARTIAL / NOT CONFIGURED]
@@ -422,6 +462,20 @@ violations:
 
 ---
 
+## Dimensión 8 — Testing & Verification [OK|ADVERTENCIA|CRÍTICO]
+
+**openspec/config.yaml tiene bloque testing:** ✅/❌
+
+**Cambios archivados sin verify-report.md:**
+[lista o "ninguna"]
+
+**Cambios archivados con verify-report.md vacío (sin [x]):**
+[lista o "ninguna"]
+
+**Reglas de verify son ejecutables:** ✅/⚠️/❌
+
+---
+
 ## Acciones Requeridas
 
 ### Críticas (bloquean SDD):
@@ -451,11 +505,12 @@ violations:
 | **CLAUDE.md** | Existe + estructura completa + stack preciso + SDD refs | 20 |
 | **Memoria — existencia** | Los 5 archivos existen | 15 |
 | **Memoria — calidad** | Contenido sustancial + coherente con código | 10 |
-| **SDD Orchestrator** | Global skills + openspec/ + config.yaml + CLAUDE.md refs | 25 |
+| **SDD Orchestrator** | Global skills + openspec/ + config.yaml + CLAUDE.md refs | 20 |
 | **Skills** | Registry exacto + contenido mínimo + sin skills globales faltantes | 10 |
 | **Commands** | Registry exacto + commands funcionales | 10 |
 | **Cross-references** | Sin referencias rotas | 5 |
 | **Architecture** | Sin violaciones críticas en muestras | 5 |
+| **Testing & Verification** | config.yaml tiene testing block + cambios archivados tienen verify-report.md | 5 |
 
 **Interpretación:**
 - 90-100: SDD fully operational, excelente mantenimiento

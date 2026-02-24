@@ -39,5 +39,21 @@ rules:
     - "Update global CLAUDE.md if the change adds/removes commands"
   verify:
     - "Run /project:audit — score must be >= previous score"
-    - "Verify the modified skill works on a test project"
+    - "Every archived change MUST have a verify-report.md with at least one [x] checked criterion"
+    - "Verify the modified skill works on a real test project (not just in isolation)"
     - "Confirm sync.sh + install.sh work with the new files"
+    - "If the change modifies a skill that produces artifacts, verify the artifact format is valid"
+
+testing:
+  strategy: "audit-as-integration-test"
+  minimum_score_to_archive: 75
+  required_artifacts_per_change:
+    - "proposal.md"
+    - "verify-report.md"
+  verify_report_requirements:
+    - "At least one checklist item marked [x]"
+    - "Explicitly states which test project was used"
+    - "Documents any known gaps or deferred issues"
+  test_project:
+    description: "Use the Audiio V3 project (D:/Proyectos/Audiio/audiio_v3_1) as the canonical test target"
+    why: "Complex real-world project that exercises all audit dimensions"

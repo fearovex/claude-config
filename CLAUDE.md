@@ -327,3 +327,4 @@ Each project has its memory layer in `ai-context/`:
 - `~/.claude/skills/claude-code-expert/SKILL.md` — CLAUDE.md configuration, custom skills, hooks, MCP servers, and advanced Claude Code workflows
 - `~/.claude/skills/excel-expert/SKILL.md` — creating, reading, and analyzing Excel files with ExcelJS, SheetJS (JS/TS) and openpyxl, pandas (Python)
 - `~/.claude/skills/openclaw-assistant/SKILL.md` — installing, configuring, and developing skills for OpenClaw, the open-source self-hosted AI agent runtime
+- `~/.claude/skills/image-ocr/SKILL.md` — extracting text from images using OCR (Tesseract, EasyOCR, PaddleOCR, Google Vision, AWS Textract, Claude Vision)

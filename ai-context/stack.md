@@ -46,12 +46,12 @@ claude-config/
 | Category | Count | Examples |
 |----------|-------|---------|
 | SDD phases | 8 | sdd-propose, sdd-spec, sdd-design, sdd-tasks, sdd-apply, sdd-verify, sdd-archive, sdd-explore |
-| Meta-tools | 5 | project-setup, project-audit, project-fix, project-update, memory-manager |
+| Meta-tools | 6 | project-setup, project-audit, project-fix, project-update, memory-manager, skill-creator |
 | Tech — Frontend | 8 | react-19, nextjs-15, typescript, zustand-5, zod-4, tailwind-4, ai-sdk-5, react-native |
 | Tech — Backend | 4 | django-drf, spring-boot-3, hexagonal-architecture-java, java-21 |
 | Tech — Testing | 2 | playwright, pytest |
 | Tech — Tooling | 5 | github-pr, jira-task, jira-epic, elixir-antipatterns, electron |
-| Misc | 3+ | claude-code-expert, excel-expert, openclaw-assistant |
+| Misc | 4 | claude-code-expert, excel-expert, openclaw-assistant, image-ocr |
 
 ## Sync workflow
 

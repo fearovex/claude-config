@@ -168,10 +168,10 @@ auth/
 ```json
 {
   "status": "ok|warning|blocked",
-  "resumen": "Design for [change-name]: [N] affected files, approach [brief description], risk [level].",
-  "artefactos": ["openspec/changes/<name>/design.md"],
+  "summary": "Design for [change-name]: [N] affected files, approach [brief description], risk [level].",
+  "artifacts": ["openspec/changes/<name>/design.md"],
   "next_recommended": ["sdd-tasks (requires spec + design completed)"],
-  "riesgos": ["[technical risk if found]"]
+  "risks": ["[technical risk if found]"]
 }
 ```
 

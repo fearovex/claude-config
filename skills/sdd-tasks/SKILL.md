@@ -125,10 +125,10 @@ Design: openspec/changes/[name]/design.md
 ```json
 {
   "status": "ok|warning|blocked",
-  "resumen": "Plan for [change-name]: [N] phases, [M] total tasks. Estimate: [Low/Medium/High].",
-  "artefactos": ["openspec/changes/<name>/tasks.md"],
+  "summary": "Plan for [change-name]: [N] phases, [M] total tasks. Estimate: [Low/Medium/High].",
+  "artifacts": ["openspec/changes/<name>/tasks.md"],
   "next_recommended": ["sdd-apply"],
-  "riesgos": ["[blocker if any]"]
+  "risks": ["[blocker if any]"]
 }
 ```
 

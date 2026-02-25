@@ -149,13 +149,13 @@ docs/ai-context/ with the decisions from this cycle.
 ```json
 {
   "status": "ok|warning|failed",
-  "resumen": "Change [name] archived. [N] master specs updated.",
-  "artefactos": [
+  "summary": "Change [name] archived. [N] master specs updated.",
+  "artifacts": [
     "openspec/specs/<domain>/spec.md — updated",
     "openspec/changes/archive/YYYY-MM-DD-<name>/ — created"
   ],
   "next_recommended": ["memory:update"],
-  "riesgos": []
+  "risks": []
 }
 ```
 

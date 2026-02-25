@@ -2,45 +2,45 @@
 
 > Deep diagnostic of Claude/SDD configuration. Read-only. Produces a structured report that /project:fix consumes as its spec.
 
-**Triggers**: `/project:audit`, auditar proyecto, revisar config claude, diagnostico sdd, health check proyecto
+**Triggers**: `/project:audit`, audit project, review claude config, sdd diagnostic, project health check
 
 ---
 
-## Rol en el flujo SDD meta-configuración
+## Role in SDD meta-config flow
 
-Este skill es el **equivalente a la fase SPEC** del ciclo SDD, aplicado a la configuración del proyecto:
+This skill is the **equivalent of the SPEC phase** of the SDD cycle, applied to the project configuration:
 
 ```
-/project:audit  →  audit-report.md  →  /project:fix  →  /project:audit (verify)
-     (spec)           (artefacto)          (apply)           (verify)
+/project-audit  →  audit-report.md  →  /project-fix  →  /project-audit (verify)
+     (spec)           (artifact)          (apply)           (verify)
 ```
 
-El reporte generado ES la especificación que `/project:fix` implementa. Sin audit, no hay fix.
+The generated report IS the specification that `/project-fix` implements. Without audit, there is no fix.
 
-**Regla absoluta**: Este skill NUNCA modifica archivos. Solo lee y reporta.
+**Absolute rule**: This skill NEVER modifies files. It only reads and reports.
 
 ---
 
-## Artefacto de salida
+## Output artifact
 
-Al finalizar, guarda el reporte en:
+When finished, save the report at:
 ```
 [project_root]/.claude/audit-report.md
 ```
 
-Este archivo persiste entre sesiones y es el input de `/project:fix`.
+This file persists between sessions and is the input for `/project-fix`.
 
 ---
 
-## Proceso de Auditoría — 7 Dimensiones
+## Audit Process — 7 Dimensions
 
-Ejecuto todas las dimensiones de forma sistemática, leyendo archivos reales. Nunca asumo.
+I run all dimensions systematically, reading real files. Never assume.
 
 ---
 
-### Dimensión 1 — CLAUDE.md
+### Dimension 1 — CLAUDE.md
 
-**Objetivo**: Verificar que el CLAUDE.md del proyecto es completo, preciso y habilita SDD.
+**Objective**: Verify that the project's CLAUDE.md is complete, accurate, and enables SDD.
 
 **Project type detection (run before checks):**
 
@@ -53,60 +53,60 @@ If detected as global-config:
 - Note in report header: `Project Type: global-config`
 - The CLAUDE.md path check passes without penalty
 
-**Checks a ejecutar:**
+**Checks to run:**
 
-| Check | Cómo verifico | Severidad si falla |
+| Check | How I verify | Severity if fails |
 |-------|--------------|-------------------|
-| Existe `.claude/CLAUDE.md` (or root `CLAUDE.md` for global-config repos) | Intento leerlo | ❌ CRÍTICO |
-| No está vacío (>50 líneas) | Contar líneas | ❌ CRÍTICO |
-| Tiene sección Stack | Buscar `## Tech Stack` o `## Stack` | ⚠️ ALTO |
-| Stack coincide con package.json/pyproject.toml | Leer ambos, comparar versiones clave | ⚠️ ALTO |
-| Tiene sección Architecture | Buscar `## Architecture` | ⚠️ ALTO |
-| Tiene Skills registry | Buscar tabla de skills | ⚠️ ALTO |
-| Tiene Commands registry | Buscar tabla de commands | ⚠️ MEDIO |
-| Tiene Unbreakable Rules | Buscar `## Unbreakable Rules` o similar | ⚠️ MEDIO |
-| Tiene Plan Mode Rules | Buscar `## Plan Mode` | ℹ️ BAJO |
-| Menciona SDD (`/sdd:new` o `/sdd:ff`) | Buscar texto `/sdd:` | ⚠️ ALTO |
-| Referencias a ai-context/ son correctas | Verificar que las rutas mencionadas existen | ⚠️ MEDIO |
+| Exists `.claude/CLAUDE.md` (or root `CLAUDE.md` for global-config repos) | Attempt to read it | ❌ CRITICAL |
+| Not empty (>50 lines) | Count lines | ❌ CRITICAL |
+| Has Stack section | Search for `## Tech Stack` or `## Stack` | ⚠️ HIGH |
+| Stack matches package.json/pyproject.toml | Read both, compare key versions | ⚠️ HIGH |
+| Has Architecture section | Search for `## Architecture` | ⚠️ HIGH |
+| Has Skills registry | Search for skills table | ⚠️ HIGH |
+| Has Commands registry | Search for commands table | ⚠️ MEDIUM |
+| Has Unbreakable Rules | Search for `## Unbreakable Rules` or similar | ⚠️ MEDIUM |
+| Has Plan Mode Rules | Search for `## Plan Mode` | ℹ️ LOW |
+| Mentions SDD (`/sdd:new` or `/sdd:ff`) | Search for text `/sdd:` | ⚠️ HIGH |
+| References to ai-context/ are correct | Verify that mentioned paths exist | ⚠️ MEDIUM |
 
-**Para el stack**: leo `package.json` (o equivalente), extraigo las 5-10 dependencias más importantes, y comparo con lo declarado en CLAUDE.md. Reporto discrepancias específicas con versión declarada vs versión real.
+**For the stack**: I read `package.json` (or equivalent), extract the 5-10 most important dependencies, and compare with what is declared in CLAUDE.md. I report specific discrepancies with declared version vs real version.
 
 ---
 
-### Dimensión 2 — Memoria (ai-context/)
+### Dimension 2 — Memory (ai-context/)
 
-**Objetivo**: Verificar que la capa de memoria existe, tiene contenido sustancial y es coherente con el código real.
+**Objective**: Verify that the memory layer exists, has substantial content, and is coherent with the real code.
 
-**Checks de existencia:**
+**Existence checks:**
 
-| Archivo | Líneas mínimas aceptables |
+| File | Minimum acceptable lines |
 |---------|--------------------------|
-| `ai-context/stack.md` | > 30 líneas |
-| `ai-context/architecture.md` | > 40 líneas |
-| `ai-context/conventions.md` | > 30 líneas |
-| `ai-context/known-issues.md` | > 10 líneas (puede ser breve si el proyecto es nuevo) |
-| `ai-context/changelog-ai.md` | > 5 líneas (al menos una entrada) |
+| `ai-context/stack.md` | > 30 lines |
+| `ai-context/architecture.md` | > 40 lines |
+| `ai-context/conventions.md` | > 30 lines |
+| `ai-context/known-issues.md` | > 10 lines (can be brief if the project is new) |
+| `ai-context/changelog-ai.md` | > 5 lines (at least one entry) |
 
-**Checks de contenido** (para cada archivo que existe):
+**Content checks** (for each file that exists):
 
-- **stack.md**: ¿Menciona las mismas versiones que package.json? Busco las top-5 dependencias del proyecto y verifico que están documentadas.
-- **architecture.md**: ¿Menciona directorios que realmente existen en el proyecto? Leo el árbol de carpetas y cruzo.
-- **conventions.md**: ¿Las convenciones documentadas mencionan patrones que se usan en el código real? Tomo 2-3 archivos de muestra y verifico.
-- **known-issues.md**: ¿Tiene contenido real o es un template vacío? Busco frases como "[Por confirmar]" o "[Vacío]".
-- **changelog-ai.md**: ¿Tiene al menos una entrada con fecha? Verifico formato `## YYYY-MM-DD`.
+- **stack.md**: Does it mention the same versions as package.json? I look for the top-5 project dependencies and verify they are documented.
+- **architecture.md**: Does it mention directories that actually exist in the project? I read the folder tree and cross-check.
+- **conventions.md**: Do the documented conventions mention patterns used in the real code? I take 2-3 sample files and verify.
+- **known-issues.md**: Does it have real content or is it an empty template? I search for phrases like "[To confirm]" or "[Empty]".
+- **changelog-ai.md**: Does it have at least one entry with a date? I verify the format `## YYYY-MM-DD`.
 
-**Nota sobre ubicación**: La ruta puede ser `ai-context/` (sin docs/) o `docs/ai-context/`. Verifico ambas.
+**Note on location**: The path can be `ai-context/` (without docs/) or `docs/ai-context/`. I check both.
 
 ---
 
-### Dimensión 3 — SDD Orchestrator
+### Dimension 3 — SDD Orchestrator
 
-**Objetivo**: Verificar que el ciclo SDD está completamente operativo en este proyecto.
+**Objective**: Verify that the SDD cycle is fully operational in this project.
 
 **Sub-checks:**
 
-#### 3a. Global SDD skills (prerequisito de todo lo demás)
-Leo si existen los 8 archivos en `~/.claude/skills/`:
+#### 3a. Global SDD skills (prerequisite for everything else)
+I read whether the 8 files exist in `~/.claude/skills/`:
 - `sdd-explore/SKILL.md`
 - `sdd-propose/SKILL.md`
 - `sdd-spec/SKILL.md`
@@ -116,53 +116,53 @@ Leo si existen los 8 archivos en `~/.claude/skills/`:
 - `sdd-verify/SKILL.md`
 - `sdd-archive/SKILL.md`
 
-Si alguno falta → ❌ CRÍTICO (SDD no puede funcionar sin las fases).
+If any is missing → ❌ CRITICAL (SDD cannot function without the phases).
 
-#### 3b. openspec/ en el proyecto
-| Check | Severidad |
+#### 3b. openspec/ in the project
+| Check | Severity |
 |-------|-----------|
-| Existe `openspec/` | ❌ CRÍTICO (SDD no tiene dónde guardar artefactos) |
-| Existe `openspec/config.yaml` | ❌ CRÍTICO (orquestador no puede arrancar) |
-| `config.yaml` tiene `artifact_store.mode: openspec` | ⚠️ ALTO |
-| `config.yaml` tiene nombre y stack del proyecto | ℹ️ BAJO |
+| `openspec/` exists | ❌ CRITICAL (SDD has nowhere to store artifacts) |
+| `openspec/config.yaml` exists | ❌ CRITICAL (orchestrator cannot start) |
+| `config.yaml` has `artifact_store.mode: openspec` | ⚠️ HIGH |
+| `config.yaml` has project name and stack | ℹ️ LOW |
 
-#### 3c. CLAUDE.md menciona SDD
-| Check | Severidad |
+#### 3c. CLAUDE.md mentions SDD
+| Check | Severity |
 |-------|-----------|
-| Contiene `/sdd:new` o `/sdd:ff` | ⚠️ ALTO |
-| Tiene sección explicando el flujo SDD | ℹ️ BAJO |
+| Contains `/sdd:new` or `/sdd:ff` | ⚠️ HIGH |
+| Has section explaining the SDD flow | ℹ️ LOW |
 
-#### 3d. Cambios huérfanos
-Leo `openspec/changes/` (si existe). Un cambio huérfano es una carpeta en `changes/` que NO está en `changes/archive/` y cuya última modificación tiene >14 días.
+#### 3d. Orphaned changes
+I read `openspec/changes/` (if it exists). An orphaned change is a folder in `changes/` that is NOT in `changes/archive/` and whose last modification was >14 days ago.
 
-Listo:
+I list:
 ```
-Cambios huérfanos detectados:
-  - nombre-cambio: última fase completada "tasks" (lleva X días sin actividad)
+Orphaned changes detected:
+  - change-name: last completed phase "tasks" (X days inactive)
 ```
 
 ---
 
-### Dimensión 4 — Skills Quality
+### Dimension 4 — Skills Quality
 
-**Objetivo**: Verificar que las skills son sustanciales y que el registry en CLAUDE.md es exacto.
+**Objective**: Verify that skills are substantial and that the registry in CLAUDE.md is accurate.
 
 **Checks:**
 
-#### 4a. Registry vs disco (bidireccional)
-- Por cada skill listada en CLAUDE.md → verifico que el archivo/directorio existe en `.claude/skills/`
-- Por cada archivo en `.claude/skills/` → verifico que está listado en CLAUDE.md
-- Reporto: skills en registry pero no en disco / skills en disco pero no en registry
+#### 4a. Registry vs disk (bidirectional)
+- For each skill listed in CLAUDE.md → I verify that the file/directory exists in `.claude/skills/`
+- For each file in `.claude/skills/` → I verify that it is listed in CLAUDE.md
+- I report: skills in registry but not on disk / skills on disk but not in registry
 
-#### 4b. Contenido mínimo
-Para cada skill file (`.md` o directorio con `SKILL.md`):
-- ¿Tiene más de 30 líneas? → Si no, es probablemente un stub
-- ¿Tiene alguna sección de proceso/instrucciones? → Si no, no es funcional
+#### 4b. Minimum content
+For each skill file (`.md` or directory with `SKILL.md`):
+- Does it have more than 30 lines? → If not, it is probably a stub
+- Does it have some process/instructions section? → If not, it is not functional
 
-#### 4c. Global tech skills relevantes no instaladas
-Leo el stack del proyecto (package.json) y verifico si existen en `~/.claude/skills/` skills tecnológicas relevantes que no están en el proyecto:
+#### 4c. Relevant global tech skills not installed
+I read the project stack (package.json) and check whether relevant technology skills exist in `~/.claude/skills/` that are not in the project:
 
-| Si proyecto usa | Skill global disponible |
+| If project uses | Available global skill |
 |-----------------|------------------------|
 | React 18+ | `react-19/SKILL.md` |
 | Next.js 14+ | `nextjs-15/SKILL.md` |
@@ -174,122 +174,122 @@ Leo el stack del proyecto (package.json) y verifico si existen en `~/.claude/ski
 
 ---
 
-### Dimensión 5 — Commands Quality
+### Dimension 5 — Commands Quality
 
-**Objetivo**: Verificar que los commands son funcionales y el registry es exacto.
+**Objective**: Verify that commands are functional and the registry is accurate.
 
 **Checks:**
 
-#### 5a. Registry vs disco (bidireccional)
-- Por cada command listado en CLAUDE.md → verifico que el archivo existe en `.claude/commands/`
-- Por cada archivo en `.claude/commands/` → verifico que está listado en CLAUDE.md
-- Reporto discrepancias en ambas direcciones
+#### 5a. Registry vs disk (bidirectional)
+- For each command listed in CLAUDE.md → I verify that the file exists in `.claude/commands/`
+- For each file in `.claude/commands/` → I verify that it is listed in CLAUDE.md
+- I report discrepancies in both directions
 
-#### 5b. Contenido mínimo
-Para cada command file:
-- ¿Tiene más de 20 líneas?
-- ¿Tiene sección de pasos o proceso definido? (busco "##", "Paso", "Step", lista numerada)
-- Si es un stub sin proceso definido → marcarlo como ⚠️ NO FUNCIONAL
+#### 5b. Minimum content
+For each command file:
+- Does it have more than 20 lines?
+- Does it have a steps or defined process section? (I search for "##", "Step", numbered list)
+- If it is a stub without a defined process → mark it as ⚠️ NOT FUNCTIONAL
 
 ---
 
-### Dimensión 6 — Cross-reference Integrity
+### Dimension 6 — Cross-reference Integrity
 
-**Objetivo**: Todo lo referenciado en la configuración de Claude debe existir en disco.
+**Objective**: Everything referenced in the Claude configuration must exist on disk.
 
 **Checks:**
 
-| Qué verifico | Dónde busco referencias |
+| What I verify | Where I search for references |
 |-------------|------------------------|
-| Docs referenciados en CLAUDE.md | Sección `## Documentation` → `.claude/docs/` |
-| Templates referenciados en CLAUDE.md | Sección templates → `.claude/templates/` |
-| Rutas mencionadas en skills | Scan de skills buscando paths (`/lib/`, `/domain/`, `pages/api/`) |
-| Rutas mencionadas en ai-context/ | Verificar que dirs documentados en architecture.md existen |
-| Skill files mencionadas en commands | Si un command importa o referencia una skill |
+| Docs referenced in CLAUDE.md | Section `## Documentation` → `.claude/docs/` |
+| Templates referenced in CLAUDE.md | Templates section → `.claude/templates/` |
+| Paths mentioned in skills | Scan of skills searching for paths (`/lib/`, `/domain/`, `pages/api/`) |
+| Paths mentioned in ai-context/ | Verify that dirs documented in architecture.md exist |
+| Skill files mentioned in commands | If a command imports or references a skill |
 
-Para cada referencia rota: reporto el archivo fuente, la línea aproximada, y el path que no existe.
+For each broken reference: I report the source file, approximate line, and the path that does not exist.
 
 ---
 
-### Dimensión 8 — Testing & Verification Integrity
+### Dimension 8 — Testing & Verification Integrity
 
-**Objetivo**: Verificar que el proyecto exige y evidencia pruebas reales antes de archivar cambios SDD.
+**Objective**: Verify that the project requires and evidences real tests before archiving SDD changes.
 
 **Checks:**
 
-#### 8a. openspec/config.yaml tiene sección de testing
-| Check | Severidad |
+#### 8a. openspec/config.yaml has testing section
+| Check | Severity |
 |-------|-----------|
-| `config.yaml` tiene bloque `testing:` | ⚠️ ALTO |
-| Define `minimum_score_to_archive` | ⚠️ ALTO |
-| Define `required_artifacts_per_change` | ⚠️ MEDIO |
-| Define `verify_report_requirements` | ⚠️ MEDIO |
-| Tiene `test_project` o estrategia de prueba documentada | ℹ️ BAJO |
+| `config.yaml` has `testing:` block | ⚠️ HIGH |
+| Defines `minimum_score_to_archive` | ⚠️ HIGH |
+| Defines `required_artifacts_per_change` | ⚠️ MEDIUM |
+| Defines `verify_report_requirements` | ⚠️ MEDIUM |
+| Has `test_project` or documented testing strategy | ℹ️ LOW |
 
-#### 8b. Cambios archivados tienen verify-report.md
-Para cada carpeta en `openspec/changes/archive/`:
-- ¿Existe `verify-report.md`? Si no → ⚠️ ALTO
-- ¿Tiene al menos un ítem `[x]` en su checklist? Si no → ⚠️ ALTO
-- ¿Menciona qué proyecto/contexto fue usado para verificar? Si no → ℹ️ BAJO
+#### 8b. Archived changes have verify-report.md
+For each folder in `openspec/changes/archive/`:
+- Does `verify-report.md` exist? If not → ⚠️ HIGH
+- Does it have at least one `[x]` item in its checklist? If not → ⚠️ HIGH
+- Does it mention what project/context was used to verify? If not → ℹ️ LOW
 
-Reporto:
+I report:
 ```
-Cambios archivados sin verify-report.md: [lista]
-Cambios con verify-report.md vacío o sin [x]: [lista]
+Archived changes without verify-report.md: [list]
+Changes with empty verify-report.md or without [x]: [list]
 ```
 
-#### 8c. Cambios activos tienen criterios de verificación definidos
-Para cada carpeta activa en `openspec/changes/` (no archivadas):
-- Si tiene `tasks.md` → ¿incluye sección de criterios de verificación?
-- Si tiene `design.md` → ¿define cómo se probará el cambio?
+#### 8c. Active changes have verification criteria defined
+For each active folder in `openspec/changes/` (not archived):
+- If it has `tasks.md` → does it include a verification criteria section?
+- If it has `design.md` → does it define how the change will be tested?
 
-#### 8d. Reglas de verify en config.yaml son ejecutables
-Leo el bloque `rules.verify` del `openspec/config.yaml` y evalúo:
-- ¿Son verificables objetivamente o son frases vacías como "asegurarse de que funciona"?
-- ¿Al menos una regla menciona `/project:audit` o una métrica concreta?
+#### 8d. Verify rules in config.yaml are executable
+I read the `rules.verify` block of `openspec/config.yaml` and evaluate:
+- Are they objectively verifiable or empty phrases like "make sure it works"?
+- Does at least one rule mention `/project-audit` or a concrete metric?
 
 ---
 
-### Dimensión 7 — Architecture Compliance (sampling)
+### Dimension 7 — Architecture Compliance (sampling)
 
-**Objetivo**: Verificar con muestras reales que el código sigue la arquitectura documentada.
+**Objective**: Verify with real samples that the code follows the documented architecture.
 
-**Metodología**: No analizo todo el código. Tomo muestras representativas.
+**Methodology**: I do not analyze all the code. I take representative samples.
 
-**Checks de muestra:**
+**Sample checks:**
 
-#### 7a. API routes (reviso 3 al azar)
-- ¿Usan el wrapper de observabilidad (`withSegmentAPI` o equivalente)?
-- ¿Contienen lógica de negocio directamente? (señal: imports de ORM/BD directo)
-- ¿Tienen más de 50 líneas de lógica? (posible violación de "thin handler")
+#### 7a. API routes (I review 3 at random)
+- Do they use the observability wrapper (`withSegmentAPI` or equivalent)?
+- Do they contain business logic directly? (signal: direct ORM/DB imports)
+- Do they have more than 50 lines of logic? (possible "thin handler" violation)
 
-#### 7b. Domain services (reviso 3 al azar)
-- ¿Importan el ORM desde el path correcto (`lib/prisma` u equivalente)?
-- ¿Las funciones siguen la convención de naming documentada (`*Fn`, `*Service`, etc.)?
+#### 7b. Domain services (I review 3 at random)
+- Do they import the ORM from the correct path (`lib/prisma` or equivalent)?
+- Do the functions follow the documented naming convention (`*Fn`, `*Service`, etc.)?
 
-#### 7c. Components (reviso 2 al azar)
-- ¿Importan servicios directamente en lugar de usar hooks?
-- ¿Tienen lógica de negocio inline?
+#### 7c. Components (I review 2 at random)
+- Do they import services directly instead of using hooks?
+- Do they have inline business logic?
 
-#### 7d. Violaciones críticas (busco en todo el codebase)
+#### 7d. Critical violations (I search the entire codebase)
 ```
-Busco señales de violaciones graves:
-- new PrismaClient() fuera de lib/
-- import { PrismaClient } fuera de lib/
-- font-weight (si el proyecto tiene SCSS y la convención lo prohíbe)
-- console.log en archivos de producción (no en tests)
+I search for signs of serious violations:
+- new PrismaClient() outside lib/
+- import { PrismaClient } outside lib/
+- font-weight (if the project has SCSS and the convention prohibits it)
+- console.log in production files (not in tests)
 ```
 
-Para cada violación: reporto archivo, línea, y la regla violada.
+For each violation: I report file, line, and the violated rule.
 
 ---
 
-## Formato del Reporte
+## Report Format
 
-El reporte se guarda en `.claude/audit-report.md` con esta estructura exacta:
+The report is saved in `.claude/audit-report.md` with this exact structure:
 
 ```markdown
-# Audit Report — [Nombre del Proyecto]
+# Audit Report — [Project Name]
 Generated: [YYYY-MM-DD HH:MM]
 Score: [XX/100]
 SDD Ready: [YES|NO|PARTIAL]
@@ -297,22 +297,22 @@ SDD Ready: [YES|NO|PARTIAL]
 ---
 
 ## FIX_MANIFEST
-<!-- Este bloque es consumido por /project:fix — NO modificar manualmente -->
+<!-- This block is consumed by /project-fix — DO NOT modify manually -->
 ```yaml
 score: [XX]
 sdd_ready: [true|false|partial]
 generated_at: "[timestamp]"
-project_root: "[ruta absoluta]"
+project_root: "[absolute path]"
 
 required_actions:
   critical:
-    - id: "[id-unico]"
+    - id: "[unique-id]"
       type: "[create_file|update_file|create_dir|add_registry_entry|install_skill]"
-      target: "[ruta o elemento]"
-      reason: "[por qué es necesario]"
-      template: "[nombre_template si aplica]"
+      target: "[path or element]"
+      reason: "[why it is necessary]"
+      template: "[template_name if applicable]"
   high:
-    - id: "[id-unico]"
+    - id: "[unique-id]"
       type: "..."
       target: "..."
       reason: "..."
@@ -325,66 +325,66 @@ missing_global_skills:
   - "[skill-name]"
 
 orphaned_changes:
-  - name: "[nombre]"
-    last_phase: "[fase]"
+  - name: "[name]"
+    last_phase: "[phase]"
     days_inactive: [N]
 
 violations:
-  - file: "[ruta]"
+  - file: "[path]"
     line: [N]
-    rule: "[regla violada]"
+    rule: "[violated rule]"
     severity: "[critical|high|medium]"
 ```​
 ---
 
-## Resumen Ejecutivo
-[3-5 líneas describiendo el estado general del proyecto desde la perspectiva de Claude/SDD]
+## Executive Summary
+[3-5 lines describing the general state of the project from the Claude/SDD perspective]
 
 ---
 
 ## Score: [XX]/100
 
-| Dimensión | Puntos | Max | Estado |
+| Dimension | Points | Max | Status |
 |-----------|--------|-----|--------|
-| CLAUDE.md completo y preciso | [X] | 20 | ✅/⚠️/❌ |
-| Memoria inicializada | [X] | 15 | ✅/⚠️/❌ |
-| Memoria con contenido sustancial | [X] | 10 | ✅/⚠️/❌ |
-| SDD Orchestrator operativo | [X] | 20 | ✅/⚠️/❌ |
-| Skills registry íntegro y funcional | [X] | 10 | ✅/⚠️/❌ |
-| Commands registry íntegro y funcional | [X] | 10 | ✅/⚠️/❌ |
-| Cross-references válidas | [X] | 5 | ✅/⚠️/❌ |
+| CLAUDE.md complete and accurate | [X] | 20 | ✅/⚠️/❌ |
+| Memory initialized | [X] | 15 | ✅/⚠️/❌ |
+| Memory with substantial content | [X] | 10 | ✅/⚠️/❌ |
+| SDD Orchestrator operational | [X] | 20 | ✅/⚠️/❌ |
+| Skills registry complete and functional | [X] | 10 | ✅/⚠️/❌ |
+| Commands registry complete and functional | [X] | 10 | ✅/⚠️/❌ |
+| Cross-references valid | [X] | 5 | ✅/⚠️/❌ |
 | Architecture compliance | [X] | 5 | ✅/⚠️/❌ |
 | Testing & Verification integrity | [X] | 5 | ✅/⚠️/❌ |
 | **TOTAL** | **[X]** | **100** | |
 
 **SDD Readiness**: [FULL / PARTIAL / NOT CONFIGURED]
-- FULL: openspec/ existe, config.yaml válido, CLAUDE.md menciona /sdd:*, global skills presentes
-- PARTIAL: Algunos elementos SDD presentes pero incompletos
-- NOT CONFIGURED: openspec/ no existe
+- FULL: openspec/ exists, config.yaml valid, CLAUDE.md mentions /sdd:*, global skills present
+- PARTIAL: Some SDD elements present but incomplete
+- NOT CONFIGURED: openspec/ does not exist
 
 ---
 
-## Dimensión 1 — CLAUDE.md [OK|ADVERTENCIA|CRÍTICO]
+## Dimension 1 — CLAUDE.md [OK|WARNING|CRITICAL]
 
-| Check | Estado | Detalle |
+| Check | Status | Detail |
 |-------|--------|---------|
-| Existe `.claude/CLAUDE.md` (or root `CLAUDE.md` for global-config repos) | ✅/❌ | |
-| Tiene >50 líneas | ✅/❌ | [X] líneas |
-| Stack documentado | ✅/⚠️/❌ | |
-| Stack vs package.json | ✅/⚠️/❌ | [discrepancias específicas] |
-| Tiene Architecture section | ✅/⚠️/❌ | |
-| Skills registry presente | ✅/⚠️/❌ | |
-| Commands registry presente | ✅/⚠️/❌ | |
-| Menciona SDD (/sdd:*) | ✅/⚠️/❌ | |
+| Exists `.claude/CLAUDE.md` (or root `CLAUDE.md` for global-config repos) | ✅/❌ | |
+| Has >50 lines | ✅/❌ | [X] lines |
+| Stack documented | ✅/⚠️/❌ | |
+| Stack vs package.json | ✅/⚠️/❌ | [specific discrepancies] |
+| Has Architecture section | ✅/⚠️/❌ | |
+| Skills registry present | ✅/⚠️/❌ | |
+| Commands registry present | ✅/⚠️/❌ | |
+| Mentions SDD (/sdd:*) | ✅/⚠️/❌ | |
 
-**Discrepancias de Stack:**
-[Lista cada discrepancia: "Declara React 18, actual ^19.0.0"]
+**Stack Discrepancies:**
+[List each discrepancy: "Declares React 18, actual ^19.0.0"]
 
 ---
 
-## Dimensión 2 — Memoria [OK|ADVERTENCIA|CRÍTICO]
+## Dimension 2 — Memory [OK|WARNING|CRITICAL]
 
-| Archivo | Existe | Líneas | Contenido | Coherencia |
+| File | Exists | Lines | Content | Coherence |
 |---------|--------|--------|-----------|------------|
 | stack.md | ✅/❌ | [N] | ✅/⚠️/❌ | ✅/⚠️/❌ |
 | architecture.md | ✅/❌ | [N] | ✅/⚠️/❌ | ✅/⚠️/❌ |
@@ -392,15 +392,15 @@ violations:
 | known-issues.md | ✅/❌ | [N] | ✅/⚠️/❌ | ✅/⚠️/❌ |
 | changelog-ai.md | ✅/❌ | [N] | ✅/⚠️/❌ | N/A |
 
-**Problemas de coherencia detectados:**
-[Lista problemas concretos con archivo + qué está desactualizado]
+**Coherence issues detected:**
+[List specific issues with file + what is outdated]
 
 ---
 
-## Dimensión 3 — SDD Orchestrator [OK|ADVERTENCIA|CRÍTICO]
+## Dimension 3 — SDD Orchestrator [OK|WARNING|CRITICAL]
 
 **Global SDD Skills:**
-| Skill | Existe |
+| Skill | Exists |
 |-------|--------|
 | sdd-explore | ✅/❌ |
 | sdd-propose | ✅/❌ |
@@ -411,132 +411,132 @@ violations:
 | sdd-verify | ✅/❌ |
 | sdd-archive | ✅/❌ |
 
-**openspec/ en proyecto:**
-| Check | Estado |
+**openspec/ in project:**
+| Check | Status |
 |-------|--------|
-| `openspec/` existe | ✅/❌ |
-| `openspec/config.yaml` existe | ✅/❌ |
-| Config válido | ✅/⚠️/❌ |
+| `openspec/` exists | ✅/❌ |
+| `openspec/config.yaml` exists | ✅/❌ |
+| Config valid | ✅/⚠️/❌ |
 
-**CLAUDE.md menciona SDD:** ✅/❌
+**CLAUDE.md mentions SDD:** ✅/❌
 
-**Cambios huérfanos:** [ninguno | lista]
-
----
-
-## Dimensión 4 — Skills [OK|ADVERTENCIA|CRÍTICO]
-
-**Skills en registry pero no en disco:**
-[lista o "ninguna"]
-
-**Skills en disco pero no en registry:**
-[lista o "ninguna"]
-
-**Skills con contenido insuficiente (<30 líneas):**
-[lista o "ninguna"]
-
-**Global tech skills recomendadas no instaladas:**
-[lista con comando para instalar: /skill:add nombre]
+**Orphaned changes:** [none | list]
 
 ---
 
-## Dimensión 5 — Commands [OK|ADVERTENCIA|CRÍTICO]
+## Dimension 4 — Skills [OK|WARNING|CRITICAL]
 
-**Commands en registry pero no en disco:**
-[lista o "ninguna"]
+**Skills in registry but not on disk:**
+[list or "none"]
 
-**Commands en disco pero no en registry:**
-[lista o "ninguna"]
+**Skills on disk but not in registry:**
+[list or "none"]
 
-**Commands sin proceso definido (stubs):**
-[lista o "ninguna"]
+**Skills with insufficient content (<30 lines):**
+[list or "none"]
+
+**Recommended global tech skills not installed:**
+[list with install command: /skill:add name]
 
 ---
 
-## Dimensión 6 — Cross-references [OK|ADVERTENCIA|CRÍTICO]
+## Dimension 5 — Commands [OK|WARNING|CRITICAL]
 
-**Referencias rotas:**
-| Archivo fuente | Referencia | Problema |
+**Commands in registry but not on disk:**
+[list or "none"]
+
+**Commands on disk but not in registry:**
+[list or "none"]
+
+**Commands without defined process (stubs):**
+[list or "none"]
+
+---
+
+## Dimension 6 — Cross-references [OK|WARNING|CRITICAL]
+
+**Broken references:**
+| Source file | Reference | Problem |
 |----------------|-----------|---------|
-[lista o "ninguna"]
+[list or "none"]
 
 ---
 
-## Dimensión 7 — Architecture Compliance [OK|ADVERTENCIA|CRÍTICO]
+## Dimension 7 — Architecture Compliance [OK|WARNING|CRITICAL]
 
-**Archivos de muestra analizados:** [lista]
+**Sample files analyzed:** [list]
 
-**Violaciones encontradas:**
-| Archivo | Línea | Regla violada | Severidad |
+**Violations found:**
+| File | Line | Violated rule | Severity |
 |---------|-------|--------------|-----------|
-[lista o "ninguna"]
+[list or "none"]
 
 ---
 
-## Dimensión 8 — Testing & Verification [OK|ADVERTENCIA|CRÍTICO]
+## Dimension 8 — Testing & Verification [OK|WARNING|CRITICAL]
 
-**openspec/config.yaml tiene bloque testing:** ✅/❌
+**openspec/config.yaml has testing block:** ✅/❌
 
-**Cambios archivados sin verify-report.md:**
-[lista o "ninguna"]
+**Archived changes without verify-report.md:**
+[list or "none"]
 
-**Cambios archivados con verify-report.md vacío (sin [x]):**
-[lista o "ninguna"]
+**Archived changes with empty verify-report.md (without [x]):**
+[list or "none"]
 
-**Reglas de verify son ejecutables:** ✅/⚠️/❌
-
----
-
-## Acciones Requeridas
-
-### Críticas (bloquean SDD):
-1. [acción concreta] → ejecutar `/project:fix` o manualmente: [instrucción]
-
-### Altas (degradan calidad):
-1. [acción concreta]
-
-### Medias:
-1. [acción concreta]
-
-### Bajas (mejoras opcionales):
-1. [acción concreta]
+**Verify rules are executable:** ✅/⚠️/❌
 
 ---
 
-*Para implementar estas correcciones: ejecutar `/project:fix`*
-*Este reporte fue generado por `/project:audit` — no modificar el bloque FIX_MANIFEST manualmente*
+## Required Actions
+
+### Critical (block SDD):
+1. [concrete action] → run `/project-fix` or manually: [instruction]
+
+### High (degrade quality):
+1. [concrete action]
+
+### Medium:
+1. [concrete action]
+
+### Low (optional improvements):
+1. [concrete action]
+
+---
+
+*To implement these corrections: run `/project-fix`*
+*This report was generated by `/project-audit` — do not modify the FIX_MANIFEST block manually*
 ```
 
 ---
 
-## Scoring detallado
+## Detailed Scoring
 
-| Dimensión | Criterio | Puntos máx |
+| Dimension | Criterion | Max points |
 |-----------|---------|------------|
-| **CLAUDE.md** | Existe + estructura completa + stack preciso + SDD refs | 20 |
-| **Memoria — existencia** | Los 5 archivos existen | 15 |
-| **Memoria — calidad** | Contenido sustancial + coherente con código | 10 |
+| **CLAUDE.md** | Exists + complete structure + accurate stack + SDD refs | 20 |
+| **Memory — existence** | All 5 files exist | 15 |
+| **Memory — quality** | Substantial content + coherent with code | 10 |
 | **SDD Orchestrator** | Global skills + openspec/ + config.yaml + CLAUDE.md refs | 20 |
-| **Skills** | Registry exacto + contenido mínimo + sin skills globales faltantes | 10 |
-| **Commands** | Registry exacto + commands funcionales | 10 |
-| **Cross-references** | Sin referencias rotas | 5 |
-| **Architecture** | Sin violaciones críticas en muestras | 5 |
-| **Testing & Verification** | config.yaml tiene testing block + cambios archivados tienen verify-report.md | 5 |
+| **Skills** | Exact registry + minimum content + no missing global skills | 10 |
+| **Commands** | Exact registry + functional commands | 10 |
+| **Cross-references** | No broken references | 5 |
+| **Architecture** | No critical violations in samples | 5 |
+| **Testing & Verification** | config.yaml has testing block + archived changes have verify-report.md | 5 |
 
-**Interpretación:**
-- 90-100: SDD fully operational, excelente mantenimiento
-- 75-89: Listo para usar SDD, mejoras menores pendientes
-- 50-74: SDD parcialmente configurado, necesita `/project:fix`
-- <50: Requiere setup completo
+**Interpretation:**
+- 90-100: SDD fully operational, excellent maintenance
+- 75-89: Ready to use SDD, minor improvements pending
+- 50-74: SDD partially configured, needs `/project-fix`
+- <50: Requires complete setup
 
 ---
 
-## Reglas de ejecución
+## Execution Rules
 
-1. **Siempre leo archivos reales** — nunca asumo el contenido de un archivo
-2. **Ejecuto en un subagente** con herramientas de lectura — nunca en contexto principal
-3. **Siempre guardo el reporte** en `.claude/audit-report.md` antes de presentar al usuario
-4. **El FIX_MANIFEST es YAML válido** — verifico que el bloque sea parseable
-5. **Nunca modifico nada** — este skill es 100% read-only
-6. **Si no puedo leer un archivo**, lo reporto como ❌ con el error exacto, no asumo que no existe
-7. **Al finalizar**, notifico al usuario: "Reporte guardado en `.claude/audit-report.md`. Para implementar las correcciones: `/project:fix`"
+1. **I always read real files** — I never assume the content of a file
+2. **I run in a subagent** with read tools — never in main context
+3. **I always save the report** in `.claude/audit-report.md` before presenting to the user
+4. **The FIX_MANIFEST is valid YAML** — I verify that the block is parseable
+5. **I never modify anything** — this skill is 100% read-only
+6. **If I cannot read a file**, I report it as ❌ with the exact error, I do not assume it does not exist
+7. **When finished**, I notify the user: "Report saved in `.claude/audit-report.md`. To implement the corrections: `/project-fix`"

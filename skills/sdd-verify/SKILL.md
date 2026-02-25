@@ -172,10 +172,10 @@ Verifier: sdd-verify
 ```json
 {
   "status": "ok|warning|failed",
-  "resumen": "Verification [change-name]: [verdict]. [N] critical, [M] warnings.",
-  "artefactos": ["openspec/changes/<name>/verify-report.md"],
+  "summary": "Verification [change-name]: [verdict]. [N] critical, [M] warnings.",
+  "artifacts": ["openspec/changes/<name>/verify-report.md"],
   "next_recommended": ["sdd-archive (if PASS or PASS WITH WARNINGS)"],
-  "riesgos": ["CRITICAL: [description if any]"]
+  "risks": ["CRITICAL: [description if any]"]
 }
 ```
 

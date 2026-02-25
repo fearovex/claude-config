@@ -1,262 +1,308 @@
 # Audit Report — claude-config
-Generated: 2026-02-24 16:00
-Score: 96/100
+Generated: 2026-02-24 (Round 4 — Verification Audit)
+Score: 97/100
 SDD Ready: YES
 
 ---
 
 ## FIX_MANIFEST
-<!-- This block is consumed by /project:fix — do NOT modify manually -->
+<!-- This block is consumed by /project-fix — DO NOT modify manually -->
 ```yaml
-score: 96
+score: 97
 sdd_ready: true
-generated_at: "2026-02-24T16:00:00"
-project_root: "C:/Users/juanp/claude-config"
-
 required_actions:
-  critical: []
-  high: []
+
   medium:
-    - id: "claude-md-location-note"
-      type: "note"
-      target: "CLAUDE.md"
-      reason: "CLAUDE.md is at repo root, not .claude/CLAUDE.md. This is intentional for a global-config repo but causes the audit skill's Dimension 1 file-exists check to technically flag it. Consider adding a comment in project-audit SKILL.md acknowledging this exception for global-config repos."
-      template: ""
+    - id: M1
+      dimension: D4
+      description: "skill-creator/SKILL.md Global Catalog section is missing 4 Tools/Platforms skills: claude-code-expert, excel-expert, openclaw-assistant, image-ocr. These exist on disk and in CLAUDE.md registry but are absent from skill-creator's catalog table. Users running /skill:add cannot discover them."
+      file: skills/skill-creator/SKILL.md
+      action: "Add a '### Tools / Platforms' subsection to the Global Catalog Skills section listing the 4 missing skills with their one-line descriptions."
+
+    - id: M2
+      dimension: D6
+      description: "memory-manager/SKILL.md and project-setup/SKILL.md reference 'docs/ai-context/' throughout, while CLAUDE.md Project Memory section defines the canonical path as 'ai-context/' (no docs/ prefix). When /memory:init is run on claude-config itself, the skill would target the wrong path."
+      files:
+        - skills/memory-manager/SKILL.md
+        - skills/project-setup/SKILL.md
+      action: "Update all 'docs/ai-context/' references to 'ai-context/' in both files."
+
   low:
-    - id: "archive-sdd-cycle-completeness"
-      type: "note"
-      target: "openspec/changes/archive/"
-      reason: "All 3 archived changes only contain proposal.md + verify-report.md. config.yaml requires exactly those two artifacts, so they are compliant. However, future changes should go through /sdd:ff to produce tasks.md and design.md before archiving, per Unbreakable Rule 3."
-      template: ""
-
-missing_global_skills: []
-
-orphaned_changes: []
-
-violations: []
+    - id: L1
+      dimension: D4
+      description: "electron is categorized under Frontend / Full-stack in CLAUDE.md and skill-creator, but under Tech — Tooling in stack.md (count 5). This makes stack.md's Frontend count wrong (8 instead of 9) and Tooling count wrong (5 instead of 4)."
+      file: ai-context/stack.md
+      action: "Move electron from Tech — Tooling row to Tech — Frontend row in stack.md. Update counts: Frontend 8→9, Tooling 5→4."
 ```
----
-
-## Executive Summary
-
-`claude-config` scores 96/100 — up from 91. All four issues from the previous audit have been resolved: (1) CLAUDE.md fully translated to English, (2) `verify-report.md` added for `2026-02-24-project-fix-corrections`, (3) retroactive artifacts added for `2026-02-23-overhaul-project-audit-add-project-fix`, and (4) `next_recommended` key is now present in all 8 SDD phase skills. No critical or high issues remain. The only structural note is that `CLAUDE.md` lives at repo root instead of `.claude/CLAUDE.md` — an intentional design choice for a global-config repo.
 
 ---
 
-## Score: 96/100
+## Dimension 1 — CLAUDE.md [OK]
 
-| Dimension | Points | Max | Status |
-|-----------|--------|-----|--------|
-| CLAUDE.md complete and precise | 18 | 20 | ⚠️ |
-| Memory initialized | 15 | 15 | ✅ |
-| Memory with substantial content | 10 | 10 | ✅ |
-| SDD Orchestrator operational | 20 | 20 | ✅ |
-| Skills registry intact and functional | 10 | 10 | ✅ |
-| Commands registry intact and functional | N/A | N/A | N/A (no commands/ by design — full credit) |
-| Cross-references valid | 5 | 5 | ✅ |
-| Architecture compliance | 5 | 5 | ✅ |
-| Testing & Verification integrity | 5 | 5 | ✅ |
-| **TOTAL** | **96** | **100** | |
+**Score: 20/20**
 
-> Note: Commands dimension (max 10) is N/A for this project by design. Score is normalized to 96/100 with full credit applied for that dimension and -4 for the CLAUDE.md location structural note (-2) across the remaining dimensions.
+**File**: `CLAUDE.md` (331 lines)
 
-**SDD Readiness**: FULL
-- openspec/ exists with valid config.yaml ✅
-- All 8 global SDD phase skills present ✅
-- All 8 SDD skills include `next_recommended` key ✅
-- CLAUDE.md references /sdd:ff, /sdd:new, /sdd:apply ✅
-- No orphaned changes ✅
+**Sections verified:**
 
-**Score delta from 91 → 96:**
-- +3: CLAUDE.md fully translated to English (no English-only violations)
-- +2: sync.sh run — runtime ~/.claude/ now matches repo (all 8 skills have next_recommended)
-- +4: verify-report.md added for 2026-02-24-project-fix-corrections (Testing dimension full credit)
-- -2: CLAUDE.md at root vs .claude/CLAUDE.md (structural note, -2 from Dim 1)
-- -2: Retained from prior audit for the location note
+| Section | Status |
+|---------|--------|
+| Identity and Purpose (two roles) | OK |
+| Tech Stack (table) | OK |
+| Architecture (three-layer structure + diagram) | OK |
+| Unbreakable Rules (4 rules: Language, Skill structure, SDD compliance, Sync discipline) | OK |
+| Plan Mode Rules | OK |
+| Working Principles | OK |
+| Available Commands (meta-tools + SDD phases) | OK |
+| How I Execute Commands (routing table + delegation pattern) | OK |
+| SDD Flow — Phase DAG | OK |
+| Fast-Forward (/sdd:ff) | OK |
+| Apply Strategy | OK |
+| SDD Artifact Storage | OK |
+| Project Memory | OK |
+| Skills Registry | OK |
 
----
+**Commands documented:**
+- Meta-tools: 8 (`/project:setup`, `/project:audit`, `/project:fix`, `/project:update`, `/skill:create`, `/skill:add`, `/memory:init`, `/memory:update`)
+- SDD phases: 11 (`/sdd:new`, `/sdd:ff`, `/sdd:explore`, `/sdd:propose`, `/sdd:spec`, `/sdd:design`, `/sdd:tasks`, `/sdd:apply`, `/sdd:verify`, `/sdd:archive`, `/sdd:status`)
 
-## Dimension 1 — CLAUDE.md [ADVERTENCIA — minor/structural]
+**Language check**: Zero Spanish keywords or accented narrative content in CLAUDE.md.
 
-| Check | Status | Detail |
-|-------|--------|--------|
-| Exists at `.claude/CLAUDE.md` | ⚠️ | CLAUDE.md is at repo root — intentional for a global-config repo |
-| Has >50 lines | ✅ | 329 lines |
-| Stack documented | ✅ | `## Tech Stack` section present |
-| Stack vs package.json | N/A | No package.json — Markdown+YAML+Bash project |
-| Architecture section | ✅ | `## Architecture` present |
-| Skills registry present | ✅ | `## Skills Registry` with full catalog (all 35 skills) |
-| Commands registry present | ✅ | Commands table present (meta-tools + SDD phases) |
-| Unbreakable Rules present | ✅ | `## Unbreakable Rules` with 4 rules |
-| Plan Mode Rules present | ✅ | `## Plan Mode Rules` present |
-| Mentions SDD (/sdd:*) | ✅ | /sdd:ff, /sdd:new, /sdd:apply, /sdd:explore — full phase table |
-| ai-context/ references correct | ✅ | References ai-context/ at root — exists |
-| English-only compliance | ✅ | Fully translated — no Spanish content detected |
+**Skills Registry**: 37 unique skills listed — exact match with disk.
 
-**Structural note on CLAUDE.md location:** This repo IS the global Claude config. At runtime, `CLAUDE.md` is installed to `~/.claude/CLAUDE.md`. The repo stores it at root so it is the canonical source. The audit skill's Dimension 1 check (`Exists .claude/CLAUDE.md`) will always flag this as missing unless the skill is updated to accommodate global-config repos. No functional impact — -2 points assessed for audit completeness.
+**global-config type detection**: Confirmed (`install.sh` + `sync.sh` at root; `openspec/config.yaml` contains `framework: "Claude Code SDD meta-system"`).
 
-**Discrepancias de Stack:** None. This is a Markdown+YAML+Bash repo. Stack declaration matches repo reality.
+**No issues found.**
 
 ---
 
-## Dimension 2 — Memory [OK]
+## Dimension 2 — Memory Layer [OK]
 
-| File | Exists | Lines | Content | Coherence |
-|------|--------|-------|---------|-----------|
-| stack.md | ✅ | 68 | ✅ | ✅ |
-| architecture.md | ✅ | 70 | ✅ | ✅ |
-| conventions.md | ✅ | 73 | ✅ | ✅ |
-| known-issues.md | ✅ | 58 | ✅ | ✅ |
-| changelog-ai.md | ✅ | 61 | ✅ | N/A |
+**Score: 25/25**
 
-**Content quality checks:**
-- `stack.md`: Documents file types, directory structure, 7 skill categories with counts, sync workflow. Accurate and current.
-- `architecture.md`: Documents two-layer architecture (repo ↔ runtime), skill structure, artifact communication map. All referenced dirs (`hooks/`, `memory/`, `openspec/`) exist on disk.
-- `conventions.md`: Language rule, naming conventions, SKILL.md required sections, git workflow, sync discipline. All enforced in practice.
-- `known-issues.md`: 6 concrete issues with workarounds — rsync on Windows, install.sh directionality, settings.local.json, GITHUB_TOKEN, skills not auto-syncing, project-audit no-package.json handling.
-- `changelog-ai.md`: 3 dated entries (`## 2026-02-23`). Follows `## YYYY-MM-DD` format. No entry yet for 2026-02-24 session work (low severity gap).
+**Directory**: `ai-context/` at repo root — all 5 files present.
 
-**Problems detected:** None substantive.
+| File | Status | Notes |
+|------|--------|-------|
+| `stack.md` | OK | Meta-tools count = 6 (corrected in round 3). 7 categories documented. |
+| `architecture.md` | OK | Two-layer architecture, skill structure, artifact communication map. |
+| `conventions.md` | OK | Language rule, naming, SKILL.md structure, git conventions. |
+| `known-issues.md` | OK | 6 known issues documented (rsync, install.sh directionality, settings.local.json, GITHUB_TOKEN, auto-sync gap, no-package.json). |
+| `changelog-ai.md` | OK | 6 entries total. 3 project-fix rounds documented: round 1 (88→91), round 2 (93→97), round 3 (97). |
+
+**changelog-ai.md project-fix entries confirmed:**
+- `2026-02-24 — project-fix round 3`: skill-creator, jira-task, jira-epic translations; stack.md Meta-tools count 5→6
+- `2026-02-24 — project-fix round 2`: memory-manager, project-fix, project-setup, project-update translations; config.yaml tasks.md added; stack.md Misc count 3→4
+- `2026-02-24 — project-fix executed`: project-audit, 8 SDD skills translated; CLAUDE.md image-ocr added; retroactive archives
+
+**No issues found.**
 
 ---
 
 ## Dimension 3 — SDD Orchestrator [OK]
 
-**Global SDD Skills:**
-| Skill | Exists | next_recommended key |
-|-------|--------|---------------------|
-| sdd-explore | ✅ | ✅ → sdd-propose |
-| sdd-propose | ✅ | ✅ → sdd-spec, sdd-design |
-| sdd-spec | ✅ | ✅ → sdd-tasks (after sdd-design) |
-| sdd-design | ✅ | ✅ → sdd-tasks (requires spec + design) |
-| sdd-tasks | ✅ | ✅ → sdd-apply |
-| sdd-apply | ✅ | ✅ → sdd-apply (Phase 2) |
-| sdd-verify | ✅ | ✅ → sdd-archive (if PASS) |
-| sdd-archive | ✅ | ✅ → memory:update |
+**Score: 20/20**
 
-**openspec/ in project:**
-| Check | Status |
-|-------|--------|
-| `openspec/` exists | ✅ |
-| `openspec/config.yaml` exists | ✅ |
-| `artifact_store.mode: openspec` | ✅ |
-| Project name + stack in config | ✅ |
-| `testing:` block complete | ✅ |
-| `minimum_score_to_archive: 75` | ✅ |
-| `required_artifacts_per_change` defined | ✅ |
-| `verify_report_requirements` defined | ✅ (3 requirements) |
-| `test_project` documented | ✅ (Audiio V3) |
+**All 8 SDD phase skills present and verified:**
 
-**CLAUDE.md mentions SDD:** ✅ — 15+ occurrences of /sdd:* commands
+| Skill | SKILL.md exists | Status |
+|-------|----------------|--------|
+| sdd-explore | YES | OK |
+| sdd-propose | YES | OK |
+| sdd-spec | YES | OK |
+| sdd-design | YES | OK |
+| sdd-tasks | YES | OK |
+| sdd-apply | YES | OK |
+| sdd-verify | YES | OK |
+| sdd-archive | YES | OK |
 
-**Orphaned changes:** None. `openspec/changes/` contains only `archive/` — all changes are archived.
+**Spanish keyword check on all 8 SDD phase skills**: 0 hits across all files. Output field names verified as English (`summary`, `artifacts`, `risks`, `next_recommended`, `deviations`).
+
+**Orchestrator delegation pattern**: NEVER/ALWAYS rules present in CLAUDE.md. Sub-agent launch template correctly specified.
+
+**Phase DAG**: Correctly documented (explore optional → propose → spec+design parallel → tasks → apply → verify → archive).
+
+**openspec/changes/**: Contains only `archive/` subdirectory. No active or orphaned change directories.
+
+**No issues found.**
 
 ---
 
-## Dimension 4 — Skills [OK]
+## Dimension 4 — Skills Quality [WARNING]
 
-**Skills in registry but NOT on disk:** None
+**Score: 8/10**
 
-**Skills on disk but NOT in registry:** None
+### 4a. Registry vs disk (bidirectional)
 
-**Registry bidirectional match:** ✅ (35 skill directories = 35 entries in CLAUDE.md Skills Registry)
+- Skills on disk: **37** (verified via directory listing of `skills/`)
+- Skills in CLAUDE.md `## Skills Registry`: **37** unique entries
+- Bidirectional match: **PERFECT** — no skills missing from either side
 
-**Skills on disk:**
-- SDD phases (8): sdd-explore, sdd-propose, sdd-spec, sdd-design, sdd-tasks, sdd-apply, sdd-verify, sdd-archive
-- Meta-tools (6): project-setup, project-audit, project-fix, project-update, skill-creator, memory-manager
-- Tech — Frontend (8): react-19, nextjs-15, typescript, zustand-5, zod-4, tailwind-4, ai-sdk-5, react-native
-- Tech — Backend (4): django-drf, spring-boot-3, hexagonal-architecture-java, java-21
-- Tech — Testing (2): playwright, pytest
-- Tech — Tooling (5): github-pr, jira-task, jira-epic, elixir-antipatterns, electron
-- Platform/Misc (3): claude-code-expert, excel-expert, openclaw-assistant
+### 4b. Minimum content (30+ lines)
 
-**Skills with insufficient content (<30 lines):** Not re-checked individually — no change since previous audit which confirmed all passing.
+All 37 skills pass the 30-line minimum. No stub files detected.
 
-**Global tech skills recommended but not installed:** N/A — this IS the global skills catalog.
+### 4c. Round 4 critical checks
+
+| Check | Expected | Actual | Result |
+|-------|----------|--------|--------|
+| skill-creator/SKILL.md English | "Step 1" not "Paso 1" | Lines 23-130 use "Step 1", "Step 2", "Step 3", "Step 4", "Step 5" | PASS |
+| jira-task/SKILL.md headings | English section headings | "When to Use", "Critical Patterns", "Templates", "Priorities", "Anti-Patterns" | PASS |
+| jira-epic/SKILL.md headings | English section headings | "When to Use", "Epic Title Format", "Task Decomposition", "Anti-Patterns" | PASS |
+| stack.md Meta-tools count | 6 | Row shows: `6 | project-setup, project-audit, project-fix, project-update, memory-manager, skill-creator` | PASS |
+
+### 4d. Issues found
+
+**M1 (medium) — skill-creator catalog incomplete:**
+`skill-creator/SKILL.md` `## Global Catalog Skills` section contains subsections: Meta-tools and SDD, Frontend / Full-stack, Backend, Testing, Tooling / Process, Languages / Frameworks. Missing subsection: **Tools / Platforms**. The following 4 skills exist on disk and in CLAUDE.md but are not listed in skill-creator's catalog:
+- `claude-code-expert`
+- `excel-expert`
+- `openclaw-assistant`
+- `image-ocr`
+
+Impact: When a user runs `/skill:add claude-code-expert`, the catalog lookup would not find it.
+
+**L1 (low) — electron categorization mismatch:**
+- CLAUDE.md: electron listed under `**Frontend / Full-stack:**` (9 skills in that section)
+- skill-creator: electron listed under `### Frontend / Full-stack` (matches CLAUDE.md)
+- stack.md: electron listed under `Tech — Tooling | 5` (incorrect — should be Frontend)
+
+stack.md is the outlier. Frontend count should be 9 (not 8), Tooling count should be 4 (not 5).
 
 ---
 
-## Dimension 5 — Commands [N/A]
+## Dimension 5 — Commands [OK]
 
-No `.claude/commands/` directory by design. This is the global meta-tool config repo; commands are implemented as SDD phase skills and meta-tools. Full credit applied.
+**Score: 10/10**
+
+**All meta-tool commands routed via CLAUDE.md:**
+
+| Command | Routed Skill | Disk exists |
+|---------|-------------|-------------|
+| `/project:setup` | `skills/project-setup/SKILL.md` | YES |
+| `/project:audit` | `skills/project-audit/SKILL.md` | YES |
+| `/project:fix` | `skills/project-fix/SKILL.md` | YES |
+| `/project:update` | `skills/project-update/SKILL.md` | YES |
+| `/skill:create` | `skills/skill-creator/SKILL.md` | YES |
+| `/skill:add` | `skills/skill-creator/SKILL.md` | YES |
+| `/memory:init` | `skills/memory-manager/SKILL.md` | YES |
+| `/memory:update` | `skills/memory-manager/SKILL.md` | YES |
+
+All SDD phase commands (`/sdd:*`) are documented in the Available Commands table with correct descriptions.
+
+**No issues found.**
 
 ---
 
-## Dimension 6 — Cross-references [OK]
+## Dimension 6 — Cross-references [WARNING]
 
-| Source | Reference | Status |
-|--------|-----------|--------|
-| CLAUDE.md | All 35 `~/.claude/skills/*/SKILL.md` entries | ✅ All exist on disk |
-| CLAUDE.md | `ai-context/` memory layer | ✅ Exists at root |
-| architecture.md | `audit-report.md` artifact path | ✅ `.claude/audit-report.md` exists |
-| architecture.md | `openspec/config.yaml` | ✅ Exists |
-| architecture.md | `openspec/changes/*/` structure | ✅ Exists |
-| stack.md | `skills/`, `openspec/`, `hooks/`, `memory/` | ✅ All exist in repo |
+**Score: 4/5**
 
-**Broken references:** None.
+**Registry paths**: All 37 `~/.claude/skills/<name>/SKILL.md` paths in CLAUDE.md Skills Registry are valid.
+
+**Artifact paths in architecture.md**: `audit-report.md`, `openspec/config.yaml`, `openspec/changes/*/proposal.md`, `openspec/changes/*/tasks.md`, `ai-context/*.md` — all correct.
+
+**M2 (medium) — docs/ai-context/ path inconsistency:**
+
+CLAUDE.md `## Project Memory` section states: *"Each project has its memory layer in `ai-context/`"* (root-level, no `docs/` prefix).
+
+However, two skills still reference `docs/ai-context/`:
+- `skills/memory-manager/SKILL.md`: description line (`docs/ai-context/`), trigger text (`docs/ai-context/`), `/memory-init` mode description, output example (5+ occurrences of `docs/ai-context/`)
+- `skills/project-setup/SKILL.md`: setup output description references `docs/ai-context/`
+
+For `claude-config` itself, `ai-context/` is at the repo root. If a user runs `/memory:init` on this repo, `memory-manager` would create `docs/ai-context/` instead of the correct `ai-context/` path.
+
+Note: `skills/project-fix/SKILL.md` correctly uses `ai-context/` — it was updated in round 2. Only memory-manager and project-setup retain the stale path.
 
 ---
 
 ## Dimension 7 — Architecture Compliance [OK]
 
-This is a Markdown/YAML/Bash repo — no source code architecture violations apply.
+**Score: 5/5**
 
-| Invariant | Status |
-|-----------|--------|
-| All skills are directories (not flat .md files) | ✅ |
-| Every skill dir has SKILL.md entry point | ✅ |
-| CLAUDE.md orchestrator delegates via Task tool pattern | ✅ |
-| openspec artifact structure correct | ✅ |
-| All content in English | ✅ (fully translated) |
-| Skill output contracts include next_recommended | ✅ (all 8 SDD phase skills) |
+**Methodology**: Sampled 3 skills for English compliance and structural conventions.
 
-**Violations found:** None.
+**Sample 1: `skills/sdd-explore/SKILL.md`**
+- Trigger defined: YES — `**Triggers**: sdd:explore, explore, investigate codebase, analyze before changing, research feature`
+- Process sections: YES — `## Purpose`, `## Process` (steps 1-5), output templates
+- Rules section: YES — `## Rules`
+- English compliance: CLEAN
 
----
+**Sample 2: `skills/project-fix/SKILL.md`**
+- Trigger defined: YES — `**Triggers**: /project-fix, apply audit corrections, fix claude project, implement audit`
+- Process sections: YES — `## Role`, `## Prerequisite`, `## Fix Process` (phases 1-4)
+- Rules section: YES — `## Execution rules`
+- English compliance: CLEAN — fully translated from Spanish in round 2
 
-## Dimension 8 — Testing & Verification [OK]
+**Sample 3: `skills/image-ocr/SKILL.md`**
+- Trigger defined: YES — `**Triggers**: ocr, extract text from image, image to text, ...` (line 15)
+- Process sections: YES — `## Tool Selection Guide`, `## Python Implementations`, detailed implementations
+- Rules section: NOT PRESENT
+- Assessment: `image-ocr` is an external tech reference skill (sourced from gentleman-programming catalog). Tech reference skills (github-pr, jira-task, react-19, etc.) consistently follow an alternative structure without a formal `## Rules` section. This pattern is intentional for content/reference skills vs orchestration skills. No deduction applied.
+- English compliance: Core narrative in English. Code comments in English. No Spanish narrative content.
 
-**config.yaml testing block:** ✅ Complete
-
-| Sub-check | Status |
-|-----------|--------|
-| `testing:` block present | ✅ |
-| `minimum_score_to_archive: 75` | ✅ |
-| `required_artifacts_per_change: [proposal.md, verify-report.md]` | ✅ |
-| `verify_report_requirements` defined (3 items) | ✅ |
-| `test_project` documented (Audiio V3) | ✅ |
-
-**Archived changes:**
-| Change | verify-report.md | [x] items | Test project stated |
-|--------|-----------------|-----------|-------------------|
-| 2026-02-23-bootstrap-sdd-infrastructure | ✅ | 9 | ✅ |
-| 2026-02-23-overhaul-project-audit-add-project-fix | ✅ | 6 | ✅ (Audiio V3 explicitly) |
-| 2026-02-24-project-fix-corrections | ✅ | 10 | ✅ (Audiio V3 explicitly) |
-
-**Archived changes missing verify-report.md:** None.
-
-**Archived changes with verify-report.md but no [x]:** None.
-
-**Verify rules are executable:** ✅ — 5 concrete rules including `/project:audit` score comparison, `sync.sh + install.sh` confirmation, artifact format validation. All are objectively verifiable.
+**No issues found.**
 
 ---
 
-## Required Actions
+## Dimension 8 — Testing [OK]
 
-### Critical (blocking SDD):
-None.
+**Score: 5/5**
 
-### High (degrade quality):
-None.
+**config.yaml `required_artifacts_per_change`** (added in round 2):
+```yaml
+required_artifacts_per_change:
+  - "proposal.md"
+  - "tasks.md"
+  - "verify-report.md"
+```
+All 3 required artifacts present. `tasks.md` was added as part of round 2 fixes.
 
-### Medium:
-1. **Document CLAUDE.md location exception in project-audit SKILL.md** — The audit skill's Dimension 1 check expects `.claude/CLAUDE.md`. For global-config repos, CLAUDE.md lives at root. Adding a note to the skill prevents false positives in future audits of this repo.
+**Archived changes — complete artifact audit:**
 
-### Low:
-1. **Add 2026-02-24 entry to `ai-context/changelog-ai.md`** — Document the project-fix-corrections cycle (English translation, verify-report addition, retroactive artifacts, next_recommended key).
-2. **Future changes: run /sdd:ff before applying** — Current 3 archived changes only have proposal.md + verify-report.md. Future changes should produce tasks.md and design.md through the full fast-forward cycle.
+| Archive directory | proposal.md | tasks.md | verify-report.md | [x] items in verify-report |
+|------------------|-------------|----------|-----------------|---------------------------|
+| `2026-02-23-bootstrap-sdd-infrastructure` | OK | OK | OK | 9 |
+| `2026-02-23-overhaul-project-audit-add-project-fix` | OK | OK | OK | 6 |
+| `2026-02-24-add-global-config-exception` | OK | OK | OK | 7 |
+| `2026-02-24-project-fix-corrections` | OK | OK | OK | 10 |
+
+All 4 archived changes are complete. All verify-reports meet the minimum of 1 `[x]` criterion (actual range: 6–10).
+
+**No active (non-archived) change directories**: `openspec/changes/` contains only `archive/`.
+
+**No issues found.**
 
 ---
 
-*Report saved to `.claude/audit-report.md`. To implement corrections: `/project:fix`*
-*This report was generated by `/project:audit` — do not modify the FIX_MANIFEST block manually*
+## Summary
+
+| Dimension | Max | Score | Status |
+|-----------|-----|-------|--------|
+| D1 — CLAUDE.md | 20 | 20 | OK |
+| D2 — Memory Layer | 25 | 25 | OK |
+| D3 — SDD Orchestrator | 20 | 20 | OK |
+| D4 — Skills Quality | 10 | 8 | WARNING |
+| D5 — Commands | 10 | 10 | OK |
+| D6 — Cross-references | 5 | 4 | WARNING |
+| D7 — Architecture | 5 | 5 | OK |
+| D8 — Testing | 5 | 5 | OK |
+| **TOTAL** | **100** | **97** | **SDD FULL** |
+
+---
+
+## Honest Assessment
+
+**Round progression**: 88 → 93 → 97 → **97** (net: same score after round 4 fixes)
+
+**Why the score did not increase despite fixes**: Rounds 2 and 3 fixes were genuine and would have raised the score, but this Round 4 audit discovered 3 issues not previously reported:
+- M1: skill-creator catalog missing 4 Tools/Platforms skills (was masked by lack of completeness check in prior audits)
+- M2: memory-manager + project-setup still have `docs/ai-context/` path (partially captured in round 2, not fully resolved)
+- L1: electron category mismatch in stack.md (newly detected by comparing CLAUDE.md vs stack.md)
+
+**To reach 100/100**, 3 fixes are required:
+1. Add `### Tools / Platforms` section to skill-creator catalog (M1)
+2. Update `docs/ai-context/` → `ai-context/` in memory-manager and project-setup (M2)
+3. Move electron from Tooling to Frontend in stack.md (L1)
+
+**SDD Readiness**: FULL — All orchestration infrastructure is complete, all 8 SDD phase skills are English-clean, all 4 archived changes are properly documented.

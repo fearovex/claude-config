@@ -1,266 +1,266 @@
 # memory-manager
 
-> Inicializa y actualiza la capa de memoria híbrida del proyecto (docs/ai-context/).
+> Initializes and updates the hybrid memory layer of the project (docs/ai-context/).
 
-**Triggers**: memory:init, memory:update, actualizar memoria, inicializar memoria, ai-context, contexto proyecto, memoria proyecto
-
----
-
-## Dos modos de operación
-
-### `/memory:init`
-Genera los 5 archivos de memoria desde cero leyendo el proyecto actual.
-Usar cuando: el proyecto no tiene `docs/ai-context/` todavía.
-
-### `/memory:update`
-Actualiza los archivos existentes con lo trabajado en la sesión actual.
-Usar cuando: se terminó trabajo significativo y quiero que la memoria refleje el estado actual.
+**Triggers**: memory-init, memory-update, update memory, initialize memory, ai-context, project context, project memory
 
 ---
 
-## Proceso: /memory:init
+## Two modes of operation
 
-### Paso 1 — Inventario del proyecto
+### `/memory-init`
+Generates the 5 memory files from scratch by reading the current project.
+Use when: the project does not yet have `docs/ai-context/`.
 
-Leo en profundidad:
-- Archivos de configuración (package.json, pyproject.toml, etc.)
-- Estructura de carpetas
-- README.md y cualquier documentación existente
-- Archivos de código representativos (entry points, modelos, componentes principales)
-- Tests existentes
-- Configuraciones de CI/CD si existen
+### `/memory-update`
+Updates existing files with the work done in the current session.
+Use when: significant work has been completed and the memory should reflect the current state.
 
-### Paso 2 — Generar stack.md
+---
+
+## Process: /memory-init
+
+### Step 1 — Project inventory
+
+I read in depth:
+- Configuration files (package.json, pyproject.toml, etc.)
+- Folder structure
+- README.md and any existing documentation
+- Representative code files (entry points, models, main components)
+- Existing tests
+- CI/CD configurations if they exist
+
+### Step 2 — Generate stack.md
 
 ```markdown
-# Stack Técnico
+# Technical Stack
 
-Última actualización: [YYYY-MM-DD]
+Last updated: [YYYY-MM-DD]
 
-## Lenguaje Principal
-- **[Lenguaje]** [versión]
+## Main Language
+- **[Language]** [version]
 
 ## Framework(s)
-- **[Framework]** [versión] — [propósito]
-- **[Framework2]** [versión] — [propósito]
+- **[Framework]** [version] — [purpose]
+- **[Framework2]** [version] — [purpose]
 
-## Base de Datos
-- **[DB]** [versión] — [ORM si aplica]
+## Database
+- **[DB]** [version] — [ORM if applicable]
 
 ## Testing
-- **[Framework de testing]** [versión]
-- Comando: `[comando para correr tests]`
-- Cobertura: [si está configurada]
+- **[Testing framework]** [version]
+- Command: `[command to run tests]`
+- Coverage: [if configured]
 
 ## Build & Dev
-- **[Bundler/Builder]** [versión]
-- Dev: `[comando]`
-- Build: `[comando]`
-- Preview: `[comando si existe]`
+- **[Bundler/Builder]** [version]
+- Dev: `[command]`
+- Build: `[command]`
+- Preview: `[command if it exists]`
 
-## Dependencias Clave
-| Paquete | Versión | Propósito |
-|---------|---------|-----------|
-| [nombre] | [versión] | [para qué sirve en el proyecto] |
+## Key Dependencies
+| Package | Version | Purpose |
+|---------|---------|---------|
+| [name] | [version] | [what it does in the project] |
 
-## Herramientas de Calidad
+## Quality Tools
 - Linter: [eslint/flake8/etc. + config]
 - Formatter: [prettier/black/etc.]
 - Type checker: [tsc/mypy/etc.]
 ```
 
-### Paso 3 — Generar architecture.md
+### Step 3 — Generate architecture.md
 
 ```markdown
-# Arquitectura del Proyecto
+# Project Architecture
 
-Última actualización: [YYYY-MM-DD]
+Last updated: [YYYY-MM-DD]
 
-## Visión General
-[2-3 líneas describiendo qué hace el proyecto]
+## Overview
+[2-3 lines describing what the project does]
 
-## Patrón Arquitectónico
+## Architectural Pattern
 [Feature-based / Layer-based / Clean Architecture / Hexagonal / etc.]
-[Justificación si se puede inferir]
+[Rationale if it can be inferred]
 
-## Estructura de Carpetas
+## Folder Structure
 ```
-[árbol de carpetas principales con descripción de cada una]
-```
-
-## Decisiones de Arquitectura
-| Decisión | Elección | Alternativas | Razón inferida |
-|----------|----------|--------------|----------------|
-| [decisión] | [qué se eligió] | [alternativas] | [por qué] |
-
-## Flujo Principal
-[Descripción del flujo de datos / request más común]
-
-## Puntos de Entrada
-- [Archivo/ruta]: [qué es]
-
-## Integraciones Externas
-- [Servicio/API]: [cómo se integra]
+[main folder tree with description of each]
 ```
 
-### Paso 4 — Generar conventions.md
+## Architecture Decisions
+| Decision | Choice | Alternatives | Inferred Reason |
+|----------|--------|--------------|-----------------|
+| [decision] | [what was chosen] | [alternatives] | [why] |
+
+## Main Flow
+[Description of the most common data flow / request]
+
+## Entry Points
+- [File/path]: [what it is]
+
+## External Integrations
+- [Service/API]: [how it integrates]
+```
+
+### Step 4 — Generate conventions.md
 
 ```markdown
-# Convenciones del Proyecto
+# Project Conventions
 
-Última actualización: [YYYY-MM-DD]
+Last updated: [YYYY-MM-DD]
 
 ## Naming
-- **Archivos**: [detectado: kebab-case / snake_case / PascalCase]
-- **Variables/Funciones**: [detectado]
-- **Clases/Tipos/Interfaces**: [detectado]
-- **Constantes**: [detectado]
-- **Tests**: [patrón detectado: *.test.ts / test_*.py / etc.]
+- **Files**: [detected: kebab-case / snake_case / PascalCase]
+- **Variables/Functions**: [detected]
+- **Classes/Types/Interfaces**: [detected]
+- **Constants**: [detected]
+- **Tests**: [detected pattern: *.test.ts / test_*.py / etc.]
 
-## Organización de Archivos
-[Cómo se organizan los archivos según el patrón detectado]
-[Dónde van los tests relativos al código]
+## File Organization
+[How files are organized according to the detected pattern]
+[Where tests live relative to code]
 
-## Patrones de Código Detectados
-[Patrones recurrentes observados en el código real]
+## Detected Code Patterns
+[Recurring patterns observed in real code]
 
 ## Commits
-[Convención si se detecta en historial: conventional commits, etc.]
+[Convention if detected in history: conventional commits, etc.]
 
 ## Branches
-[Estrategia si se detecta: main/develop, feature branches, etc.]
+[Strategy if detected: main/develop, feature branches, etc.]
 ```
 
-### Paso 5 — Generar known-issues.md
+### Step 5 — Generate known-issues.md
 
 ```markdown
-# Issues Conocidos y Gotchas
+# Known Issues and Gotchas
 
-Última actualización: [YYYY-MM-DD]
+Last updated: [YYYY-MM-DD]
 
-## Deuda Técnica Detectada
-[Código con TODO/FIXME/HACK comments]
-[Patrones problemáticos observados]
+## Detected Technical Debt
+[Code with TODO/FIXME/HACK comments]
+[Problematic patterns observed]
 
-## Gotchas del Proyecto
-[Cosas raras o no obvias detectadas en el código]
+## Project Gotchas
+[Unusual or non-obvious things detected in the code]
 
-## Limitaciones Actuales
-[Limitaciones funcionales evidentes en el código]
+## Current Limitations
+[Functional limitations evident in the code]
 
-## Workarounds en Uso
-[Si hay workarounds documentados en el código, listarlos aquí]
+## Workarounds in Use
+[If there are workarounds documented in the code, list them here]
 
 ---
-*Este archivo se actualiza durante el desarrollo. Ejecutar /memory:update después de resolver issues.*
+*This file is updated during development. Run /memory-update after resolving issues.*
 ```
 
-### Paso 6 — Generar changelog-ai.md
+### Step 6 — Generate changelog-ai.md
 
 ```markdown
-# Changelog de Cambios por AI
+# AI Changelog
 
-Este archivo registra los cambios significativos realizados por Claude.
-Se actualiza ejecutando /memory:update al finalizar una sesión de trabajo.
+This file records significant changes made by Claude.
+Updated by running /memory-update at the end of a work session.
 
-## Formato
-### [YYYY-MM-DD] — [Nombre del cambio]
-**Qué se hizo**: [descripción]
-**Archivos modificados**: [lista]
-**Decisiones tomadas**: [decisiones relevantes]
-**Notas**: [cualquier cosa importante para sesiones futuras]
-
----
-
-*Historial vacío — se llenará durante el desarrollo.*
-```
+## Format
+### [YYYY-MM-DD] — [Change name]
+**What was done**: [description]
+**Modified files**: [list]
+**Decisions made**: [relevant decisions]
+**Notes**: [anything important for future sessions]
 
 ---
 
-## Proceso: /memory:update
+*Empty history — will be filled during development.*
+```
 
-### Cuándo usar
-Después de:
-- Completar un ciclo SDD (/sdd:archive)
-- Hacer cambios arquitectónicos significativos
-- Resolver bugs importantes
-- Cambiar convenciones o patrones del proyecto
-- Al final de una sesión larga de trabajo
+---
 
-### Paso 1 — Analizar qué cambió en esta sesión
+## Process: /memory-update
 
-Reviso el contexto de la sesión actual:
-- Qué archivos fueron creados/modificados
-- Qué decisiones se tomaron
-- Qué problemas se encontraron y resolvieron
-- Si cambió el stack (nuevas deps, versiones actualizadas)
+### When to use
+After:
+- Completing an SDD cycle (/sdd-archive)
+- Making significant architectural changes
+- Resolving important bugs
+- Changing project conventions or patterns
+- At the end of a long work session
 
-### Paso 2 — Determinar qué archivos actualizar
+### Step 1 — Analyze what changed in this session
 
-| Si en la sesión... | Actualizo |
-|-------------------|-----------|
-| Se agregaron/quitaron dependencias | `stack.md` |
-| Se tomaron decisiones de arquitectura | `architecture.md` |
-| Se definieron/cambiaron convenciones | `conventions.md` |
-| Se encontraron/resolvieron bugs | `known-issues.md` |
-| Se hizo cualquier cambio significativo | `changelog-ai.md` |
+I review the context of the current session:
+- Which files were created/modified
+- What decisions were made
+- What problems were found and resolved
+- If the stack changed (new deps, updated versions)
 
-### Paso 3 — Actualizar stack.md (si aplica)
+### Step 2 — Determine which files to update
 
-Solo actualizo las secciones que cambiaron. Agrego sin borrar historia:
-- Nueva dependencia: la añado a la tabla con su versión y propósito
-- Dependencia removida: la marco como `~~[nombre]~~ (removido [fecha])`
-- Versión actualizada: actualizo el número
+| If in the session... | I update |
+|---------------------|----------|
+| Dependencies were added/removed | `stack.md` |
+| Architecture decisions were made | `architecture.md` |
+| Conventions were defined/changed | `conventions.md` |
+| Bugs were found/resolved | `known-issues.md` |
+| Any significant change was made | `changelog-ai.md` |
 
-### Paso 4 — Actualizar architecture.md (si aplica)
+### Step 3 — Update stack.md (if applicable)
 
-Si se tomaron decisiones nuevas, las añado a la tabla de decisiones:
+I only update the sections that changed. I add without deleting history:
+- New dependency: add it to the table with its version and purpose
+- Removed dependency: mark it as `~~[name]~~ (removed [date])`
+- Updated version: update the number
+
+### Step 4 — Update architecture.md (if applicable)
+
+If new decisions were made, I add them to the decisions table:
 ```markdown
-| [nueva decisión] | [elección] | [alternativas] | [razón real] |
+| [new decision] | [choice] | [alternatives] | [actual reason] |
 ```
 
-Si cambió la estructura de carpetas, actualizo el árbol.
+If the folder structure changed, I update the tree.
 
-### Paso 5 — Actualizar known-issues.md (si aplica)
+### Step 5 — Update known-issues.md (if applicable)
 
-- Issues resueltos: los muevo a una sección `## Issues Resueltos` con fecha de resolución
-- Issues nuevos encontrados: los añado a la sección correspondiente
+- Resolved issues: move them to a `## Resolved Issues` section with resolution date
+- New issues found: add them to the corresponding section
 
-### Paso 6 — Añadir entrada a changelog-ai.md
+### Step 6 — Add entry to changelog-ai.md
 
-Siempre añado una entrada al inicio (cronológicamente descendente):
+I always add an entry at the top (chronologically descending):
 
 ```markdown
-### [YYYY-MM-DD] — [Nombre descriptivo del trabajo]
-**Qué se hizo**: [descripción concisa]
-**Archivos modificados**:
-- `ruta/archivo.ext` — [qué cambió]
-**Decisiones tomadas**:
-- [decisión relevante para sesiones futuras]
-**Notas**: [cualquier cosa importante]
+### [YYYY-MM-DD] — [Descriptive name of the work]
+**What was done**: [concise description]
+**Modified files**:
+- `path/file.ext` — [what changed]
+**Decisions made**:
+- [decision relevant for future sessions]
+**Notes**: [anything important]
 ```
 
-### Paso 7 — Resumen al usuario
+### Step 7 — Summary for the user
 
 ```
-✅ Memoria actualizada
+✅ Memory updated
 
-Archivos modificados:
-  - docs/ai-context/stack.md — añadidas 2 dependencias
-  - docs/ai-context/known-issues.md — 1 issue resuelto, 1 nuevo
-  - docs/ai-context/changelog-ai.md — entrada añadida
+Modified files:
+  - docs/ai-context/stack.md — 2 dependencies added
+  - docs/ai-context/known-issues.md — 1 issue resolved, 1 new
+  - docs/ai-context/changelog-ai.md — entry added
 
-Sin cambios:
+No changes:
   - docs/ai-context/architecture.md
   - docs/ai-context/conventions.md
 ```
 
 ---
 
-## Reglas
+## Rules
 
-- Leo código real para inferir, nunca invento
-- Actualizo de forma incremental, nunca sobreescribo todo
-- Marco con [Por confirmar] lo que no puedo determinar con certeza
-- Preservo el historial: los items resueltos se mueven, no se borran
-- Si `docs/ai-context/` no existe y se ejecuta `/memory:update`, sugiero `/memory:init` primero
+- I read real code to infer, I never invent
+- I update incrementally, I never overwrite everything
+- I mark with [To confirm] what I cannot determine with certainty
+- I preserve history: resolved items are moved, not deleted
+- If `docs/ai-context/` does not exist and `/memory-update` is run, I suggest `/memory-init` first

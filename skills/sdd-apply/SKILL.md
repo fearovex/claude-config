@@ -87,17 +87,17 @@ If I am implementing in a specific stack, I load the corresponding skill:
 ```json
 {
   "status": "ok|warning|blocked|failed",
-  "resumen": "Implemented [N] tasks of [total]. Phase [X] complete.",
-  "artefactos": [
+  "summary": "Implemented [N] tasks of [total]. Phase [X] complete.",
+  "artifacts": [
     "src/services/auth.service.ts — created",
     "src/types/auth.types.ts — created",
     "openspec/changes/<name>/tasks.md — updated"
   ],
-  "desviaciones": [
+  "deviations": [
     "DEVIATION in task 2.1: [description and reason]"
   ],
   "next_recommended": ["sdd-apply (Phase 2)"],
-  "riesgos": []
+  "risks": []
 }
 ```
 

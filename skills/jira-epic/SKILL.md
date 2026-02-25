@@ -13,77 +13,77 @@ metadata:
 
 Load when: creating Jira epics for large features, planning work that spans multiple sprints or components, or decomposing epics into tasks.
 
-## Cuándo crear un Epic vs una Task
+## When to create an Epic vs a Task
 
-| Crear Epic | Crear Task directa |
-|------------|-------------------|
-| Feature que span múltiples sprints | Feature de 1-2 días |
-| Requiere trabajo en API + UI + SDK | Trabajo en un solo componente |
-| Nueva página completa de la app | Mejora pequeña existente |
-| Refactor arquitectónico mayor | Bug fix o tweak |
+| Create Epic | Create Task directly |
+|-------------|---------------------|
+| Feature spanning multiple sprints | Feature taking 1-2 days |
+| Requires work in API + UI + SDK | Work in a single component |
+| Entire new page of the app | Small improvement to existing feature |
+| Major architectural refactor | Bug fix or minor tweak |
 
-## Formato de Título de Epic
+## Epic Title Format
 
 ```
 [EPIC] Feature Name
 
-Ejemplos:
+Examples:
   [EPIC] User Authentication System
   [EPIC] Analytics Dashboard
   [EPIC] Multi-tenant Support
   [EPIC] Payment Integration
 ```
 
-## Plantilla de Epic
+## Epic Template
 
 ```
 h2. Overview
 
-*What:* [Qué hace esta feature en una oración]
-*Who:* [Para qué usuarios/roles]
-*Why:* [Qué problema resuelve o qué valor aporta]
+*What:* [What this feature does in one sentence]
+*Who:* [For which users/roles]
+*Why:* [What problem it solves or what value it provides]
 
 h2. Goals
-* [Objetivo medible 1]
-* [Objetivo medible 2]
-* [Objetivo medible 3]
+* [Measurable goal 1]
+* [Measurable goal 2]
+* [Measurable goal 3]
 
 h2. Out of Scope
-* [Qué explícitamente NO incluye esta epic]
-* [Qué se deja para una epic futura]
+* [What this epic explicitly does NOT include]
+* [What is left for a future epic]
 
 h2. Requirements
 
 h3. Functional Requirements
-* [RF-01] [Requisito funcional 1]
-* [RF-02] [Requisito funcional 2]
-* [RF-03] [Requisito funcional 3]
+* [FR-01] [Functional requirement 1]
+* [FR-02] [Functional requirement 2]
+* [FR-03] [Functional requirement 3]
 
 h3. Non-Functional Requirements
-* Performance: [ej: API < 200ms p95]
-* Security: [ej: autenticación requerida en todos los endpoints]
-* Scalability: [ej: soportar N usuarios concurrentes]
+* Performance: [e.g.: API < 200ms p95]
+* Security: [e.g.: authentication required on all endpoints]
+* Scalability: [e.g.: support N concurrent users]
 
 h2. Technical Considerations
 
 h3. Architecture
-[Descripción del enfoque arquitectónico]
+[Description of the architectural approach]
 
 h3. Data Model Changes
-[Nuevas tablas, campos, relaciones si aplica]
+[New tables, fields, relationships if applicable]
 
 h3. API Changes
-[Nuevos endpoints, cambios en existentes]
+[New endpoints, changes to existing ones]
 
 h3. UI Components
-[Nuevas páginas, componentes principales]
+[New pages, main components]
 
 h2. Diagram
 
 {code}
-[Diagrama ASCII del flujo principal o arquitectura]
+[ASCII diagram of the main flow or architecture]
 
-Ejemplo:
+Example:
 User → Login Page → POST /api/auth/login
                          ↓
                     Validate credentials
@@ -96,34 +96,34 @@ User → Login Page → POST /api/auth/login
 h2. Implementation Plan
 
 h3. Phase 1: Foundation
-* [ ] [Tarea técnica 1] — (API)
-* [ ] [Tarea técnica 2] — (API)
+* [ ] [Technical task 1] — (API)
+* [ ] [Technical task 2] — (API)
 
 h3. Phase 2: Core Features
-* [ ] [Tarea técnica 3] — (UI)
-* [ ] [Tarea técnica 4] — (UI)
+* [ ] [Technical task 3] — (UI)
+* [ ] [Technical task 4] — (UI)
 
 h3. Phase 3: Integration & Polish
-* [ ] [Tarea técnica 5] — (API + UI)
-* [ ] [Tarea técnica 6]
+* [ ] [Technical task 5] — (API + UI)
+* [ ] [Technical task 6]
 
 h2. Acceptance Criteria
-* [ ] [Criterio de éxito medible 1]
-* [ ] [Criterio de éxito medible 2]
-* [ ] [Criterio de éxito medible 3]
+* [ ] [Measurable success criterion 1]
+* [ ] [Measurable success criterion 2]
+* [ ] [Measurable success criterion 3]
 
 h2. Dependencies
-* [Dependencia externa o interna que bloquea el inicio]
+* [External or internal dependency that blocks the start]
 
 h2. Links
-* Figma: [link si existe]
-* Design doc: [link si existe]
+* Figma: [link if available]
+* Design doc: [link if available]
 * Related epics: [links]
 ```
 
-## Descomposición en Tasks
+## Task Decomposition
 
-Una vez creada la epic, la descompongo en tasks usando `jira-task` skill:
+Once the epic is created, decompose it into tasks using the `jira-task` skill:
 
 ```
 Epic: [EPIC] User Authentication System
@@ -139,29 +139,29 @@ Tasks:
   [FEATURE] Add E2E auth tests (UI)
 ```
 
-Reglas de descomposición:
-- Cada task ≤ 2 días de trabajo
-- Split por componente (API/UI/SDK)
-- Orden respeta dependencias técnicas
-- Tasks de la misma fase pueden ser paralelas
+Decomposition rules:
+- Each task <= 2 days of work
+- Split by component (API/UI/SDK)
+- Order respects technical dependencies
+- Tasks in the same phase can be parallel
 
-## Campos Jira MCP para Epic
+## Jira MCP Fields for Epic
 
 ```javascript
 {
-  project_key: "PROYECTO",
+  project_key: "PROJECT",
   issue_type: "Epic",
   summary: "[EPIC] Feature Name",
   description: "...",           // Jira Wiki markup
   priority: "High",
-  // epic_name: "Feature Name"  // Campo específico de Epic en Jira
+  // epic_name: "Feature Name"  // Epic-specific field in Jira
 }
 ```
 
-## Diagramas con Mermaid (si el proyecto los soporta)
+## Mermaid Diagrams (if the project supports them)
 
 ```
-// Flujo de datos
+// Data flow
 sequenceDiagram
     User->>+Browser: Enter credentials
     Browser->>+API: POST /auth/login
@@ -170,7 +170,7 @@ sequenceDiagram
     API-->>-Browser: JWT token
     Browser-->>-User: Redirect to dashboard
 
-// Arquitectura
+// Architecture
 graph TD
     A[React App] --> B[Auth Context]
     B --> C[API Client]
@@ -182,23 +182,23 @@ graph TD
 
 ## Anti-Patterns
 
-### ❌ Epic sin out of scope
+### ❌ Epic without out of scope
 
 ```
-Sin "Out of Scope" → scope creep inevitable
-→ Siempre definir explícitamente qué NO entra
+No "Out of Scope" → inevitable scope creep
+→ Always explicitly define what does NOT belong
 ```
 
-### ❌ Tasks demasiado grandes en el epic
+### ❌ Tasks too large in the epic
 
 ```
-❌ [FEATURE] Implement entire auth system (API + UI) ← Una sola tarea
-✅ Split en 6-8 tasks específicas por componente
+❌ [FEATURE] Implement entire auth system (API + UI) ← Single task
+✅ Split into 6-8 specific tasks per component
 ```
 
-### ❌ Criterios vagos
+### ❌ Vague criteria
 
 ```
-❌ "El sistema de auth funciona"
-✅ "Usuario puede hacer login con email/password y recibe JWT con expiración 24h"
+❌ "The auth system works"
+✅ "User can log in with email/password and receives a JWT with 24h expiration"
 ```

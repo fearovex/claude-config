@@ -1,249 +1,249 @@
 # skill-creator
 
-> Crea skills nuevas, ya sea genéricas para el catálogo global o específicas para el proyecto actual.
+> Creates new skills, either generic for the global catalog or specific to the current project.
 
-**Triggers**: skill:create, skill:add, crear skill, nueva skill, generar skill, add skill to project
-
----
-
-## Dos modos de operación
-
-### Modo `/skill:create <nombre>`
-Crea una skill **nueva** que no existe en ningún lado. Me pregunta si es:
-- **Genérica** → va a `~/.claude/skills/<nombre>/SKILL.md` (disponible en todos los proyectos)
-- **De proyecto** → va a `.claude/skills/<nombre>/SKILL.md` (solo en este proyecto)
-
-### Modo `/skill:add <nombre>`
-Agrega al proyecto actual una skill **existente del catálogo global**. Copia o crea referencia.
+**Triggers**: skill:create, skill:add, create skill, new skill, generate skill, add skill to project
 
 ---
 
-## Proceso: /skill:create
+## Two modes of operation
 
-### Paso 1 — Recopilar información
+### Mode `/skill-create <name>`
+Creates a **new** skill that does not exist anywhere. Asks whether it is:
+- **Generic** → goes to `~/.claude/skills/<name>/SKILL.md` (available in all projects)
+- **Project-specific** → goes to `.claude/skills/<name>/SKILL.md` (only in this project)
 
-Hago las preguntas necesarias para crear una skill útil:
+### Mode `/skill-add <name>`
+Adds an **existing skill from the global catalog** to the current project. Copies or creates a reference.
+
+---
+
+## Process: /skill-create
+
+### Step 1 — Gather information
+
+Ask the necessary questions to create a useful skill:
 
 ```
-¿Esta skill es para este proyecto específico o para todos tus proyectos?
-  1. Solo este proyecto → .claude/skills/
-  2. Catálogo global → ~/.claude/skills/
+Is this skill for this specific project or for all your projects?
+  1. This project only → .claude/skills/
+  2. Global catalog → ~/.claude/skills/
 
-¿Qué hace esta skill? (descripción en una oración)
+What does this skill do? (one-sentence description)
 
-¿Cuándo debe activarse? (¿qué situaciones disparan su uso?)
+When should it activate? (what situations trigger its use?)
 
-¿Hay patrones de código, comandos o procesos específicos que debe conocer?
+Are there specific code patterns, commands, or processes it should know about?
 ```
 
-Si el usuario ya dio suficiente contexto en el comando, omito preguntas obvias.
+If the user has already provided enough context in the command, skip obvious questions.
 
-### Paso 2 — Si es skill de proyecto: analizar el código
+### Step 2 — If project skill: analyze the code
 
-Leo el código existente del proyecto para:
-- Detectar patrones reales que documentar
-- Encontrar ejemplos reales para incluir en la skill
-- Identificar anti-patrones que ya existen y deben evitarse
+Read the existing project code to:
+- Detect real patterns to document
+- Find real examples to include in the skill
+- Identify existing anti-patterns that must be avoided
 
-### Paso 3 — Generar la skill
+### Step 3 — Generate the skill
 
-**Formato estándar de SKILL.md:**
+**Standard SKILL.md format:**
 
 ```markdown
-# [nombre-skill]
+# [skill-name]
 
-> [Descripción de una línea. Qué hace y para qué sirve.]
+> [One-line description. What it does and what it is for.]
 
-**Triggers**: [palabra1, palabra2, situación1, situación2]
-
----
-
-## Cuándo usar esta skill
-
-[Explicación de los contextos donde aplica]
-[Condiciones específicas que la activan]
-
-## Patrones Principales
-
-### [Patrón 1]: [Nombre descriptivo]
-[Explicación del patrón]
-
-```[lenguaje]
-[código de ejemplo real]
-```
-
-### [Patrón 2]: [Nombre descriptivo]
-[Explicación]
-
-```[lenguaje]
-[código de ejemplo]
-```
-
-### [Patrón 3]: [Nombre descriptivo]
-[Explicación]
-
-```[lenguaje]
-[código de ejemplo]
-```
-
-## Ejemplos Completos
-
-### [Escenario 1]
-[Código completo y ejecutable]
-
-### [Escenario 2]
-[Código completo y ejecutable]
-
-## Anti-Patrones — Qué Evitar
-
-### ❌ [Cosa a evitar]
-[Por qué es problemático]
-
-```[lenguaje]
-// ❌ Mal
-[código malo]
-```
-
-```[lenguaje]
-// ✅ Bien
-[código correcto]
-```
-
-## Referencia Rápida
-
-| Tarea | Patrón/Comando |
-|-------|---------------|
-| [tarea común] | [solución] |
-| [tarea común] | [solución] |
-```
-
-### Paso 4 — Previsualizar y confirmar
-
-Muestro el contenido que voy a crear y confirmo con el usuario antes de escribir.
-
-### Paso 5 — Crear y registrar
-
-1. Creo el archivo en la ruta correspondiente
-2. Si es skill de proyecto, sugiero añadirla al `CLAUDE.md` del proyecto en la sección de skills
-3. Si es skill genérica, la añado al registry en `~/.claude/CLAUDE.md`
+**Triggers**: [word1, word2, situation1, situation2]
 
 ---
 
-## Proceso: /skill:add
+## When to use this skill
 
-Cuando el usuario ejecuta `/skill:add <nombre>`:
+[Explanation of the contexts where it applies]
+[Specific conditions that activate it]
 
-### Verifico que existe en el catálogo global
-```
-~/.claude/skills/<nombre>/SKILL.md
-```
+## Main Patterns
 
-Si no existe:
-```
-La skill "<nombre>" no está en el catálogo global.
-Skills disponibles similares: [lista de skills parecidas]
+### [Pattern 1]: [Descriptive name]
+[Explanation of the pattern]
 
-¿Quieres crear una nueva con /skill:create <nombre>?
+```[language]
+[real example code]
 ```
 
-### Verifico que el proyecto tiene `.claude/skills/`
-Si no existe, lo creo.
+### [Pattern 2]: [Descriptive name]
+[Explanation]
 
-### Estrategia de adición
+```[language]
+[example code]
+```
 
-**Opción A — Referencia simbólica conceptual:**
-Añado la skill al `CLAUDE.md` del proyecto en la sección de skills activas, indicando que está en el catálogo global.
+### [Pattern 3]: [Descriptive name]
+[Explanation]
+
+```[language]
+[example code]
+```
+
+## Complete Examples
+
+### [Scenario 1]
+[Complete, executable code]
+
+### [Scenario 2]
+[Complete, executable code]
+
+## Anti-Patterns — What to Avoid
+
+### ❌ [Thing to avoid]
+[Why it is problematic]
+
+```[language]
+// ❌ Bad
+[bad code]
+```
+
+```[language]
+// ✅ Good
+[correct code]
+```
+
+## Quick Reference
+
+| Task | Pattern/Command |
+|------|----------------|
+| [common task] | [solution] |
+| [common task] | [solution] |
+```
+
+### Step 4 — Preview and confirm
+
+Show the content to be created and confirm with the user before writing.
+
+### Step 5 — Create and register
+
+1. Create the file at the corresponding path
+2. If it is a project skill, suggest adding it to the project `CLAUDE.md` in the skills section
+3. If it is a generic skill, add it to the registry in `~/.claude/CLAUDE.md`
+
+---
+
+## Process: /skill-add
+
+When the user runs `/skill-add <name>`:
+
+### Verify it exists in the global catalog
+```
+~/.claude/skills/<name>/SKILL.md
+```
+
+If it does not exist:
+```
+The skill "<name>" is not in the global catalog.
+Similar available skills: [list of similar skills]
+
+Do you want to create a new one with /skill-create <name>?
+```
+
+### Verify the project has `.claude/skills/`
+If it does not exist, create it.
+
+### Addition strategy
+
+**Option A — Conceptual symbolic reference:**
+Add the skill to the project `CLAUDE.md` in the active skills section, indicating it is in the global catalog.
 
 ```markdown
-## Skills Activas
+## Active Skills
 - `~/.claude/skills/typescript/SKILL.md` — TypeScript patterns
 - `~/.claude/skills/nextjs-15/SKILL.md` — Next.js 15 patterns
 ```
 
-**Opción B — Copia local** (si el usuario quiere personalizar):
-Copia el archivo a `.claude/skills/<nombre>/SKILL.md` y añade nota de origen.
+**Option B — Local copy** (if the user wants to customize):
+Copy the file to `.claude/skills/<name>/SKILL.md` and add an origin note.
 
-### Actualizo CLAUDE.md del proyecto
+### Update project CLAUDE.md
 
-Añado la skill al registry del proyecto para que sea visible.
+Add the skill to the project registry so it is visible.
 
 ---
 
-## Skills del Catálogo Global
+## Global Catalog Skills
 
-Catálogo actual disponible en `~/.claude/skills/`:
+Current catalog available in `~/.claude/skills/`:
 
-### Meta-tools y SDD
+### Meta-tools and SDD
 
-| Skill | Para qué |
-|-------|----------|
-| `project-setup` | Setup de proyectos con SDD |
-| `project-audit` | Auditoría de configuración |
-| `project-update` | Actualización de configuración |
-| `skill-creator` | Creación de skills |
-| `memory-manager` | Gestión de memoria de proyecto |
-| `sdd-explore` | Fase exploración SDD |
-| `sdd-propose` | Fase propuesta SDD |
-| `sdd-spec` | Fase especificaciones SDD |
-| `sdd-design` | Fase diseño técnico SDD |
-| `sdd-tasks` | Fase plan de tareas SDD |
-| `sdd-apply` | Fase implementación SDD |
-| `sdd-verify` | Fase verificación SDD |
-| `sdd-archive` | Fase archivo SDD |
+| Skill | Purpose |
+|-------|---------|
+| `project-setup` | Project setup with SDD |
+| `project-audit` | Configuration audit |
+| `project-update` | Configuration updates |
+| `skill-creator` | Skill creation |
+| `memory-manager` | Project memory management |
+| `sdd-explore` | SDD exploration phase |
+| `sdd-propose` | SDD proposal phase |
+| `sdd-spec` | SDD specifications phase |
+| `sdd-design` | SDD technical design phase |
+| `sdd-tasks` | SDD task plan phase |
+| `sdd-apply` | SDD implementation phase |
+| `sdd-verify` | SDD verification phase |
+| `sdd-archive` | SDD archive phase |
 
 ### Frontend / Full-stack
 
-| Skill | Para qué |
-|-------|----------|
-| `react-19` | React 19 con React Compiler, Server Components, use() hook |
+| Skill | Purpose |
+|-------|---------|
+| `react-19` | React 19 with React Compiler, Server Components, use() hook |
 | `nextjs-15` | Next.js 15 App Router, Server Actions, data fetching |
-| `typescript` | TypeScript strict mode, utility types, patrones avanzados |
-| `zustand-5` | State management con Zustand 5, slices, persistencia |
-| `zod-4` | Validación de schemas con Zod 4, breaking changes desde v3 |
-| `tailwind-4` | Tailwind CSS 4, cn() utility, estilos dinámicos |
+| `typescript` | TypeScript strict mode, utility types, advanced patterns |
+| `zustand-5` | State management with Zustand 5, slices, persistence |
+| `zod-4` | Schema validation with Zod 4, breaking changes from v3 |
+| `tailwind-4` | Tailwind CSS 4, cn() utility, dynamic styles |
 | `ai-sdk-5` | Vercel AI SDK 5, useChat, streaming, tool integration |
-| `react-native` | React Native con Expo, navegación, NativeWind |
-| `electron` | Electron apps de escritorio, IPC, auto-updater |
+| `react-native` | React Native with Expo, navigation, NativeWind |
+| `electron` | Electron desktop apps, IPC, auto-updater |
 
 ### Backend
 
-| Skill | Para qué |
-|-------|----------|
+| Skill | Purpose |
+|-------|---------|
 | `django-drf` | Django REST Framework, ViewSets, Serializers |
 | `spring-boot-3` | Spring Boot 3.3+, constructor injection, @ConfigurationProperties |
-| `hexagonal-architecture-java` | Arquitectura hexagonal en Java, Ports & Adapters |
+| `hexagonal-architecture-java` | Hexagonal architecture in Java, Ports & Adapters |
 | `java-21` | Java 21, records, sealed types, virtual threads |
 
 ### Testing
 
-| Skill | Para qué |
-|-------|----------|
-| `playwright` | E2E testing con Playwright, Page Object Model |
-| `pytest` | Testing Python con pytest, fixtures, mocking, async |
+| Skill | Purpose |
+|-------|---------|
+| `playwright` | E2E testing with Playwright, Page Object Model |
+| `pytest` | Python testing with pytest, fixtures, mocking, async |
 
-### Tooling / Proceso
+### Tooling / Process
 
-| Skill | Para qué |
-|-------|----------|
-| `github-pr` | Pull Requests con conventional commits y gh CLI |
-| `jira-task` | Crear Jira tasks con estructura estándar y Wiki markup |
-| `jira-epic` | Crear Jira epics con overview, requisitos y desglose |
+| Skill | Purpose |
+|-------|---------|
+| `github-pr` | Pull Requests with conventional commits and gh CLI |
+| `jira-task` | Create Jira tasks with standard structure and Wiki markup |
+| `jira-epic` | Create Jira epics with overview, requirements, and decomposition |
 
-### Lenguajes / Frameworks
+### Languages / Frameworks
 
-| Skill | Para qué |
-|-------|----------|
-| `elixir-antipatterns` | Anti-patrones Elixir/Phoenix: error handling, Ecto, testing |
+| Skill | Purpose |
+|-------|---------|
+| `elixir-antipatterns` | Elixir/Phoenix anti-patterns: error handling, Ecto, testing |
 
-> **Nota**: `angular` no está disponible (404 en el repo origen). Se puede crear con `/skill:create angular`.
+> **Note**: `angular` is not available (404 in the source repo). It can be created with `/skill-create angular`.
 
 ---
 
-## Reglas
+## Rules
 
-- Siempre uso código real del proyecto como ejemplos cuando es skill de proyecto
-- Nunca invento patrones — los extraigo del código existente
-- Mínimo 3 ejemplos de código por skill
-- Siempre incluyo anti-patrones
-- Previualizo y confirmo antes de escribir
-- Registro la skill nueva en el CLAUDE.md correspondiente
+- Always use real project code as examples when it is a project skill
+- Never invent patterns — extract them from existing code
+- Minimum 3 code examples per skill
+- Always include anti-patterns
+- Preview and confirm before writing
+- Register the new skill in the corresponding CLAUDE.md

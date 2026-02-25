@@ -150,13 +150,13 @@ For each requirement I include:
 ```json
 {
   "status": "ok|warning|blocked",
-  "resumen": "Specs for [change-name]: [N] domains, [M] requirements, [K] scenarios.",
-  "artefactos": [
+  "summary": "Specs for [change-name]: [N] domains, [M] requirements, [K] scenarios.",
+  "artifacts": [
     "openspec/changes/<name>/specs/<domain1>/spec.md",
     "openspec/changes/<name>/specs/<domain2>/spec.md"
   ],
   "next_recommended": ["sdd-tasks (after sdd-design)"],
-  "riesgos": []
+  "risks": []
 }
 ```
 

@@ -15,33 +15,33 @@ Load when: creating Jira tickets, structuring work items, splitting tasks by com
 
 ## Critical Patterns
 
-### Regla 1: Split por componente
+### Rule 1: Split by component
 
-Si el cambio toca API, UI o SDK → **crear tareas separadas** por componente:
-- Permite desarrollo paralelo
-- Asignación por equipo
-- Tracking de dependencias
+If the change touches API, UI, or SDK → **create separate tasks** per component:
+- Enables parallel development
+- Assignment by team
+- Dependency tracking
 
 ```
-✅ Feature en API + UI:
-  Tarea 1: [FEATURE] Add user endpoint (API)
-  Tarea 2: [FEATURE] Add user form (UI)
+✅ Feature in API + UI:
+  Task 1: [FEATURE] Add user endpoint (API)
+  Task 2: [FEATURE] Add user form (UI)
 
 ❌ No:
-  Tarea 1: [FEATURE] Add user (API + UI)
+  Task 1: [FEATURE] Add user (API + UI)
 ```
 
-### Regla 2: Estructura diferente para Bug vs Feature
+### Rule 2: Different structure for Bug vs Feature
 
-- **Bug**: Tareas hermanas (independientes, urgentes)
-- **Feature**: Jerarquía padre-hijo (contexto de negocio arriba, técnico abajo)
+- **Bug**: Sibling tasks (independent, urgent)
+- **Feature**: Parent-child hierarchy (business context above, technical below)
 
-### Regla 3: Jira Wiki Markup (no Markdown)
+### Rule 3: Jira Wiki Markup (not Markdown)
 
 ```
-Jira Wiki:          Markdown equivalente:
-h2. Título          ## Título
-*texto*             **texto**
+Jira Wiki:          Markdown equivalent:
+h2. Title           ## Title
+*text*              **text**
 * item              - item
 || col1 || col2 ||  | col1 | col2 |
 | val1 | val2 |
@@ -50,166 +50,166 @@ h2. Título          ## Título
 {code}              ```
 ```
 
-## Formato de Títulos
+## Title Format
 
 ```
 [TYPE] Description (components)
 
-Tipos:
-  [BUG]         Error en producción o desarrollo
-  [FEATURE]     Nueva funcionalidad
-  [ENHANCEMENT] Mejora de existente
-  [REFACTOR]    Refactoring sin cambio de comportamiento
-  [DOCS]        Documentación
-  [CHORE]       Mantenimiento, deps, CI
+Types:
+  [BUG]         Error in production or development
+  [FEATURE]     New functionality
+  [ENHANCEMENT] Improvement of existing feature
+  [REFACTOR]    Refactoring without behavior change
+  [DOCS]        Documentation
+  [CHORE]       Maintenance, deps, CI
 
-Componentes: (API) (UI) (SDK) (API + UI)
+Components: (API) (UI) (SDK) (API + UI)
 
-Ejemplos:
+Examples:
   [FEATURE] Add user authentication (API)
   [FEATURE] Add login form (UI)
   [BUG] Fix session timeout (API)
   [ENHANCEMENT] Improve search performance (API)
 ```
 
-## Plantillas
+## Templates
 
-### Tarea Padre (Feature — contexto de negocio)
+### Parent Task (Feature — business context)
 
 ```
 h2. Overview
-Como [rol], quiero [funcionalidad] para [beneficio].
+As a [role], I want [functionality] so that [benefit].
 
 h2. Acceptance Criteria
-* El usuario puede [acción 1]
-* El sistema [comportamiento 1]
-* Cuando [condición], entonces [resultado]
+* The user can [action 1]
+* The system [behavior 1]
+* When [condition], then [result]
 
 h2. Design
-[Link a Figma si aplica]
+[Link to Figma if applicable]
 
 h2. Notes
-[Contexto adicional, decisiones, restricciones]
+[Additional context, decisions, constraints]
 ```
 
-### Tarea Hijo / Técnica (API)
+### Child / Technical Task (API)
 
 ```
 h2. Description
-*Context:* [Link a tarea padre]
+*Context:* [Link to parent task]
 
 h2. Technical Requirements
-* Crear endpoint POST /api/v1/[recurso]
-* Validar input con [schema/validator]
-* Retornar [formato de respuesta]
+* Create POST /api/v1/[resource] endpoint
+* Validate input with [schema/validator]
+* Return [response format]
 
 h2. Affected Files
-* {{src/routes/[archivo].ts}} — [qué cambia]
-* {{src/services/[archivo].ts}} — [qué cambia]
-* {{tests/[archivo].spec.ts}} — [qué se agrega]
+* {{src/routes/[file].ts}} — [what changes]
+* {{src/services/[file].ts}} — [what changes]
+* {{tests/[file].spec.ts}} — [what is added]
 
 h2. Acceptance Criteria
-* [ ] Endpoint responde 201 con datos válidos
-* [ ] Retorna 400 con input inválido
-* [ ] Tests unitarios pasan
-* [ ] Tests de integración pasan
+* [ ] Endpoint responds 201 with valid data
+* [ ] Returns 400 with invalid input
+* [ ] Unit tests pass
+* [ ] Integration tests pass
 
 h2. Testing
 *Happy path:*
-# Enviar request válido → recibir 201
-# Verificar datos en DB
+# Send valid request → receive 201
+# Verify data in DB
 
 *Edge cases:*
-# Input inválido → 400 con mensaje descriptivo
-# Usuario no autorizado → 401
+# Invalid input → 400 with descriptive message
+# Unauthorized user → 401
 ```
 
-### Tarea de Bug
+### Bug Task
 
 ```
 h2. Current Behavior
-[Qué está pasando actualmente — ser específico]
+[What is currently happening — be specific]
 
 h2. Expected Behavior
-[Qué debería pasar]
+[What should happen]
 
 h2. Steps to Reproduce
-# Paso 1
-# Paso 2
-# Paso 3
+# Step 1
+# Step 2
+# Step 3
 
 h2. Environment
-* Version: [versión afectada]
-* Browser/OS: [si aplica]
+* Version: [affected version]
+* Browser/OS: [if applicable]
 
 h2. Logs / Evidence
 {code}
-[stacktrace o logs relevantes]
+[stacktrace or relevant logs]
 {code}
 
 h2. Affected Files
-* {{ruta/al/archivo.ts}} — línea aprox. [N]
+* {{path/to/file.ts}} — approx. line [N]
 
 h2. Fix Approach
-[Descripción de cómo se va a resolver]
+[Description of how it will be resolved]
 
 h2. Testing
-* [ ] Bug no reproducible después del fix
-* [ ] Tests de regresión añadidos
+* [ ] Bug not reproducible after fix
+* [ ] Regression tests added
 ```
 
-## Campos Jira MCP
+## Jira MCP Fields
 
 ```javascript
-// Campos requeridos para crear tarea via MCP
+// Required fields to create a task via MCP
 {
-  project_key: "PROYECTO",      // Key del proyecto Jira
+  project_key: "PROJECT",       // Jira project key
   issue_type: "Task",
-  summary: "[FEATURE] Título (API)",
+  summary: "[FEATURE] Title (API)",
   description: "...",           // Jira Wiki markup
   priority: "Medium",           // Blocker|Critical|High|Medium|Low
 
-  // Campos custom (verificar con tu instancia):
+  // Custom fields (verify with your instance):
   // customfield_10359: "UI"    // Team field
 }
 ```
 
-## Prioridades
+## Priorities
 
-| Prioridad | Criterio |
-|-----------|----------|
-| Blocker | Sistema caído, datos en riesgo, bloquea a todo el equipo |
-| Critical | Feature principal rota, afecta a mayoría de usuarios |
-| High | Feature importante, workaround disponible |
-| Medium | Mejora importante, no bloquea trabajo actual |
-| Low | Nice-to-have, deuda técnica menor |
+| Priority | Criteria |
+|----------|----------|
+| Blocker | System down, data at risk, blocks the entire team |
+| Critical | Main feature broken, affects majority of users |
+| High | Important feature, workaround available |
+| Medium | Important improvement, does not block current work |
+| Low | Nice-to-have, minor technical debt |
 
 ## Anti-Patterns
 
-### ❌ Tarea gigante multi-componente
+### ❌ Giant multi-component task
 
 ```
 [FEATURE] Implement user auth (API + UI + docs + tests)
-→ Demasiado grande, difícil de estimar y asignar
+→ Too large, hard to estimate and assign
 ```
 
-### ❌ Criterios de aceptación vagos
+### ❌ Vague acceptance criteria
 
 ```
-* El login funciona ← No testeable
-* El usuario puede autenticarse exitosamente ← También vago
+* Login works ← Not testable
+* The user can authenticate successfully ← Also vague
 
-✅ Criterios testables:
-* POST /api/auth/login con credenciales válidas retorna 200 + JWT
-* POST /api/auth/login con password incorrecto retorna 401
-* JWT tiene expiración de 24h
+✅ Testable criteria:
+* POST /api/auth/login with valid credentials returns 200 + JWT
+* POST /api/auth/login with wrong password returns 401
+* JWT has 24h expiration
 ```
 
-### ❌ Sin rutas de archivos
+### ❌ No file paths
 
 ```
-* Modificar el servicio de auth ← ¿Cuál?
+* Modify the auth service ← Which one?
 
-✅ Con rutas:
-* Modificar {{src/services/auth.service.ts}} — añadir método refreshToken()
+✅ With paths:
+* Modify {{src/services/auth.service.ts}} — add refreshToken() method
 ```

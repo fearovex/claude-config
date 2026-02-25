@@ -1,129 +1,129 @@
 # project-update
 
-> Actualiza y migra la configuración Claude de un proyecto al estado actual del user-level.
+> Updates and migrates the Claude configuration of a project to the current user-level state.
 
-**Triggers**: project:update, actualizar config proyecto, migrar sdd, sync proyecto claude, actualizar claude proyecto
-
----
-
-## Qué hace este skill
-
-Cuando el usuario ejecuta `/project:update`, sincronizo la configuración Claude del proyecto con:
-- Cambios en el user-level CLAUDE.md
-- Nuevas skills disponibles en el catálogo global
-- Cambios en el stack real del proyecto (nuevas deps, versiones)
-- Mejoras en la estructura de memoria
+**Triggers**: project-update, update project config, migrate sdd, sync claude project, update claude project
 
 ---
 
-## Casos de Uso
+## What this skill does
 
-### Caso A — Actualizar stack en ai-context/
+When the user runs `/project-update`, I synchronize the project's Claude configuration with:
+- Changes in the user-level CLAUDE.md
+- New skills available in the global catalog
+- Changes in the real project stack (new deps, versions)
+- Improvements in the memory structure
 
-El proyecto tiene nuevas dependencias o versiones que no están documentadas:
+---
 
-1. Leo el stack actual del código (`package.json`, etc.)
-2. Comparo con `docs/ai-context/stack.md`
-3. Muestro diff de cambios detectados
-4. Actualizo `stack.md` con las diferencias (confirmando con usuario)
+## Use Cases
 
-### Caso B — Actualizar CLAUDE.md del proyecto
+### Case A — Update stack in ai-context/
 
-El user-level CLAUDE.md o las convenciones de SDD cambiaron:
+The project has new dependencies or versions not yet documented:
 
-1. Leo el `CLAUDE.md` del proyecto
-2. Identifico secciones que corresponden a templates del user-level
-3. Propongo actualizaciones conservando la personalización del proyecto
-4. Confirmo con usuario antes de escribir
+1. I read the current stack from code (`package.json`, etc.)
+2. I compare with `docs/ai-context/stack.md`
+3. I show a diff of detected changes
+4. I update `stack.md` with the differences (confirming with the user)
 
-Secciones que sincronizo:
-- Instrucciones de memoria (protocolo al inicio/fin de sesión)
-- Comandos SDD disponibles
-- Registry de skills (añado las nuevas del catálogo)
+### Case B — Update the project CLAUDE.md
 
-Secciones que NUNCA toco sin confirmación explícita:
-- Stack del proyecto
-- Arquitectura documentada
-- Convenciones específicas del equipo
+The user-level CLAUDE.md or SDD conventions changed:
+
+1. I read the project's `CLAUDE.md`
+2. I identify sections that correspond to user-level templates
+3. I propose updates while preserving project customization
+4. I confirm with the user before writing
+
+Sections I synchronize:
+- Memory instructions (protocol at session start/end)
+- Available SDD commands
+- Skills registry (I add new ones from the catalog)
+
+Sections I NEVER touch without explicit confirmation:
+- Project stack
+- Documented architecture
+- Team-specific conventions
 - Known issues
 
-### Caso C — Agregar archivos de memoria faltantes
+### Case C — Add missing memory files
 
-Si `docs/ai-context/` existe pero le faltan archivos:
+If `docs/ai-context/` exists but is missing files:
 
-1. Detecto qué archivos faltan
-2. Genero solo los que faltan, leyendo el código real
-3. No modifico los existentes
+1. I detect which files are missing
+2. I generate only the missing ones, reading the real code
+3. I do not modify existing ones
 
-### Caso D — Migrar estructura antigua
+### Case D — Migrate old structure
 
-Si el proyecto tiene una estructura de memoria diferente (ej: AGENTS.md, memory.md, etc.):
+If the project has a different memory structure (e.g., AGENTS.md, memory.md, etc.):
 
-1. Identifico la estructura existente
-2. Propongo migración al nuevo formato
-3. Preservo TODO el contenido existente en la migración
-4. Crea estructura nueva + archiva la antigua en `docs/ai-context/legacy/`
+1. I identify the existing structure
+2. I propose migration to the new format
+3. I preserve ALL existing content in the migration
+4. I create the new structure and archive the old one in `docs/ai-context/legacy/`
 
 ---
 
-## Proceso
+## Process
 
-### Paso 1 — Diagnóstico rápido
+### Step 1 — Quick diagnosis
 
-Ejecuto una auditoría interna (como `project-audit` pero sin reporte completo) para identificar qué necesita actualización.
+I run an internal audit (like `project-audit` but without a full report) to identify what needs updating.
 
-### Paso 2 — Plan de cambios
+### Step 2 — Change plan
 
-Presento al usuario exactamente qué voy a cambiar:
+I present to the user exactly what I am going to change:
 
 ```
-Cambios propuestos:
+Proposed changes:
 
-ACTUALIZAR:
+UPDATE:
   - docs/ai-context/stack.md
-    Motivo: Se detectaron 3 dependencias nuevas (zod 4.0, tanstack-query 5.x)
+    Reason: 3 new dependencies detected (zod 4.0, tanstack-query 5.x)
 
-CREAR:
+CREATE:
   - docs/ai-context/known-issues.md
-    Motivo: Archivo faltante
+    Reason: Missing file
 
-SIN CAMBIOS:
-  - CLAUDE.md (personalización del proyecto detectada)
-  - docs/ai-context/architecture.md (actualizado hace 5 días)
+NO CHANGES:
+  - CLAUDE.md (project customization detected)
+  - docs/ai-context/architecture.md (updated 5 days ago)
 
-¿Procedo? [s/n]
+Proceed? [y/n]
 ```
 
-### Paso 3 — Ejecución
+### Step 3 — Execution
 
-Aplico solo los cambios aprobados:
-- Cambios de stack: actualizo sección por sección, no reescribo
-- Archivos nuevos: genero con contenido real detectado
-- CLAUDE.md: uso merge inteligente preservando custom content
+I apply only the approved changes:
+- Stack changes: I update section by section, I do not rewrite
+- New files: I generate with real detected content
+- CLAUDE.md: I use intelligent merge preserving custom content
 
-### Paso 4 — Resumen
+### Step 4 — Summary
 
 ```
-✅ Actualización completada
+✅ Update completed
 
-Cambios aplicados:
-  - docs/ai-context/stack.md — actualizadas 3 dependencias
-  - docs/ai-context/known-issues.md — creado
+Changes applied:
+  - docs/ai-context/stack.md — 3 dependencies updated
+  - docs/ai-context/known-issues.md — created
 
-Sin cambios:
+No changes:
   - CLAUDE.md
   - docs/ai-context/architecture.md
 
-Recomendación: Revisa docs/ai-context/architecture.md,
-la estructura de carpetas cambió desde la última actualización.
+Recommendation: Review docs/ai-context/architecture.md,
+the folder structure changed since the last update.
 ```
 
 ---
 
-## Reglas
+## Rules
 
-- NUNCA sobreescribo sin mostrar qué cambia y pedir confirmación
-- Preservo TODO el contenido existente como base, solo añado/actualizo
-- Si hay conflicto entre lo existente y lo nuevo, lo muestro y pregunto
-- Backup automático antes de modificar (`CLAUDE.md.bak`, etc.) si el archivo tiene más de 30 líneas
-- Los archivos de `docs/ai-context/` son del equipo — los trato con respeto
+- NEVER overwrite without showing what changes and asking for confirmation
+- I preserve ALL existing content as a base, I only add/update
+- If there is a conflict between what exists and what is new, I show it and ask
+- Automatic backup before modifying (`CLAUDE.md.bak`, etc.) if the file has more than 30 lines
+- The files in `docs/ai-context/` belong to the team — I treat them with care

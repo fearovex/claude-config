@@ -100,10 +100,10 @@ If invoked as `/sdd:explore <change-name>`, I save to:
 ```json
 {
   "status": "ok|warning|blocked",
-  "resumen": "Analysis of [topic]: [2-3 lines of the main finding]",
-  "artefactos": ["openspec/changes/<name>/exploration.md"],
+  "summary": "Analysis of [topic]: [2-3 lines of the main finding]",
+  "artifacts": ["openspec/changes/<name>/exploration.md"],
   "next_recommended": ["sdd-propose"],
-  "riesgos": ["[risk if found]"]
+  "risks": ["[risk if found]"]
 }
 ```
 

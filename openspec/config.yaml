@@ -49,6 +49,7 @@ testing:
   minimum_score_to_archive: 75
   required_artifacts_per_change:
     - "proposal.md"
+    - "tasks.md"
     - "verify-report.md"
   verify_report_requirements:
     - "At least one checklist item marked [x]"

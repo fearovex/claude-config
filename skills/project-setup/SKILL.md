@@ -1,216 +1,216 @@
 # project-setup
 
-> Despliega la arquitectura SDD completa con capa de memoria híbrida en el proyecto actual.
+> Deploys the complete SDD architecture with a hybrid memory layer in the current project.
 
-**Triggers**: project:setup, inicializar proyecto, setup sdd, configurar claude proyecto, nuevo proyecto sdd
-
----
-
-## Qué hace este skill
-
-Cuando el usuario ejecuta `/project:setup`, analizo el proyecto actual y genero:
-1. `CLAUDE.md` en la raíz del proyecto con contexto real detectado
-2. `docs/ai-context/` con los 5 archivos de memoria inicializados
-3. `openspec/config.yaml` para el ciclo SDD
-4. Registro de skills relevantes según el stack detectado
+**Triggers**: project-setup, initialize project, setup sdd, configure claude project, new sdd project
 
 ---
 
-## Proceso de Setup
+## What this skill does
 
-### Paso 1 — Detección del proyecto
+When the user runs `/project-setup`, I analyze the current project and generate:
+1. `CLAUDE.md` at the project root with real detected context
+2. `docs/ai-context/` with the 5 memory files initialized
+3. `openspec/config.yaml` for the SDD cycle
+4. Registry of relevant skills based on the detected stack
 
-Leo y analizo:
+---
+
+## Setup Process
+
+### Step 1 — Project detection
+
+I read and analyze:
 - `package.json` / `pyproject.toml` / `go.mod` / `Cargo.toml` / `pom.xml`
-- Estructura de carpetas (src/, app/, lib/, tests/, etc.)
-- Archivos de configuración (tsconfig, eslint, prettier, etc.)
-- README.md si existe
-- Carpetas de docs existentes
-- `.git/` para confirmar que es un repositorio
+- Folder structure (src/, app/, lib/, tests/, etc.)
+- Configuration files (tsconfig, eslint, prettier, etc.)
+- README.md if it exists
+- Existing docs folders
+- `.git/` to confirm it is a repository
 
-**Infiero:**
-- Lenguaje principal y versión
-- Framework(s) en uso
-- Base de datos / ORM
-- Herramientas de testing
-- Herramientas de build / bundler
-- Convenciones de naming detectadas (camelCase, snake_case, etc.)
-- Estructura de carpetas (feature-based, layer-based, monorepo, etc.)
+**I infer:**
+- Main language and version
+- Framework(s) in use
+- Database / ORM
+- Testing tools
+- Build / bundler tools
+- Detected naming conventions (camelCase, snake_case, etc.)
+- Folder structure (feature-based, layer-based, monorepo, etc.)
 
-### Paso 2 — Generar CLAUDE.md del proyecto
+### Step 2 — Generate project CLAUDE.md
 
-Creo `CLAUDE.md` en la raíz con estas secciones:
+I create `CLAUDE.md` at the root with these sections:
 
 ```markdown
-# [Nombre del Proyecto]
+# [Project Name]
 
 ## Stack
-[Stack detectado con versiones]
+[Detected stack with versions]
 
-## Arquitectura
-[Estructura de carpetas explicada]
-[Patrón arquitectónico detectado]
+## Architecture
+[Explained folder structure]
+[Detected architectural pattern]
 
-## Convenciones
-[Naming conventions detectadas]
-[Patrones de código observados]
+## Conventions
+[Detected naming conventions]
+[Observed code patterns]
 
-## Comandos Importantes
-[Scripts de package.json / Makefile / etc.]
+## Important Commands
+[Scripts from package.json / Makefile / etc.]
 
-## Memoria de Proyecto
-Al inicio de cada sesión, lee los archivos relevantes en docs/ai-context/:
-- docs/ai-context/stack.md — Stack técnico detallado
-- docs/ai-context/architecture.md — Decisiones de arquitectura
-- docs/ai-context/conventions.md — Convenciones del equipo
-- docs/ai-context/known-issues.md — Bugs conocidos y gotchas
-- docs/ai-context/changelog-ai.md — Historial de cambios del AI
+## Project Memory
+At the start of each session, read the relevant files in docs/ai-context/:
+- docs/ai-context/stack.md — Detailed technical stack
+- docs/ai-context/architecture.md — Architecture decisions
+- docs/ai-context/conventions.md — Team conventions
+- docs/ai-context/known-issues.md — Known bugs and gotchas
+- docs/ai-context/changelog-ai.md — AI change history
 
-Al finalizar trabajo significativo: actualiza los archivos relevantes o
-ejecuta /memory:update para que el AI los actualice.
+After completing significant work: update the relevant files or
+run /memory-update so the AI updates them.
 
-## Skills Activas
-[Lista de skills relevantes para este proyecto]
+## Active Skills
+[List of relevant skills for this project]
 
 ## SDD — Spec-Driven Development
-Este proyecto usa SDD. Los artefactos viven en openspec/.
-Para iniciar un cambio: /sdd:new <nombre-cambio>
-Para ciclo rápido: /sdd:ff <nombre-cambio>
+This project uses SDD. Artifacts live in openspec/.
+To start a change: /sdd-new <change-name>
+For fast cycle: /sdd-ff <change-name>
 ```
 
-### Paso 3 — Inicializar docs/ai-context/
+### Step 3 — Initialize docs/ai-context/
 
-Creo los 5 archivos con contenido real basado en lo detectado:
+I create the 5 files with real content based on what was detected:
 
 #### `docs/ai-context/stack.md`
 ```markdown
-# Stack Técnico
+# Technical Stack
 
-Última actualización: [fecha]
+Last updated: [date]
 
-## Lenguaje
-- [Lenguaje]: [versión]
+## Language
+- [Language]: [version]
 
-## Framework Principal
-- [Framework]: [versión]
-- [Detalles de configuración relevantes]
+## Main Framework
+- [Framework]: [version]
+- [Relevant configuration details]
 
-## Base de Datos / ORM
-- [Si aplica]
+## Database / ORM
+- [If applicable]
 
 ## Testing
-- [Framework de testing]
-- [Comandos para correr tests]
+- [Testing framework]
+- [Commands to run tests]
 
 ## Build / Bundler
-- [Herramienta]: [versión]
-- [Comando de build]
-- [Comando de dev]
+- [Tool]: [version]
+- [Build command]
+- [Dev command]
 
-## Dependencias Clave
-| Paquete | Versión | Propósito |
-|---------|---------|-----------|
-| [nombre] | [versión] | [para qué sirve] |
+## Key Dependencies
+| Package | Version | Purpose |
+|---------|---------|---------|
+| [name] | [version] | [what it does] |
 ```
 
 #### `docs/ai-context/architecture.md`
 ```markdown
-# Arquitectura del Proyecto
+# Project Architecture
 
-Última actualización: [fecha]
+Last updated: [date]
 
-## Patrón Arquitectónico
-[Detectado: feature-based / layer-based / clean architecture / etc.]
+## Architectural Pattern
+[Detected: feature-based / layer-based / clean architecture / etc.]
 
-## Estructura de Carpetas
-[Árbol explicado con propósito de cada carpeta]
+## Folder Structure
+[Explained tree with the purpose of each folder]
 
-## Decisiones de Arquitectura
-| Decisión | Elección | Alternativas | Razón |
-|----------|----------|--------------|-------|
-[Inferidas del código existente]
+## Architecture Decisions
+| Decision | Choice | Alternatives | Reason |
+|----------|--------|--------------|--------|
+[Inferred from existing code]
 
-## Flujo de Datos
-[Descripción del flujo principal]
+## Data Flow
+[Description of the main flow]
 
-## Puntos de Entrada
-[Entry points principales del sistema]
+## Entry Points
+[Main entry points of the system]
 ```
 
 #### `docs/ai-context/conventions.md`
 ```markdown
-# Convenciones del Proyecto
+# Project Conventions
 
-Última actualización: [fecha]
+Last updated: [date]
 
 ## Naming
-- Archivos: [detectado]
-- Variables/Funciones: [detectado]
-- Clases/Tipos: [detectado]
-- Constantes: [detectado]
+- Files: [detected]
+- Variables/Functions: [detected]
+- Classes/Types: [detected]
+- Constants: [detected]
 
-## Estructura de Archivos
-[Cómo se organizan los archivos de cada tipo]
+## File Structure
+[How files of each type are organized]
 
-## Patrones de Código
-[Patrones detectados en el código existente]
+## Code Patterns
+[Patterns detected in existing code]
 
 ## Git
-[Convenciones de commits si se detectan]
-[Estrategia de branches si se detecta]
+[Commit conventions if detected]
+[Branch strategy if detected]
 
 ## Testing
-[Dónde van los tests]
-[Convenciones de naming de tests]
+[Where tests live]
+[Test naming conventions]
 ```
 
 #### `docs/ai-context/known-issues.md`
 ```markdown
-# Issues Conocidos
+# Known Issues
 
-Última actualización: [fecha]
+Last updated: [date]
 
-## Bugs Activos
-[Vacío al inicio — se llena durante el desarrollo]
+## Active Bugs
+[Empty at start — filled during development]
 
-## Gotchas y Limitaciones
-[Cualquier cosa rara detectada en el código existente]
+## Gotchas and Limitations
+[Anything unusual detected in existing code]
 
-## Deuda Técnica Identificada
-[Patrones problemáticos detectados]
+## Identified Technical Debt
+[Problematic patterns detected]
 
-## Workarounds en Uso
-[Si hay workarounds en el código, documentarlos aquí]
+## Workarounds in Use
+[If there are workarounds in the code, document them here]
 ```
 
 #### `docs/ai-context/changelog-ai.md`
 ```markdown
-# Changelog de Cambios por AI
+# AI Changelog
 
-Este archivo registra los cambios significativos realizados por Claude.
+This file records significant changes made by Claude.
 
-## Formato de Entrada
-### [YYYY-MM-DD] — [Nombre del cambio]
-**Qué se hizo**: [descripción]
-**Archivos modificados**: [lista]
-**Decisiones tomadas**: [decisiones relevantes]
-**Notas**: [cualquier cosa importante]
+## Entry Format
+### [YYYY-MM-DD] — [Change name]
+**What was done**: [description]
+**Modified files**: [list]
+**Decisions made**: [relevant decisions]
+**Notes**: [anything important]
 
 ---
 
-[Las entradas se agregan aquí cronológicamente]
+[Entries are added here chronologically]
 ```
 
-### Paso 4 — Crear openspec/config.yaml
+### Step 4 — Create openspec/config.yaml
 
 ```yaml
 project:
-  name: "[nombre detectado]"
-  description: "[descripción del README o inferida]"
+  name: "[detected name]"
+  description: "[description from README or inferred]"
   stack:
-    language: "[lenguaje]"
+    language: "[language]"
     framework: "[framework]"
-    database: "[db o none]"
+    database: "[db or none]"
   conventions:
     naming: "[snake_case|camelCase|kebab-case]"
     structure: "[feature|layer|mono]"
@@ -220,37 +220,37 @@ artifact_store:
 
 rules:
   proposal:
-    - "Debe incluir plan de rollback"
-    - "Debe definir criterios de éxito medibles"
+    - "Must include rollback plan"
+    - "Must define measurable success criteria"
   specs:
-    - "Usar Given/When/Then para todos los escenarios"
-    - "Incluir casos límite y estados de error"
+    - "Use Given/When/Then for all scenarios"
+    - "Include edge cases and error states"
   design:
-    - "Cada decisión debe tener justificación"
-    - "Preferir patrones existentes del proyecto"
+    - "Each decision must have a justification"
+    - "Prefer existing project patterns"
   tasks:
-    - "Tareas atómicas y verificables"
-    - "Incluir rutas de archivos en descripción"
+    - "Atomic and verifiable tasks"
+    - "Include file paths in description"
   apply:
-    - "Seguir convenciones del proyecto"
-    - "Correr tests antes de marcar completo"
+    - "Follow project conventions"
+    - "Run tests before marking complete"
   verify:
-    - "Verificar compliance con specs primero"
-    - "Luego verificar adherencia al diseño"
+    - "Verify compliance with specs first"
+    - "Then verify adherence to design"
 ```
 
-### Paso 5 — Reporte final
+### Step 5 — Final report
 
-Presento al usuario:
+I present to the user:
 ```
-✅ Proyecto configurado: [nombre]
+✅ Project configured: [name]
 
-Stack detectado:
-  - [lenguaje + versión]
-  - [framework + versión]
+Detected stack:
+  - [language + version]
+  - [framework + version]
   - [testing framework]
 
-Archivos creados:
+Files created:
   - CLAUDE.md
   - docs/ai-context/stack.md
   - docs/ai-context/architecture.md
@@ -259,18 +259,18 @@ Archivos creados:
   - docs/ai-context/changelog-ai.md
   - openspec/config.yaml
 
-Próximos pasos:
-  1. Revisa y ajusta CLAUDE.md con detalles que yo no pude detectar
-  2. Para iniciar un cambio: /sdd:new <nombre>
-  3. Para crear skills específicas del proyecto: /skill:create <nombre>
+Next steps:
+  1. Review and adjust CLAUDE.md with details I could not detect
+  2. To start a change: /sdd-new <name>
+  3. To create project-specific skills: /skill-create <name>
 ```
 
 ---
 
-## Reglas
+## Rules
 
-- NUNCA sobreescribo archivos existentes sin advertir y pedir confirmación
-- Si ya existe `CLAUDE.md`, ofrezco merge inteligente o crear backup
-- Si ya existe `docs/ai-context/`, ofrezco actualizar solo lo que falta
-- Siempre leo código real — nunca invento el stack
-- Si no puedo detectar algo con certeza, lo marco como `[Por confirmar]`
+- NEVER overwrite existing files without warning and asking for confirmation
+- If `CLAUDE.md` already exists, I offer an intelligent merge or creating a backup
+- If `docs/ai-context/` already exists, I offer to update only what is missing
+- I always read real code — I never invent the stack
+- If I cannot determine something with certainty, I mark it as `[To confirm]`

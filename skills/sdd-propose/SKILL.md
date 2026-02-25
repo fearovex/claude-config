@@ -112,10 +112,10 @@ Next step: specs + design (can run in parallel)
 ```json
 {
   "status": "ok|warning|blocked",
-  "resumen": "Proposal [name]: [intent in one line]. Risk [level].",
-  "artefactos": ["openspec/changes/<name>/proposal.md"],
+  "summary": "Proposal [name]: [intent in one line]. Risk [level].",
+  "artifacts": ["openspec/changes/<name>/proposal.md"],
   "next_recommended": ["sdd-spec", "sdd-design"],
-  "riesgos": ["[main risk if any]"]
+  "risks": ["[main risk if any]"]
 }
 ```
 

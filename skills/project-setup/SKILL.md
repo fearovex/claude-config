@@ -10,7 +10,7 @@
 
 When the user runs `/project-setup`, I analyze the current project and generate:
 1. `CLAUDE.md` at the project root with real detected context
-2. `docs/ai-context/` with the 5 memory files initialized
+2. `ai-context/` with the 5 memory files initialized
 3. `openspec/config.yaml` for the SDD cycle
 4. Registry of relevant skills based on the detected stack
 
@@ -59,12 +59,12 @@ I create `CLAUDE.md` at the root with these sections:
 [Scripts from package.json / Makefile / etc.]
 
 ## Project Memory
-At the start of each session, read the relevant files in docs/ai-context/:
-- docs/ai-context/stack.md — Detailed technical stack
-- docs/ai-context/architecture.md — Architecture decisions
-- docs/ai-context/conventions.md — Team conventions
-- docs/ai-context/known-issues.md — Known bugs and gotchas
-- docs/ai-context/changelog-ai.md — AI change history
+At the start of each session, read the relevant files in ai-context/:
+- ai-context/stack.md — Detailed technical stack
+- ai-context/architecture.md — Architecture decisions
+- ai-context/conventions.md — Team conventions
+- ai-context/known-issues.md — Known bugs and gotchas
+- ai-context/changelog-ai.md — AI change history
 
 After completing significant work: update the relevant files or
 run /memory-update so the AI updates them.
@@ -78,11 +78,11 @@ To start a change: /sdd-new <change-name>
 For fast cycle: /sdd-ff <change-name>
 ```
 
-### Step 3 — Initialize docs/ai-context/
+### Step 3 — Initialize ai-context/
 
 I create the 5 files with real content based on what was detected:
 
-#### `docs/ai-context/stack.md`
+#### `ai-context/stack.md`
 ```markdown
 # Technical Stack
 
@@ -113,7 +113,7 @@ Last updated: [date]
 | [name] | [version] | [what it does] |
 ```
 
-#### `docs/ai-context/architecture.md`
+#### `ai-context/architecture.md`
 ```markdown
 # Project Architecture
 
@@ -137,7 +137,7 @@ Last updated: [date]
 [Main entry points of the system]
 ```
 
-#### `docs/ai-context/conventions.md`
+#### `ai-context/conventions.md`
 ```markdown
 # Project Conventions
 
@@ -164,7 +164,7 @@ Last updated: [date]
 [Test naming conventions]
 ```
 
-#### `docs/ai-context/known-issues.md`
+#### `ai-context/known-issues.md`
 ```markdown
 # Known Issues
 
@@ -183,7 +183,7 @@ Last updated: [date]
 [If there are workarounds in the code, document them here]
 ```
 
-#### `docs/ai-context/changelog-ai.md`
+#### `ai-context/changelog-ai.md`
 ```markdown
 # AI Changelog
 
@@ -252,11 +252,11 @@ Detected stack:
 
 Files created:
   - CLAUDE.md
-  - docs/ai-context/stack.md
-  - docs/ai-context/architecture.md
-  - docs/ai-context/conventions.md
-  - docs/ai-context/known-issues.md
-  - docs/ai-context/changelog-ai.md
+  - ai-context/stack.md
+  - ai-context/architecture.md
+  - ai-context/conventions.md
+  - ai-context/known-issues.md
+  - ai-context/changelog-ai.md
   - openspec/config.yaml
 
 Next steps:
@@ -271,6 +271,6 @@ Next steps:
 
 - NEVER overwrite existing files without warning and asking for confirmation
 - If `CLAUDE.md` already exists, I offer an intelligent merge or creating a backup
-- If `docs/ai-context/` already exists, I offer to update only what is missing
+- If `ai-context/` already exists, I offer to update only what is missing
 - I always read real code — I never invent the stack
 - If I cannot determine something with certainty, I mark it as `[To confirm]`

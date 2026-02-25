@@ -141,6 +141,55 @@ Orphaned changes detected:
   - change-name: last completed phase "tasks" (X days inactive)
 ```
 
+#### 3e. Active change completeness
+
+Enumerate all directories in `openspec/changes/` excluding `archive/`.
+If `openspec/changes/` does not exist: skip with "not applicable".
+For each active change directory:
+- Missing `proposal.md`: HIGH severity
+- `proposal.md` present but missing `tasks.md`: MEDIUM severity
+- Both present: PASS
+
+#### 3f. Archive completeness
+
+Enumerate all directories in `openspec/changes/archive/`.
+If `openspec/changes/archive/` does not exist or is empty: skip.
+For each archived change directory:
+- Missing `verify-report.md`: MEDIUM severity
+- `verify-report.md` present but contains no line matching `- [x]`: WARNING severity
+- `verify-report.md` present with at least one `- [x]` line: PASS
+
+FIX_MANIFEST schemas for D3e and D3f:
+```yaml
+- id: D3e-[change-name]-missing-proposal
+  severity: high
+  type: create_file
+  target: openspec/changes/[change-name]/proposal.md
+  reason: "Active SDD change missing required proposal.md"
+  action: "Run /sdd-propose [change-name] to create the proposal"
+
+- id: D3e-[change-name]-missing-tasks
+  severity: medium
+  type: create_file
+  target: openspec/changes/[change-name]/tasks.md
+  reason: "Active SDD change has proposal but missing tasks.md"
+  action: "Run /sdd-tasks [change-name] to create the task breakdown"
+
+- id: D3f-[change-name]-missing-verify-report
+  severity: medium
+  type: create_file
+  target: openspec/changes/archive/[change-name]/verify-report.md
+  reason: "Archived change missing verify-report.md"
+  action: "Create verify-report.md with at least one [x] criterion confirming the change was verified"
+
+- id: D3f-[change-name]-no-checked-criteria
+  severity: warning
+  type: update_file
+  target: openspec/changes/archive/[change-name]/verify-report.md
+  reason: "verify-report.md exists but has no checked [x] criteria"
+  action: "Add at least one - [x] criterion to the verify-report.md"
+```
+
 ---
 
 ### Dimension 4 — Skills Quality
@@ -171,6 +220,96 @@ I read the project stack (package.json) and check whether relevant technology sk
 | Tailwind | `tailwind-4/SKILL.md` |
 | Zod | `zod-4/SKILL.md` |
 | Playwright | `playwright/SKILL.md` |
+
+#### 4d. Structural section completeness by skill type
+
+Claude Code requires SKILL.md files to have specific sections depending on their type.
+Classify each skill by directory name:
+- **SDD-phase skills** (`sdd-*`): must contain `## Rules` section — missing = HIGH finding
+- **Meta-tool skills** (`project-*`, `skill-creator`, `memory-manager`): must contain `## Rules` or equivalent constraints section — missing = HIGH finding
+- **Tech/tool skills** (all others): must contain trigger line AND either YAML frontmatter (`---`) OR `## Rules` section — missing both = MEDIUM finding; trigger line alone = PASS
+
+Report all violations in the D4 report table.
+
+FIX_MANIFEST schemas for D4d:
+```yaml
+- id: D4d-[skill-name]-missing-rules
+  severity: high
+  type: update_file
+  target: skills/[skill-name]/SKILL.md
+  reason: "SDD/meta-tool skill missing required ## Rules section"
+  action: "Add ## Rules section with constraints specific to this skill type"
+
+- id: D4d-[skill-name]-no-format
+  severity: medium
+  type: update_file
+  target: skills/[skill-name]/SKILL.md
+  reason: "Tech skill missing both YAML frontmatter and ## Rules section"
+  action: "Add either YAML frontmatter or ## Rules section"
+```
+
+#### 4e. Language compliance check
+
+Unbreakable Rule #1 requires ALL content to be in English.
+For each SKILL.md file:
+1. Strip code blocks (triple-backtick fences) from the content
+2. Scan remaining prose for Spanish accented characters: á é í ó ú ñ ü Á É Í Ó Ú Ñ Ü
+3. If found: report as WARNING (non-blocking, does NOT deduct from score)
+4. Report up to 5 example occurrences per skill in the violations table
+5. No skill type is exempt from this check
+
+FIX_MANIFEST schema for D4e:
+```yaml
+- id: D4e-[skill-name]-language
+  severity: warning
+  type: update_file
+  target: skills/[skill-name]/SKILL.md
+  reason: "Skill contains non-English (Spanish) prose content — violates Unbreakable Rule #1"
+  action: "Translate prose headings and narrative text to English; code comments may remain"
+```
+
+#### 4f. Skill directory naming (kebab-case)
+
+Scan all entries in `skills/`. For each directory:
+- Name must match regex `^[a-z][a-z0-9-]*$` (lowercase, hyphens only, no underscores or uppercase)
+- Violation: MEDIUM severity
+
+#### 4g. Skill directory contents
+
+For each skill directory in `skills/`:
+- List all files present
+- Any file that is NOT `SKILL.md` is a finding:
+  - `.js`, `.yaml`, `.json`, `.sh` extra files: INFO (no score deduction, no FIX_MANIFEST entry)
+  - Extra `.md` files: WARNING severity
+
+#### 4h. No orphaned files in skills/ root
+
+Check for any FILES (not directories) directly under `skills/` root.
+- Any file found directly in `skills/` (not inside a subdirectory): WARNING severity
+
+FIX_MANIFEST schemas for D4f, D4g, D4h:
+```yaml
+- id: D4f-[skill-name]-naming
+  severity: medium
+  type: rename_dir
+  target: skills/[skill-name]
+  reason: "Skill directory name does not follow kebab-case convention"
+  action: "Rename directory to kebab-case equivalent"
+
+- id: D4g-[skill-name]-extra-md-[filename]
+  severity: warning
+  type: update_file
+  target: skills/[skill-name]/[filename]
+  reason: "Unexpected .md file in skill directory (only SKILL.md is allowed)"
+  action: "Remove or integrate into SKILL.md; delete if not needed"
+
+- id: D4h-orphaned-[filename]
+  severity: warning
+  type: update_file
+  target: skills/[filename]
+  reason: "Orphaned file found directly in skills/ root"
+  action: "Move into appropriate skill directory or delete"
+```
 
 ---
 
@@ -208,6 +347,25 @@ For each command file:
 | Skill files mentioned in commands | If a command imports or references a skill |
 
 For each broken reference: I report the source file, approximate line, and the path that does not exist.
+
+#### D6d. Legacy path pattern: docs/ai-context references
+
+Scan ALL files in `skills/` for the literal string `docs/ai-context`.
+The canonical path is `ai-context/` (no `docs/` prefix).
+For each occurrence found:
+- In `sdd-*` or meta-tool skills (`project-*`, `skill-creator`, `memory-manager`): HIGH severity
+- In tech/tool skills: MEDIUM severity
+Report the file path and occurrence count.
+
+FIX_MANIFEST schema for D6d:
+```yaml
+- id: D6d-[skill-name]-path-docs-ai-context
+  severity: high  # or medium for tech skills
+  type: update_file
+  target: skills/[skill-name]/SKILL.md
+  reason: "Skill references legacy 'docs/ai-context' path — canonical path is 'ai-context/'"
+  action: "Replace all occurrences of 'docs/ai-context' with 'ai-context' throughout the file"
+```
 
 ---
 
@@ -422,6 +580,18 @@ violations:
 
 **Orphaned changes:** [none | list]
 
+**Active change completeness (3e):**
+| Change | proposal.md | tasks.md | Status |
+|--------|-------------|----------|--------|
+| [name] | ✅/❌ | ✅/❌ | PASS/HIGH/MEDIUM |
+[list or "not applicable"]
+
+**Archive completeness (3f):**
+| Archived change | verify-report.md | Has [x] | Status |
+|----------------|------------------|---------|--------|
+| [name] | ✅/❌ | ✅/❌ | PASS/MEDIUM/WARNING |
+[list or "not applicable"]
+
 ---
 
 ## Dimension 4 — Skills [OK|WARNING|CRITICAL]
@@ -437,6 +607,33 @@ violations:
 
 **Recommended global tech skills not installed:**
 [list with install command: /skill:add name]
+
+**Structural section completeness (4d):**
+| Skill | Type | Has ## Rules | Status |
+|-------|------|-------------|--------|
+| [skill-name] | sdd-phase/meta-tool/tech | ✅/❌ | PASS/HIGH/MEDIUM |
+[list or "all pass"]
+
+**Language compliance (4e):**
+| Skill | Spanish chars found | Examples | Status |
+|-------|--------------------|---------|----|
+| [skill-name] | [N] | [up to 5 examples] | WARNING/PASS |
+[list or "all pass"]
+
+**Skill directory naming (4f):**
+| Directory | Valid kebab-case | Status |
+|-----------|-----------------|--------|
+| [skill-name] | ✅/❌ | PASS/MEDIUM |
+[list or "all pass"]
+
+**Skill directory contents (4g):**
+| Skill | Extra files | Status |
+|-------|-------------|--------|
+| [skill-name] | [filename] | INFO/WARNING/PASS |
+[list or "all clean"]
+
+**Orphaned files in skills/ root (4h):**
+[list or "none"]
 
 ---
 
@@ -458,6 +655,12 @@ violations:
 **Broken references:**
 | Source file | Reference | Problem |
 |----------------|-----------|---------|
+[list or "none"]
+
+**Legacy docs/ai-context path references (D6d):**
+| Skill file | Occurrences | Severity |
+|------------|-------------|----------|
+| [skill-name]/SKILL.md | [N] | HIGH/MEDIUM |
 [list or "none"]
 
 ---

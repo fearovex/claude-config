@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-02-25 — coherence-verification apply
+
+**Type**: Feature / Compliance enhancement
+**Agent**: Claude Sonnet 4.6
+**SDD cycle**: coherence-verification (apply phase)
+**Files modified**:
+- `skills/skill-creator/SKILL.md` — added Tools/Platforms catalog section with 4 entries (claude-code-expert, excel-expert, openclaw-assistant, image-ocr)
+- `skills/memory-manager/SKILL.md` — replaced all `docs/ai-context` references with canonical `ai-context` path
+- `skills/project-setup/SKILL.md` — replaced all `docs/ai-context` references with canonical `ai-context` path
+- `skills/project-audit/SKILL.md` — added D3e (active change completeness), D3f (archive completeness), D4d (structural section completeness), D4e (language compliance), D4f (skill naming), D4g (skill contents), D4h (orphaned files), D6d (legacy path pattern) sub-checks with FIX_MANIFEST schemas and report templates
+**Decisions made**:
+- D4e language violations are WARNING severity (non-blocking, no score deduction) as intended by design
+- D6d legacy path check applies HIGH severity for SDD/meta-tool skills, MEDIUM for tech skills
+- Report format templates added inline to the existing dimension report sections
+**Notes**: The tasks.md and design.md for coherence-verification were not found at the expected path; changes were implemented directly from the apply instructions embedded in the sub-agent prompt.
+
+---
+
 ## 2026-02-24 — project-fix round 3
 
 **Type**: Config / Compliance fix

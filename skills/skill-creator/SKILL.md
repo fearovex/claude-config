@@ -235,6 +235,15 @@ Current catalog available in `~/.claude/skills/`:
 |-------|---------|
 | `elixir-antipatterns` | Elixir/Phoenix anti-patterns: error handling, Ecto, testing |
 
+### Tools / Platforms
+
+| Skill | Purpose |
+|-------|---------|
+| `claude-code-expert` | CLAUDE.md configuration, custom skills, hooks, MCP servers, and advanced Claude Code workflows |
+| `excel-expert` | creating, reading, and analyzing Excel files with ExcelJS, SheetJS (JS/TS) and openpyxl, pandas (Python) |
+| `openclaw-assistant` | installing, configuring, and developing skills for OpenClaw, the open-source self-hosted AI agent runtime |
+| `image-ocr` | extracting text from images using OCR (Tesseract, EasyOCR, PaddleOCR, Google Vision, AWS Textract, Claude Vision) |
+
 > **Note**: `angular` is not available (404 in the source repo). It can be created with `/skill-create angular`.
 
 ---

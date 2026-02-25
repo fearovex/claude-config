@@ -1,6 +1,6 @@
 # memory-manager
 
-> Initializes and updates the hybrid memory layer of the project (docs/ai-context/).
+> Initializes and updates the hybrid memory layer of the project (ai-context/).
 
 **Triggers**: memory-init, memory-update, update memory, initialize memory, ai-context, project context, project memory
 
@@ -10,7 +10,7 @@
 
 ### `/memory-init`
 Generates the 5 memory files from scratch by reading the current project.
-Use when: the project does not yet have `docs/ai-context/`.
+Use when: the project does not yet have `ai-context/`.
 
 ### `/memory-update`
 Updates existing files with the work done in the current session.
@@ -246,13 +246,13 @@ I always add an entry at the top (chronologically descending):
 ✅ Memory updated
 
 Modified files:
-  - docs/ai-context/stack.md — 2 dependencies added
-  - docs/ai-context/known-issues.md — 1 issue resolved, 1 new
-  - docs/ai-context/changelog-ai.md — entry added
+  - ai-context/stack.md — 2 dependencies added
+  - ai-context/known-issues.md — 1 issue resolved, 1 new
+  - ai-context/changelog-ai.md — entry added
 
 No changes:
-  - docs/ai-context/architecture.md
-  - docs/ai-context/conventions.md
+  - ai-context/architecture.md
+  - ai-context/conventions.md
 ```
 
 ---
@@ -263,4 +263,4 @@ No changes:
 - I update incrementally, I never overwrite everything
 - I mark with [To confirm] what I cannot determine with certainty
 - I preserve history: resolved items are moved, not deleted
-- If `docs/ai-context/` does not exist and `/memory-update` is run, I suggest `/memory-init` first
+- If `ai-context/` does not exist and `/memory-update` is run, I suggest `/memory-init` first

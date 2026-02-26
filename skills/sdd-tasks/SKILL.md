@@ -1,3 +1,10 @@
+---
+name: sdd-tasks
+description: >
+  Breaks down the design into an atomic, ordered, and verifiable task plan stored in tasks.md.
+  Trigger: /sdd-tasks <change-name>, task plan, break down implementation, task breakdown.
+---
+
 # sdd-tasks
 
 > Breaks down the design into an atomic, ordered, and verifiable task plan.

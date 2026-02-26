@@ -1,3 +1,10 @@
+---
+name: sdd-apply
+description: >
+  Implements SDD plan tasks following specs and design, marking progress in tasks.md as it goes.
+  Trigger: /sdd-apply <change-name>, implement change, apply SDD tasks, write code for change.
+---
+
 # sdd-apply
 
 > Implements the plan tasks following specs and design, marking progress as it goes.

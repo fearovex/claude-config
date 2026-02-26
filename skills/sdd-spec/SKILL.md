@@ -1,3 +1,10 @@
+---
+name: sdd-spec
+description: >
+  Writes delta specifications with requirements and Given/When/Then scenarios for a change.
+  Trigger: /sdd-spec <change-name>, write specs, functional requirements, specification phase.
+---
+
 # sdd-spec
 
 > Writes delta specifications with requirements and Given/When/Then scenarios.

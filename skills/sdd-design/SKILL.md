@@ -1,3 +1,10 @@
+---
+name: sdd-design
+description: >
+  Produces the technical design with architecture decisions, data flow, and a file change plan.
+  Trigger: /sdd-design <change-name>, technical design, change architecture, how to implement.
+---
+
 # sdd-design
 
 > Produces the technical design with architecture decisions, data flow, and a file change plan.

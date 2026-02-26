@@ -1,3 +1,10 @@
+---
+name: sdd-new
+description: >
+  Starts a complete SDD cycle with optional exploration phase and user confirmation gates at each stage.
+  Trigger: /sdd-new <change-name>, new SDD change, start full SDD cycle, new feature SDD.
+---
+
 # sdd-new
 
 > Starts a complete SDD cycle for a change, with an optional exploration phase and user confirmation gates before continuing.

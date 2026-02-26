@@ -1,3 +1,10 @@
+---
+name: sdd-archive
+description: >
+  Syncs delta specs to master specs and archives a completed SDD change to openspec/changes/archive/.
+  Trigger: /sdd-archive <change-name>, archive change, finalize SDD cycle, close change.
+---
+
 # sdd-archive
 
 > Syncs delta specs to the master specs and archives the completed change.

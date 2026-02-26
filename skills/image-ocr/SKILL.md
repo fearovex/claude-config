@@ -1,3 +1,10 @@
+---
+name: image-ocr
+description: >
+  Expert in extracting text from images using Tesseract, EasyOCR, PaddleOCR, Google Vision, AWS Textract, Claude Vision.
+  Trigger: When extracting text from images, screenshots, scanned documents, or PDFs.
+---
+
 # Image OCR Expert
 
 > Expert in extracting, processing, and structuring text from images using OCR tools and techniques.

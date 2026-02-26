@@ -1,3 +1,10 @@
+---
+name: excel-expert
+description: >
+  Expert in creating, reading, and analyzing Excel files with ExcelJS, SheetJS (JS/TS) and openpyxl, pandas (Python).
+  Trigger: When working with Excel files, spreadsheets, or tabular data export/import.
+---
+
 # Excel Expert
 
 > Expert in creating, reading, and analyzing Excel files using JavaScript/TypeScript and Python libraries.

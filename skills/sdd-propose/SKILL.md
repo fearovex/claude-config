@@ -1,3 +1,10 @@
+---
+name: sdd-propose
+description: >
+  Creates a change proposal with clear intent, defined scope, and technical approach.
+  Trigger: /sdd-propose <change-name>, create proposal, define change scope, sdd proposal.
+---
+
 # sdd-propose
 
 > Creates a change proposal with clear intent, defined scope, and technical approach.

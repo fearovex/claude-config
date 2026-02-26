@@ -1,3 +1,10 @@
+---
+name: memory-manager
+description: >
+  Initializes and updates the hybrid memory layer (ai-context/) of the project.
+  Trigger: /memory-init to generate ai-context/ from scratch, /memory-update to sync after session work.
+---
+
 # memory-manager
 
 > Initializes and updates the hybrid memory layer of the project (ai-context/).

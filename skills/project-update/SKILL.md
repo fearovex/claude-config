@@ -1,3 +1,10 @@
+---
+name: project-update
+description: >
+  Updates and migrates the Claude configuration of a project to the current user-level state.
+  Trigger: /project-update, update project config, migrate SDD, sync claude project.
+---
+
 # project-update
 
 > Updates and migrates the Claude configuration of a project to the current user-level state.

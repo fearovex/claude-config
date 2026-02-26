@@ -1,3 +1,10 @@
+---
+name: skill-add
+description: >
+  Adds a global skill from ~/.claude/skills/ to the current project's CLAUDE.md Skills Registry.
+  Trigger: /skill-add <name>, add skill to project, register global skill locally.
+---
+
 # skill-add
 
 > Adds a global skill from ~/.claude/skills/ to the current project's CLAUDE.md Skills Registry.

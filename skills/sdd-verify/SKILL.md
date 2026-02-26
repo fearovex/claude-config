@@ -1,3 +1,10 @@
+---
+name: sdd-verify
+description: >
+  Verifies that the implementation complies with the specs, design, and task plan. Produces verify-report.md.
+  Trigger: /sdd-verify <change-name>, verify implementation, quality gate, validate change.
+---
+
 # sdd-verify
 
 > Verifies that the implementation complies with the specs, design, and task plan.

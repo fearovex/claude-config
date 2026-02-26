@@ -1,3 +1,10 @@
+---
+name: skill-creator
+description: >
+  Creates new skills, either generic for the global catalog or specific to the current project.
+  Trigger: /skill-create <name>, create skill, new skill, generate skill, add skill to project.
+---
+
 # skill-creator
 
 > Creates new skills, either generic for the global catalog or specific to the current project.

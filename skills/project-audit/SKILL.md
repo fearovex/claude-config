@@ -365,6 +365,93 @@ Stack relevance check skipped — no stack source found
 
 ---
 
+### Dimension 10 — Feature Docs Coverage
+
+**Objective**: Detect feature/skill documentation gaps across the project using either config-driven or heuristic discovery, and report coverage per feature. Informational only — no score impact.
+
+**Skip condition**: If no features are detected (neither config-driven nor heuristic) → emit INFO: 'No feature directories detected — Dimension 10 skipped.' No score impact.
+
+**Phase A discovery extension**: This dimension reads the `FEATURE_DOCS_CONFIG_EXISTS` variable produced by the Phase A bash script (see Rule 8). If `FEATURE_DOCS_CONFIG_EXISTS=1`, use config-driven detection. If `0`, fall back to heuristic detection.
+
+#### Config-driven detection
+
+If `openspec/config.yaml` contains a `feature_docs:` key:
+- Read the `convention` field (`skill` | `markdown` | `mixed`)
+- Read the `paths` list (directories to scan for feature docs)
+- Read the `feature_detection` block: `strategy` (`directory` | `prefix` | `explicit`), `root` (root directory whose subdirs are treated as features), and `exclude` list
+
+Use this configuration as the source of truth for feature names and doc locations.
+
+#### Heuristic detection fallback
+
+If no `feature_docs:` key is present in `openspec/config.yaml`, run the following heuristic algorithm:
+
+```
+heuristic_sources = []
+
+# Source 1: non-SDD skills in .claude/skills/
+if .claude/skills/ exists:
+    for each subdirectory name in .claude/skills/:
+        if name does NOT start with: sdd-, project-, memory-, skill-:
+            add to heuristic_sources as type=skill
+
+# Source 2: markdown files in docs/features/ or docs/modules/
+if docs/features/ exists:
+    add each *.md file as type=markdown, feature_name = filename without extension
+if docs/modules/ exists:
+    add each *.md file as type=markdown, feature_name = filename without extension
+
+# Source 3: subdirs of src/features/, src/modules/, app/ with README.md
+for each candidate_root in [src/features/, src/modules/, app/]:
+    if candidate_root exists:
+        for each subdirectory:
+            if subdirectory/README.md exists:
+                add as type=markdown, feature_name = subdirectory name
+
+# Exclusion list — always skip these directory/feature names:
+EXCLUDE = [shared, utils, common, lib, types, hooks, components]
+
+if heuristic_sources is empty (after exclusions):
+    emit INFO: "No feature directories detected — Dimension 10 skipped."
+    skip all four checks
+```
+
+#### D10 checks (run per detected feature)
+
+**D10-a Coverage**: Verify that each detected feature has a corresponding documentation file.
+- If `convention=skill`: PASS (✅) if `.claude/skills/<feature_name>/SKILL.md` exists; FAIL (⚠️) otherwise
+- If `convention=markdown`: PASS (✅) if at least one `.md` file in the configured paths references `feature_name`; FAIL (⚠️) otherwise
+- If `convention=mixed`: PASS (✅) if either a skill or a markdown doc is found; FAIL (⚠️) otherwise
+
+**D10-b Structural Quality**: Verify that the found documentation has proper structure.
+- If doc is a `SKILL.md`: PASS (✅) if frontmatter (`---` block) present AND `**Triggers**`/`## Triggers` defined AND `## Process`/`### Step` section AND `## Rules`/`## Execution rules` section; WARN (⚠️) if any of the above is missing
+- If doc is a `.md` file (not SKILL.md): PASS (✅) if has `# title` (H1) AND at least one `## section` (H2); WARN (⚠️) if missing either; N/A if doc not found
+
+**D10-c Code Freshness**: Scan the doc file for file path references and verify they still exist on disk.
+- Read the doc file content
+- Extract all path-like strings matching: `/src/[^\s]+`, `/lib/[^\s]+`, `/app/[^\s]+`
+- For each extracted path: check if `[project_root][path]` exists on disk; if NOT found → flag as stale (⚠️)
+- PASS (✅) if no stale paths found or no paths found in doc; N/A if doc not found
+
+**D10-d Registry Alignment**: If doc is a SKILL.md in `.claude/skills/` → verify it appears in the CLAUDE.md Skills Registry section.
+- Read CLAUDE.md (or `.claude/CLAUDE.md`)
+- Check if `feature_name` appears in the Skills Registry section
+- PASS (✅) if found; INFO (ℹ️) if not found (not a warning — projects may have features without skill entries by design); N/A if doc is not a SKILL.md
+
+#### Output format
+
+Emit a per-feature coverage table:
+
+| Feature | Doc found | Structure OK | Fresh | In Registry | Status |
+|---------|-----------|--------------|-------|-------------|--------|
+| [name]  | ✅/❌     | ✅/⚠️/N/A  | ✅/⚠️/N/A | ✅/ℹ️/N/A | ✅/⚠️/❌ |
+
+**Status column logic**: ✅ if all applicable checks pass; ⚠️ if any check warns; ❌ if D10-a (coverage) fails.
+
+**FIX_MANIFEST rule**: D10 findings MUST NOT appear in `required_actions` or `skill_quality_actions` in the FIX_MANIFEST. /project-fix does not act on D10 findings.
+
+---
+
 ## Report Format
 
 The report is saved in `.claude/audit-report.md` with this exact structure:
@@ -447,6 +534,7 @@ skill_quality_actions:
 | Architecture compliance | [X] | 5 | ✅/⚠️/❌ |
 | Testing & Verification integrity | [X] | 5 | ✅/⚠️/❌ |
 | Project Skills Quality | N/A | N/A | ✅/ℹ️/— |
+| Feature Docs Coverage | N/A | N/A | ✅/ℹ️/— |
 | **TOTAL** | **[X]** | **100** | |
 
 **SDD Readiness**: [FULL / PARTIAL / NOT CONFIGURED]
@@ -586,6 +674,19 @@ skill_quality_actions:
 
 ---
 
+## Dimension 10 — Feature Docs Coverage [OK|INFO|SKIPPED]
+
+**Detection mode**: configured | heuristic | skipped
+**Features detected**: [N] ([list of names])
+
+| Feature | Doc found | Structure OK | Fresh | In Registry | Status |
+|---------|-----------|--------------|-------|-------------|--------|
+| [name]  | ✅/❌     | ✅/⚠️/N/A  | ✅/⚠️/N/A | ✅/ℹ️/N/A | ✅/⚠️/❌ |
+
+*D10 findings are informational only — they do not affect the score and are not auto-fixed by /project-fix.*
+
+---
+
 ## Required Actions
 
 ### Critical (block SDD):
@@ -621,6 +722,7 @@ skill_quality_actions:
 | **Architecture** | No critical violations in samples | 5 |
 | **Testing & Verification** | config.yaml has testing block + archived changes have verify-report.md | 5 |
 | **Project Skills Quality** | Informational only — no score deduction in iteration 1. Flags duplicates, structural gaps, language violations, stack relevance issues. | N/A |
+| **Feature Docs Coverage** | Informational only — no score deduction. Detects feature/skill documentation gaps. | N/A |
 
 **Interpretation:**
 - 90-100: SDD fully operational, excellent maintenance
@@ -684,6 +786,7 @@ skill_quality_actions:
      [ -f "$HOME/.claude/skills/sdd-$phase/SKILL.md" ] && SDD_COUNT=$((SDD_COUNT+1))
    done
    echo "SDD_SKILLS_PRESENT=$SDD_COUNT"
+   echo "FEATURE_DOCS_CONFIG_EXISTS=$(grep -l "feature_docs:" "$PROJECT/openspec/config.yaml" 2>/dev/null | wc -l | tr -d ' ')"
    ```
 
    **Output key schema** (each key is a `key=value` line in stdout):
@@ -703,6 +806,7 @@ skill_quality_actions:
    - `STACK_MD_LINES` — integer line count of `ai-context/stack.md` (0 if absent)
    - `ORPHANED_CHANGES` — comma-separated names of orphaned change dirs, or `NONE`
    - `SDD_SKILLS_PRESENT` — integer count of present `~/.claude/skills/sdd-*/SKILL.md` files (0–8)
+   - `FEATURE_DOCS_CONFIG_EXISTS` — 1 if `openspec/config.yaml` contains a `feature_docs:` key, 0 if absent or config not found
 
    **Legacy commands/ detection (Phase A post-script check):**
 

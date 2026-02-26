@@ -58,3 +58,45 @@ testing:
   test_project:
     description: "Use the Audiio V3 project (D:/Proyectos/Audiio/audiio_v3_1) as the canonical test target"
     why: "Complex real-world project that exercises all audit dimensions"
+
+# ---------------------------------------------------------------------------
+# feature_docs (optional) — Configuration for Dimension 10 feature docs audit
+# ---------------------------------------------------------------------------
+# Uncomment and configure to enable config-driven feature documentation audit.
+# Without this section, project-audit uses heuristic detection as fallback.
+#
+# convention: "skill"     # "skill" | "markdown" | "mixed"
+#   skill    — feature docs are SKILL.md files in .claude/skills/
+#   markdown — feature docs are .md files in a docs/ subdirectory
+#   mixed    — both SKILL.md and .md files are used
+#
+# paths:                  # where to look for feature docs
+#   - .claude/skills/
+#   - docs/features/
+#
+# feature_detection:
+#   strategy: "directory" # "directory" | "explicit"
+#     directory — auto-detect features from subdirectories in root
+#     explicit  — use the explicit list below
+#   root: src/            # scan this directory for feature subdirectories
+#   exclude:              # directories to skip during heuristic detection
+#     - shared
+#     - utils
+#     - common
+#     - lib
+#     - types
+#     - hooks
+#     - components
+#   # features:           # only used when strategy: "explicit"
+#   #   - auth
+#   #   - payments
+#   #   - notifications
+#
+# feature_docs:
+#   convention: skill
+#   paths:
+#     - .claude/skills/
+#   feature_detection:
+#     strategy: directory
+#     root: src/
+#     exclude: [shared, utils, common, lib, types, hooks, components]

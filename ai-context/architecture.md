@@ -60,7 +60,7 @@ Skills that need to pass state to each other use **file artifacts**:
 | Artifact | Producer | Consumer | Location |
 |----------|---------|---------|----------|
 | `audit-report.md` | project-audit | project-fix | `.claude/audit-report.md` in project |
-| `openspec/config.yaml` | project-setup / project-fix | all SDD phases | `openspec/` in project |
+| `openspec/config.yaml` | project-setup / project-fix | all SDD phases | `openspec/` in project — also contains the optional `feature_docs:` top-level key (config-driven detection source for D10); when absent, project-audit falls back to heuristic detection |
 | `openspec/changes/*/proposal.md` | sdd-propose | sdd-spec, sdd-design | `openspec/changes/<name>/` |
 | `openspec/changes/*/tasks.md` | sdd-tasks | sdd-apply | `openspec/changes/<name>/` |
 | `ai-context/*.md` | memory-manager / project-fix | all skills | `ai-context/` in project |

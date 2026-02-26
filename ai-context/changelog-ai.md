@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-02-26 — feature-docs-dimension applied
+
+**Type**: Feature
+**Agent**: Claude Sonnet 4.6
+**Files modified**:
+- `skills/project-audit/SKILL.md` — added Dimension 10 (Feature Docs Coverage): Phase A discovery extension (`FEATURE_DOCS_CONFIG_EXISTS`), config-driven detection from `openspec/config.yaml`, heuristic fallback with three source patterns and exclusion list, four checks (D10-a through D10-d), D10 row in score summary table, D10 section in report template, D10 row in Detailed Scoring table; D10 findings are informational only and do NOT affect the score or appear in FIX_MANIFEST
+- `openspec/config.yaml` — appended optional `feature_docs:` top-level section as a fully commented-out schema reference documenting `convention`, `paths`, and `feature_detection` sub-keys with all accepted values; the actual heuristic detection remains operative for this project
+
+**Decisions made**:
+- D10 is informational-only (N/A scoring) — no score deduction, no auto-fix by /project-fix
+- D10 findings are explicitly excluded from `required_actions` and `skill_quality_actions` in FIX_MANIFEST
+- Heuristic detection sources: `src/` subdirs, `docs/features/` dirs, local `.claude/skills/` dirs
+- Config-driven detection takes precedence over heuristic when `feature_docs:` key is present in `openspec/config.yaml`
+- `feature_docs:` section in `openspec/config.yaml` is commented out for claude-config itself (this repo has no feature subdirectories to audit in that sense)
+
+**Motivation**: Users with feature-rich projects need visibility into which features have supporting documentation. D10 provides a non-blocking coverage audit that surfaced documentation gaps without disrupting the existing score contract.
+
+---
+
 ## 2026-02-26 — user-docs-and-onboard-skill applied
 
 **Type**: Feature / Documentation

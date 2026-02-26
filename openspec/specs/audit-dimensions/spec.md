@@ -107,3 +107,94 @@ If the target project has a `.claude/commands/` directory, `project-audit` MUST 
 - The INFO notice for legacy commands/ is observable behavior — its presence and wording in the report are verifiable criteria
 - Score impact is verifiable by comparing scores between runs on identical projects with and without commands/
 - These specs do not constrain how the commands/ detection is implemented internally — only that the observable output matches the scenarios above
+
+---
+
+## ADDED in feature-docs-dimension (2026-02-26)
+
+### Requirement: Dimension 10 (Feature Docs Coverage) is present in project-audit
+
+`project-audit/SKILL.md` MUST contain a Dimension 10 section that evaluates feature-level documentation coverage. Dimension 10 MUST run after Dimension 9 and MUST follow the detection logic defined below.
+
+#### Scenario: SKILL.md contains a Dimension 10 section
+
+- **GIVEN** `skills/project-audit/SKILL.md` has been updated with this change
+- **WHEN** a developer reads the file from top to bottom
+- **THEN** there is a section heading "Dimension 10" or "Feature Docs Coverage" after the Dimension 9 section
+- **AND** the section documents four sub-checks: D10-a (Coverage), D10-b (Structural Quality), D10-c (Code Freshness), D10-d (Registry Alignment)
+- **AND** each sub-check has explicit pass/fail criteria documented
+
+---
+
+### Requirement: D10 detection phase — configured path
+
+When `feature_docs` is present in `openspec/config.yaml`, D10 MUST use the declared convention, paths, and feature detection strategy to enumerate features.
+
+#### Scenario: D10 uses configured feature_docs when present
+
+- **GIVEN** the target project has an `openspec/config.yaml` containing a `feature_docs` section with `convention`, `paths`, and `feature_detection` keys
+- **WHEN** `/project-audit` is run on that project
+- **THEN** D10 enumerates features using the paths and strategy declared in `feature_docs`
+- **AND** D10 does NOT fall back to heuristic detection
+- **AND** the D10 coverage table in the report lists only features identified via the declared configuration
+
+---
+
+### Requirement: D10 detection phase — heuristic fallback
+
+When `feature_docs` is absent from `openspec/config.yaml`, D10 MUST fall back to heuristic detection to discover features.
+
+#### Scenario: D10 runs heuristic detection when feature_docs is absent
+
+- **GIVEN** the target project has `openspec/config.yaml` but no `feature_docs` section (or no `openspec/config.yaml` at all)
+- **WHEN** `/project-audit` is run
+- **THEN** D10 applies the heuristic detection strategy, scanning the following locations in order:
+  1. Non-SDD skills in `.claude/skills/` (skills whose names do not start with `sdd-`, `project-`, `memory-`, or `skill-`)
+  2. Markdown files directly in `docs/features/` or `docs/modules/` (if those directories exist)
+  3. Subdirectories of `src/features/`, `src/modules/`, or `app/` that contain their own `README.md`
+- **AND** directories named `shared`, `utils`, `common`, or `lib` are excluded from heuristic detection even if they contain a `README.md`
+
+#### Scenario: D10 emits INFO and skips checks when no features are detected
+
+- **GIVEN** the target project has no `feature_docs` configured AND heuristic detection finds zero features
+- **WHEN** `/project-audit` runs D10
+- **THEN** the D10 section in the report contains exactly one line: "No feature docs detected — D10 skipped"
+- **AND** no coverage table is emitted for D10
+- **AND** no D10 findings of any severity are added to the FIX_MANIFEST
+
+---
+
+### Requirement: D10-a Coverage check
+
+For each detected feature, D10 MUST verify that a corresponding documentation artifact (SKILL.md or markdown file) exists.
+
+---
+
+### Requirement: D10-b Structural Quality check
+
+For each detected feature with a documentation artifact, D10 MUST verify that the artifact meets minimum structural quality standards.
+
+---
+
+### Requirement: D10-c Code Freshness check
+
+For each detected feature with a documentation artifact, D10 MUST verify that file paths referenced in the doc still exist on disk.
+
+---
+
+### Requirement: D10-d Registry Alignment check
+
+For each detected feature skill, D10 MUST verify that the skill is listed in the target project's `CLAUDE.md` Skills Registry.
+
+---
+
+### Requirement: D10 findings never appear in FIX_MANIFEST required_actions
+
+D10 MUST NOT generate FIX_MANIFEST entries that would cause `/project-fix` to create or repair feature documentation.
+
+#### Scenario: FIX_MANIFEST contains no D10 entries
+
+- **GIVEN** D10 has detected features with ❌ findings (e.g., missing coverage, stale paths)
+- **WHEN** the FIX_MANIFEST in `audit-report.md` is read
+- **THEN** `required_actions.critical`, `required_actions.high`, and `required_actions.medium` contain no entries referencing D10 findings
+- **AND** a note in the D10 section states that fixing feature documentation gaps is a human decision

@@ -4,6 +4,30 @@
 
 ---
 
+## 2026-02-27 — improve-project-analysis applied
+
+**Type**: Feature
+**Agent**: Claude Sonnet 4.6
+**Files created**:
+- `skills/project-analyze/SKILL.md` — new standalone framework-agnostic analysis skill (`/project-analyze`); observes and describes only — never scores, never produces FIX_MANIFEST entries; produces `analysis-report.md` at project root and updates `ai-context/` `[auto-updated]` sections; 6-step process: config read, stack detection (manifest-first + extension fallback), structure mapping, convention sampling, architecture drift detection, write outputs
+**Files modified**:
+- `skills/project-audit/SKILL.md` — rewrote Dimension 7 (Architecture Compliance): D7 is now a consumer of `analysis-report.md` (produced by `/project-analyze`); framework-agnostic; scoring table: absent=0/5 CRITICAL, no architecture.md=2/5 HIGH, drift=none→5/5, minor→3/5, significant→0/5; staleness warning when `Last analyzed:` > 7 days; D7 violations go in `violations[]` only (not `required_actions`); Phase A extension: added `ANALYSIS_REPORT_EXISTS` and `ANALYSIS_REPORT_DATE` variables to the Phase A Bash script; D7 report output template updated
+- `CLAUDE.md` — `/project-analyze` registered in: Available Commands table (Meta-tools section), execution routing table (`~/.claude/skills/project-analyze/SKILL.md`), Skills Registry (Meta-tool Skills subsection)
+- `ai-context/architecture.md` — new row added to the "Communication between skills via artifacts" table: `analysis-report.md` (Producer: `project-analyze`, Consumer: `project-audit (D7), user`, Location: project root)
+- `openspec/config.yaml` — appended optional `analysis` key comment block documenting `analysis.max_sample_files` (default: 20), `analysis.exclude_dirs` (optional list), `analysis.analysis_targets` (optional explicit override list)
+
+**Decisions made**:
+- `project-analyze` is a pure observation skill — no scoring, no FIX_MANIFEST, no severity labels
+- `project-audit` D7 does NOT auto-invoke `project-analyze` — treats `analysis-report.md` as external input
+- If `analysis-report.md` absent, D7 scores 0/5 with CRITICAL message instructing user to run `/project-analyze` first
+- `[auto-updated]` marker strategy uses HTML comment syntax invisible in rendered Markdown — no collision with existing `ai-context/` content
+- `project-analyze` NEVER creates `ai-context/` directory — if absent, writes only `analysis-report.md` and instructs user to run `/memory-init`
+- Maximum 3 Bash calls per `project-analyze` execution: Steps 1+2 share 1 call, Step 3 = 1 call, Step 4 = 1 call
+
+**Change**: improve-project-analysis | SDD cycle complete
+
+---
+
 ## 2026-02-26 — feature-docs-dimension applied
 
 **Type**: Feature

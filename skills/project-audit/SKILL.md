@@ -266,37 +266,30 @@ I read the `rules.verify` block of `openspec/config.yaml` and evaluate:
 
 ---
 
-### Dimension 7 — Architecture Compliance (sampling)
+### Dimension 7 — Architecture Compliance
 
-**Objective**: Verify with real samples that the code follows the documented architecture.
+**Objective**: Verify whether the project's architecture matches its documented baseline by reading the output of `/project-analyze`.
 
-**Methodology**: I do not analyze all the code. I take representative samples.
+**Input**: `analysis-report.md` at the project root (produced by the `project-analyze` skill).
 
-**Sample checks:**
+**Scoring table:**
 
-#### 7a. API routes (I review 3 at random)
-- Do they use the observability wrapper (`withSegmentAPI` or equivalent)?
-- Do they contain business logic directly? (signal: direct ORM/DB imports)
-- Do they have more than 50 lines of logic? (possible "thin handler" violation)
+| Condition | Score | Severity | Message |
+|-----------|-------|----------|---------|
+| `analysis-report.md` absent | 0/5 | CRITICAL | "Run /project-analyze first, then re-run /project-audit." |
+| Present + `ai-context/architecture.md` absent | 2/5 | HIGH | "No architecture baseline to compare against." |
+| Drift summary = `none` | 5/5 | OK | |
+| Drift summary = `minor` | 3/5 | MEDIUM | List drift entries from `analysis-report.md` |
+| Drift summary = `significant` | 0/5 | HIGH | List drift entries from `analysis-report.md` |
 
-#### 7b. Domain services (I review 3 at random)
-- Do they import the ORM from the correct path (`lib/prisma` or equivalent)?
-- Do the functions follow the documented naming convention (`*Fn`, `*Service`, etc.)?
+**Staleness check** (no score deduction):
+- Read the `Last analyzed:` date from `analysis-report.md`
+- If the date is more than 7 days before the current audit date → emit a warning: "analysis-report.md is [N] days old — consider re-running /project-analyze for up-to-date results."
+- The score is still computed from the existing report regardless of staleness.
 
-#### 7c. Components (I review 2 at random)
-- Do they import services directly instead of using hooks?
-- Do they have inline business logic?
+**Drift entries**: When drift summary is `minor` or `significant`, read the `## Architecture Drift` section of `analysis-report.md` and list each entry in the D7 output block.
 
-#### 7d. Critical violations (I search the entire codebase)
-```
-I search for signs of serious violations:
-- new PrismaClient() outside lib/
-- import { PrismaClient } outside lib/
-- font-weight (if the project has SCSS and the convention prohibits it)
-- console.log in production files (not in tests)
-```
-
-For each violation: I report file, line, and the violated rule.
+**FIX_MANIFEST rule**: D7 violations go in `violations[]` only — NOT in `required_actions`. The `/project-fix` skill does not auto-fix architecture drift.
 
 ---
 
@@ -629,13 +622,14 @@ skill_quality_actions:
 ---
 
 ## Dimension 7 — Architecture Compliance [OK|WARNING|CRITICAL]
+Analysis report found: YES/NO
+Last analyzed: [date or N/A]
+Architecture drift status: [none|minor|significant|N/A]
 
-**Sample files analyzed:** [list]
-
-**Violations found:**
-| File | Line | Violated rule | Severity |
-|---------|-------|--------------|-----------|
-[list or "none"]
+Drift entries: (when drift is present)
+| File/Pattern | Expected | Found |
+|---|---|---|
+| [entry] | [expected] | [found] |
 
 ---
 
@@ -787,6 +781,8 @@ skill_quality_actions:
    done
    echo "SDD_SKILLS_PRESENT=$SDD_COUNT"
    echo "FEATURE_DOCS_CONFIG_EXISTS=$(grep -l "feature_docs:" "$PROJECT/openspec/config.yaml" 2>/dev/null | wc -l | tr -d ' ')"
+   echo "ANALYSIS_REPORT_EXISTS=$(f analysis-report.md)"
+   echo "ANALYSIS_REPORT_DATE=$(head -5 "$PROJECT/analysis-report.md" 2>/dev/null | grep 'Last analyzed:' | awk '{print $3}' || echo '')"
    ```
 
    **Output key schema** (each key is a `key=value` line in stdout):
@@ -807,6 +803,8 @@ skill_quality_actions:
    - `ORPHANED_CHANGES` — comma-separated names of orphaned change dirs, or `NONE`
    - `SDD_SKILLS_PRESENT` — integer count of present `~/.claude/skills/sdd-*/SKILL.md` files (0–8)
    - `FEATURE_DOCS_CONFIG_EXISTS` — 1 if `openspec/config.yaml` contains a `feature_docs:` key, 0 if absent or config not found
+   - `ANALYSIS_REPORT_EXISTS` — 1 if `analysis-report.md` exists at project root, 0 if absent
+   - `ANALYSIS_REPORT_DATE` — ISO date string from the `Last analyzed:` field of `analysis-report.md`, or empty string if absent
 
    **Legacy commands/ detection (Phase A post-script check):**
 
@@ -821,3 +819,16 @@ skill_quality_actions:
    - Severity: LOW (informational)
    - Score penalty: none
    - FIX_MANIFEST entry: none (do NOT add a `required_actions` entry for this finding)
+
+### Phase A extension — analysis-report.md check
+
+After the Phase A Bash batch completes, the following two variables are available for use by Dimension 7 in Phase B:
+
+- `ANALYSIS_REPORT_EXISTS` — 1 if `analysis-report.md` exists at the project root, 0 if absent
+- `ANALYSIS_REPORT_DATE` — ISO date string from the `Last analyzed:` field, or empty string if absent
+
+**Important constraints:**
+
+- `project-audit` does NOT invoke `project-analyze` automatically. `analysis-report.md` is treated as external input produced by a prior `/project-analyze` run.
+- D7 in Phase B reads `ANALYSIS_REPORT_EXISTS` and `ANALYSIS_REPORT_DATE` to compute its score and staleness warning.
+- These two variables are added to the existing Phase A Bash script template — no additional Bash call is introduced. Total Bash calls per audit run remain ≤ 3.

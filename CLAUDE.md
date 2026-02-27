@@ -100,6 +100,7 @@ When working on a skill change in plan mode:
 | `/project-setup` | Deploys SDD + memory structure in the current project |
 | `/project-onboard` | Reads project state, detects onboarding case (1–6), recommends first command |
 | `/project-audit` | Audits project Claude config — generates audit-report.md (7 dimensions) |
+| `/project-analyze` | Performs deep framework-agnostic codebase analysis — produces analysis-report.md and updates ai-context/ |
 | `/project-fix` | Implements the corrections from audit-report.md — APPLY phase of the meta-SDD |
 | `/project-update` | Updates the project CLAUDE.md with user-level changes |
 | `/skill-create <name>` | Creates a new skill (generic or project-specific) |
@@ -135,6 +136,7 @@ When I receive a meta-tool command, I read the corresponding skill and execute i
 | `/project-setup` | `~/.claude/skills/project-setup/SKILL.md` |
 | `/project-onboard` | `~/.claude/skills/project-onboard/SKILL.md` |
 | `/project-audit` | `~/.claude/skills/project-audit/SKILL.md` |
+| `/project-analyze` | `~/.claude/skills/project-analyze/SKILL.md` |
 | `/project-fix` | `~/.claude/skills/project-fix/SKILL.md` |
 | `/project-update` | `~/.claude/skills/project-update/SKILL.md` |
 | `/sdd-ff` | `~/.claude/skills/sdd-ff/SKILL.md` |
@@ -300,6 +302,7 @@ Each project has its memory layer in `ai-context/`:
 - `~/.claude/skills/project-setup/SKILL.md`
 - `~/.claude/skills/project-onboard/SKILL.md` — diagnosing the current project state, detecting which of 6 onboarding cases applies, and recommending the exact command sequence
 - `~/.claude/skills/project-audit/SKILL.md`
+- `~/.claude/skills/project-analyze/SKILL.md` — deep framework-agnostic codebase analysis — observes and describes, never scores or produces FIX_MANIFEST entries; produces analysis-report.md and updates ai-context/ [auto-updated] sections
 - `~/.claude/skills/project-fix/SKILL.md` — reads audit-report.md and applies all corrections (APPLY phase of meta-SDD)
 - `~/.claude/skills/project-update/SKILL.md`
 - `~/.claude/skills/skill-creator/SKILL.md`

@@ -100,3 +100,31 @@ testing:
 #     strategy: directory
 #     root: src/
 #     exclude: [shared, utils, common, lib, types, hooks, components]
+
+# ---------------------------------------------------------------------------
+# analysis (optional) — Configuration for /project-analyze codebase analysis
+# ---------------------------------------------------------------------------
+# Uncomment and configure to control how project-analyze samples the codebase.
+# Without this section, project-analyze uses all defaults.
+#
+# max_sample_files: 20      # maximum number of files sampled for convention
+#                           # detection (default: 20); files are distributed
+#                           # proportionally across source directories by recency
+#
+# exclude_dirs:             # directories to skip during file sampling
+#   - node_modules
+#   - .git
+#   - dist
+#   - build
+#   - coverage
+#
+# analysis_targets:         # optional explicit file list — when set, overrides
+#   - src/auth/service.ts   # auto-sampling entirely; only these files are used
+#   - src/core/domain.ts    # for convention detection (Step 4)
+#
+# analysis:
+#   max_sample_files: 20
+#   exclude_dirs: [node_modules, .git, dist, build, coverage]
+#   # analysis_targets:
+#   #   - src/auth/service.ts
+#   #   - src/core/domain.ts

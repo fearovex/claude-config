@@ -70,7 +70,7 @@ SKILL.md on demand and executes its instructions.
 | Skill | Description |
 |-------|-------------|
 | `project-setup` | Deploys SDD + memory structure in a new project |
-| `project-audit` | Audits a project's Claude config across 7 dimensions, generates `audit-report.md` |
+| `project-audit` | Audits a project's Claude config across 9 dimensions, generates `audit-report.md` |
 | `project-fix` | Reads `audit-report.md` and applies all corrections |
 | `project-update` | Updates the project `CLAUDE.md` with user-level changes |
 | `memory-manager` | Generates and updates `ai-context/` memory files |
@@ -189,7 +189,7 @@ Open a Claude Code session inside any project that has `~/.claude/` installed.
 | Command | Action |
 |---------|--------|
 | `/project:setup` | Deploy SDD + memory structure in the current project |
-| `/project:audit` | Audit the project's Claude config — generates `audit-report.md` (7 dimensions) |
+| `/project:audit` | Audit the project's Claude config — generates `audit-report.md` (9 dimensions) |
 | `/project:fix` | Apply all corrections from `audit-report.md` |
 | `/project:update` | Update the project `CLAUDE.md` with user-level changes |
 | `/skill:create <name>` | Create a new skill (global or project-specific) |

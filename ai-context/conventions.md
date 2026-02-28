@@ -106,3 +106,34 @@ bash sync.sh → git add memory/ && git commit
 ```
 Use this periodically to persist Claude's automatic memory updates (`~/.claude/memory/`) into the repo.
 This is the ONLY directory that flows `~/.claude/ → repo/`.
+
+<!-- [auto-updated]: observed-conventions — last run: 2026-02-28 -->
+## Conventions Observed (auto-detected)
+
+Sample: 10 representative files across skills/, hooks/, root
+Method: auto-detected (5 SKILL.md files, 2 shell scripts, root files)
+
+### Naming
+- Skill directories: kebab-case — e.g. `project-audit`, `sdd-propose`, `react-19`
+- Entry point filenames: UPPER_CASE — `SKILL.md` in every skill directory
+- Bash functions: snake_case — e.g. `copy_dir` in install.sh
+- SDD change names: kebab-case descriptive — e.g. `normalize-tech-skill-structure`
+- Archived changes: `YYYY-MM-DD-[name]` — e.g. `2026-02-27-global-config-skill-audit`
+
+### SKILL.md structure (observed)
+All sampled SKILL.md files follow this pattern:
+1. Optional YAML frontmatter with `name`, `description`, optional `license`/`metadata`
+2. H1 heading (`# skill-name`)
+3. Blockquote description (`> ...`)
+4. Bold triggers (`**Triggers**: ...`)
+5. Numbered steps: `## Step N — Description` (em-dash separator)
+6. `## Rules` section last
+
+### Error handling (observed)
+- Bash: `set -e` + `|| true` for expected-failures — e.g. `claude mcp remove github 2>/dev/null || true`
+- SKILL.md: guard clauses with explicit "Stop here if..." — e.g. "Stop here if argument is missing."
+
+### Inter-skill communication
+File artifacts only — no in-memory passing. Examples: `audit-report.md`, `tasks.md`, `analysis-report.md`.
+
+<!-- [/auto-updated] -->

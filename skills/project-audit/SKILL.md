@@ -39,7 +39,7 @@ This file persists between sessions and is the input for `/project-fix`.
 
 ---
 
-## Audit Process — 7 Dimensions
+## Audit Process — 10 Dimensions
 
 I run all dimensions systematically, reading real files. Never assume.
 
@@ -295,19 +295,21 @@ I read the `rules.verify` block of `openspec/config.yaml` and evaluate:
 
 ### Dimension 9 — Project Skills Quality
 
-**Objective**: Audit the project's local `.claude/skills/` directory against quality criteria and the global skill catalog.
+**Objective**: Audit the project's local skills directory against quality criteria and the global skill catalog.
 
 **D9-1. Skip condition**
 
-Check whether `.claude/skills/` exists in the target project.
+Read `$LOCAL_SKILLS_DIR` from the Phase A output. Check whether `$LOCAL_SKILLS_DIR` exists in the target project.
 
 If it does NOT exist:
 ```
-No .claude/skills/ directory found — Dimension 9 skipped.
+No [value of $LOCAL_SKILLS_DIR] directory found — Dimension 9 skipped.
 ```
 No score deduction. Do not add `skill_quality_actions` to FIX_MANIFEST.
 
 If it exists, proceed with D9-2 through D9-5 for each subdirectory found.
+
+**Note — global-config circular detection**: When auditing the global-config repo itself, `$LOCAL_SKILLS_DIR` resolves to `"skills"` (root level). In this case every subdirectory under `skills/` will have a matching counterpart in `~/.claude/skills/` because they are the same files deployed by `install.sh`. D9-2 duplicate detection will assign disposition `keep` for all of them — this is correct and expected behavior (they are the source of truth, not duplicates).
 
 **D9-2. Duplicate detection**
 
@@ -382,9 +384,9 @@ If no `feature_docs:` key is present in `openspec/config.yaml`, run the followin
 ```
 heuristic_sources = []
 
-# Source 1: non-SDD skills in .claude/skills/
-if .claude/skills/ exists:
-    for each subdirectory name in .claude/skills/:
+# Source 1: non-SDD skills in $LOCAL_SKILLS_DIR
+if $LOCAL_SKILLS_DIR exists:
+    for each subdirectory name in $LOCAL_SKILLS_DIR:
         if name does NOT start with: sdd-, project-, memory-, skill-:
             add to heuristic_sources as type=skill
 
@@ -412,7 +414,7 @@ if heuristic_sources is empty (after exclusions):
 #### D10 checks (run per detected feature)
 
 **D10-a Coverage**: Verify that each detected feature has a corresponding documentation file.
-- If `convention=skill`: PASS (✅) if `.claude/skills/<feature_name>/SKILL.md` exists; FAIL (⚠️) otherwise
+- If `convention=skill`: PASS (✅) if `$LOCAL_SKILLS_DIR/<feature_name>/SKILL.md` exists; FAIL (⚠️) otherwise
 - If `convention=markdown`: PASS (✅) if at least one `.md` file in the configured paths references `feature_name`; FAIL (⚠️) otherwise
 - If `convention=mixed`: PASS (✅) if either a skill or a markdown doc is found; FAIL (⚠️) otherwise
 
@@ -442,6 +444,62 @@ Emit a per-feature coverage table:
 **Status column logic**: ✅ if all applicable checks pass; ⚠️ if any check warns; ❌ if D10-a (coverage) fails.
 
 **FIX_MANIFEST rule**: D10 findings MUST NOT appear in `required_actions` or `skill_quality_actions` in the FIX_MANIFEST. /project-fix does not act on D10 findings.
+
+---
+
+### Dimension 11 — Internal Coherence
+
+**Objective**: Validate that individual skill files and CLAUDE.md are internally self-consistent — numeric claims in headings match actual section counts, numbered sequences have no gaps or duplicates, and frontmatter descriptions agree with the body. Informational only — no score impact.
+
+**Skip condition**: If `$LOCAL_SKILLS_DIR` does not exist as a directory AND no root `CLAUDE.md` exists → emit INFO: `'No auditable files found — Dimension 11 skipped.'` No score impact.
+
+**Scope**: All `SKILL.md` files under `$LOCAL_SKILLS_DIR` (emitted by the Phase A script) plus the root `CLAUDE.md` (if it exists).
+
+**Tool constraint**: D11 uses only Read, Glob, and Grep tools for file analysis. No Bash calls.
+
+#### D11-a Count Consistency
+
+Extract numeric claims from headings (lines starting with `#`) and blockquote lines (lines starting with `>`) using the pattern:
+
+```
+CLAIM_PATTERN = /(\d+)\s+(Dimensions?|Steps?|Rules?|Phases?|Checks?|Sub-checks?)/i
+```
+
+For each claim found:
+- Identify the keyword (e.g., "Dimensions", "Steps")
+- Count matching sections in the body: heading lines containing the same keyword (case-insensitive)
+- If declared count ≠ actual count → finding with severity INFO
+
+Do NOT match numeric references inside code blocks, examples, or body prose — only headings and blockquote lines.
+
+#### D11-b Section Numbering Continuity
+
+Match numbered section patterns in H2/H3/H4 headings:
+
+```
+SEQUENCE_PATTERNS:
+  - /^#{2,3}\s+.*Step\s+(\d+)/im     → Step sequences
+  - /^#{2,3}\s+.*Dimension\s+(\d+)/im → Dimension sequences
+  - /^#{2,3}\s+.*Phase\s+(\d+)/im     → Phase sequences
+  - /^#{2,4}\s+.*D(\d+)/m             → D-prefixed sequences (D1, D2, ...)
+```
+
+For each pattern:
+- Collect all matched numbers, sort ascending
+- **Gap**: a number N is missing where min..max is not contiguous
+- **Duplicate**: a number appears more than once
+- Report only if the sequence has ≥ 2 members (single item = no sequence to validate)
+- Finding severity: INFO
+
+#### D11-c Frontmatter-Body Alignment
+
+- Parse YAML frontmatter (between first pair of `---` markers)
+- Extract the `description` field
+- If `description` contains a numeric claim (reuse `CLAIM_PATTERN`) → verify that claim against the body using the same logic as D11-a
+- If mismatch → finding with severity INFO
+- If no frontmatter or no `description` field → skip this check for that file
+
+**FIX_MANIFEST rule**: D11 findings go in `violations[]` only with severity `info`. Rule names: `D11-count-consistency`, `D11-numbering-continuity`, `D11-frontmatter-body`. D11 findings MUST NOT appear in `required_actions` or `skill_quality_actions`. /project-fix does not act on D11 findings.
 
 ---
 
@@ -528,6 +586,7 @@ skill_quality_actions:
 | Testing & Verification integrity | [X] | 5 | ✅/⚠️/❌ |
 | Project Skills Quality | N/A | N/A | ✅/ℹ️/— |
 | Feature Docs Coverage | N/A | N/A | ✅/ℹ️/— |
+| Internal Coherence | N/A | N/A | ✅/ℹ️/— |
 | **TOTAL** | **[X]** | **100** | |
 
 **SDD Readiness**: [FULL / PARTIAL / NOT CONFIGURED]
@@ -649,7 +708,7 @@ Drift entries: (when drift is present)
 
 ## Dimension 9 — Project Skills Quality [OK|INFO|SKIPPED]
 
-**Local skills directory**: `.claude/skills/` — [N skills found | not found — skipped]
+**Local skills directory**: [value of $LOCAL_SKILLS_DIR] — [N skills found | not found — skipped]
 
 | Skill | Duplicate of global | Structural complete | Language OK | Stack relevant | Disposition |
 |-------|--------------------|--------------------|-------------|----------------|-------------|
@@ -678,6 +737,20 @@ Drift entries: (when drift is present)
 | [name]  | ✅/❌     | ✅/⚠️/N/A  | ✅/⚠️/N/A | ✅/ℹ️/N/A | ✅/⚠️/❌ |
 
 *D10 findings are informational only — they do not affect the score and are not auto-fixed by /project-fix.*
+
+---
+
+## Dimension 11 — Internal Coherence [OK|INFO|SKIPPED]
+
+**Skills scanned**: [N] from $LOCAL_SKILLS_DIR
+
+| Skill | Count OK | Numbering OK | Frontmatter OK | Findings |
+|-------|----------|-------------|----------------|----------|
+| [skill-name] | ✅/⚠️ | ✅/⚠️ | ✅/⚠️/N/A | [detail or "clean"] |
+
+**Inconsistencies found**: [N] across [M] skills (or "None — all skills internally coherent")
+
+*D11 findings are informational only — they do not affect the score and are not auto-fixed by /project-fix.*
 
 ---
 
@@ -717,6 +790,7 @@ Drift entries: (when drift is present)
 | **Testing & Verification** | config.yaml has testing block + archived changes have verify-report.md | 5 |
 | **Project Skills Quality** | Informational only — no score deduction in iteration 1. Flags duplicates, structural gaps, language violations, stack relevance issues. | N/A |
 | **Feature Docs Coverage** | Informational only — no score deduction. Detects feature/skill documentation gaps. | N/A |
+| **Internal Coherence** | Informational only — no score deduction. Validates count claims, section numbering, and frontmatter consistency within individual skill files. | N/A |
 
 **Interpretation:**
 - 90-100: SDD fully operational, excellent maintenance
@@ -754,6 +828,17 @@ Drift entries: (when drift is present)
    echo "CONFIG_YAML_EXISTS=$(f openspec/config.yaml)"
    echo "INSTALL_SH_EXISTS=$(f install.sh)"
    echo "SYNC_SH_EXISTS=$(f sync.sh)"
+
+   # Global-config detection for LOCAL_SKILLS_DIR
+   if [ "$INSTALL_SH_EXISTS" = "1" ] && [ "$SYNC_SH_EXISTS" = "1" ]; then
+     LOCAL_SKILLS_DIR="skills"
+   elif grep -q 'Claude Code SDD meta-system' "$PROJECT/openspec/config.yaml" 2>/dev/null; then
+     LOCAL_SKILLS_DIR="skills"
+   else
+     LOCAL_SKILLS_DIR=".claude/skills"
+   fi
+   echo "LOCAL_SKILLS_DIR=$LOCAL_SKILLS_DIR"
+
    echo "STACK_MD_EXISTS=$(f ai-context/stack.md)"
    echo "ARCH_MD_EXISTS=$(f ai-context/architecture.md)"
    echo "CONV_MD_EXISTS=$(f ai-context/conventions.md)"
@@ -793,6 +878,7 @@ Drift entries: (when drift is present)
    - `CONFIG_YAML_EXISTS` — 1 if `openspec/config.yaml` exists, 0 if absent
    - `INSTALL_SH_EXISTS` — 1 if `install.sh` exists at project root, 0 if absent
    - `SYNC_SH_EXISTS` — 1 if `sync.sh` exists at project root, 0 if absent
+   - `LOCAL_SKILLS_DIR` — string: `"skills"` (global-config detected via Condition A or B) or `".claude/skills"` (standard project)
    - `STACK_MD_EXISTS` — 1 if `ai-context/stack.md` exists, 0 if absent
    - `ARCH_MD_EXISTS` — 1 if `ai-context/architecture.md` exists, 0 if absent
    - `CONV_MD_EXISTS` — 1 if `ai-context/conventions.md` exists, 0 if absent

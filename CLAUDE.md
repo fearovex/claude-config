@@ -99,7 +99,7 @@ When working on a skill change in plan mode:
 |---------|--------|
 | `/project-setup` | Deploys SDD + memory structure in the current project |
 | `/project-onboard` | Reads project state, detects onboarding case (1–6), recommends first command |
-| `/project-audit` | Audits project Claude config — generates audit-report.md (7 dimensions) |
+| `/project-audit` | Audits project Claude config — generates audit-report.md (9 dimensions) |
 | `/project-analyze` | Performs deep framework-agnostic codebase analysis — produces analysis-report.md and updates ai-context/ |
 | `/project-fix` | Implements the corrections from audit-report.md — APPLY phase of the meta-SDD |
 | `/project-update` | Updates the project CLAUDE.md with user-level changes |

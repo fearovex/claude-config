@@ -70,3 +70,24 @@ git clone <repo> && bash install.sh
 
 `install.sh` is repo-authoritative: copies everything repo → `~/.claude/`.
 `sync.sh` captures memory/ only: `~/.claude/memory/ → repo/memory/`. Never run it expecting to capture skill or config changes.
+
+<!-- [auto-updated]: stack-detection — last run: 2026-02-28 -->
+## Stack (auto-detected)
+
+Source: openspec/config.yaml + file-extension sampling
+
+| Category | Detected | Source |
+|----------|----------|--------|
+| Language | Markdown + YAML + Bash | openspec/config.yaml |
+| Framework | Claude Code SDD meta-system | openspec/config.yaml |
+| Database | none | openspec/config.yaml |
+| Testing | manual validation via /project-audit | openspec/config.yaml |
+| Build tool | install.sh (bash deploy) | file: install.sh |
+| Hooks runtime | Node.js | file: hooks/smart-commit-context.js |
+| Version control | Git | .git directory |
+
+File distribution: 145 `.md`, 3 `.json`, 2 `.sh`, 1 `.yaml`, 1 `.js`
+Observed skill count: **43 directories** under `skills/` (stack.md manual section documents ~35 — growth since 2026-02-23).
+No standard package manifests (package.json, pyproject.toml, etc.) — expected for a Markdown/YAML/Bash meta-system.
+
+<!-- [/auto-updated] -->

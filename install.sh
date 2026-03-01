@@ -6,6 +6,8 @@
 # Note      : memory/ flows the REVERSE direction via sync.sh — run sync.sh periodically
 #             to capture Claude's automatic memory updates back into the repo.
 #
+# Compatible with: Git Bash (MINGW64), WSL, macOS, Linux
+#
 # When to run:
 #   Workflow A (config changes): edit repo → bash install.sh → git commit
 #   New machine setup          : git clone → bash install.sh
@@ -14,25 +16,52 @@ set -e
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Detect environment: WSL vs Git Bash vs native
-# In WSL, $HOME points to /home/<user> which is not the Windows home.
-# We need the Windows user profile for ~/.claude/ to be accessible by Claude Code.
+# ---------------------------------------------------------------------------
+# Detect the Windows user profile path, working across Git Bash, WSL, Linux
+# ---------------------------------------------------------------------------
+_win_home_to_unix() {
+  # Convert a Windows-style path (C:\Users\foo) to a Unix path usable in the
+  # current shell.  Uses cygpath when available (Git Bash / MINGW), otherwise
+  # applies a manual sed conversion suited for WSL (/mnt/c/...).
+  local win_path="$1"
+  if command -v cygpath &>/dev/null; then
+    cygpath -u "$win_path"
+  else
+    echo "$win_path" | sed 's|\\|/|g; s|^\([A-Za-z]\):|/mnt/\L\1|'
+  fi
+}
+
 detect_claude_dir() {
-  if [ -n "$USERPROFILE" ]; then
-    # Git Bash on Windows: USERPROFILE is set
-    # Convert Windows path to unix-style if needed
-    echo "$(cd "$USERPROFILE" 2>/dev/null && pwd)/.claude"
-  elif grep -qi microsoft /proc/version 2>/dev/null; then
-    # WSL: read the Windows username and build the path
+  local win_home=""
+
+  # Priority 1 — PowerShell (reliable on any Windows bash: MINGW64 + WSL)
+  if command -v powershell.exe &>/dev/null; then
+    win_home=$(powershell.exe -NoProfile -Command \
+      "[Environment]::GetFolderPath('UserProfile')" 2>/dev/null | tr -d '\r\n')
+  fi
+
+  # Priority 2 — HOMEDRIVE + HOMEPATH (Git Bash when USERPROFILE is empty)
+  if [ -z "$win_home" ] && [ -n "$HOMEDRIVE" ] && [ -n "$HOMEPATH" ]; then
+    win_home="${HOMEDRIVE}${HOMEPATH}"
+  fi
+
+  # Priority 3 — USERPROFILE (sometimes set in Git Bash)
+  if [ -z "$win_home" ] && [ -n "$USERPROFILE" ]; then
+    win_home="$USERPROFILE"
+  fi
+
+  # Priority 4 — WSL interop: read Windows username via cmd.exe
+  if [ -z "$win_home" ] && grep -qi microsoft /proc/version 2>/dev/null; then
     local win_user
     win_user=$(cmd.exe /C "echo %USERNAME%" 2>/dev/null | tr -d '\r' || true)
-    if [ -n "$win_user" ] && [ -d "/mnt/c/Users/$win_user" ]; then
-      echo "/mnt/c/Users/$win_user/.claude"
-    else
-      echo "$HOME/.claude"
-    fi
+    [ -n "$win_user" ] && [ -d "/mnt/c/Users/$win_user" ] && \
+      win_home="C:\\Users\\$win_user"
+  fi
+
+  if [ -n "$win_home" ]; then
+    echo "$(_win_home_to_unix "$win_home")/.claude"
   else
-    # Native Linux/macOS
+    # Native Linux / macOS
     echo "$HOME/.claude"
   fi
 }
@@ -68,23 +97,61 @@ copy_dir "$REPO_DIR/hooks"      "$CLAUDE_DIR/hooks"
 copy_dir "$REPO_DIR/openspec"   "$CLAUDE_DIR/openspec"
 copy_dir "$REPO_DIR/ai-context" "$CLAUDE_DIR/ai-context"
 
-# Register MCP servers (requires claude CLI in PATH)
+# ---------------------------------------------------------------------------
+# Find the claude CLI — needed for MCP registration
+# ---------------------------------------------------------------------------
+_find_claude_cmd() {
+  # Fast path: already in PATH
+  if command -v claude &>/dev/null; then
+    echo "claude"
+    return
+  fi
+
+  # Windows environments (MINGW64 + WSL): resolve home and check ~/.local/bin
+  local unix_home=""
+  if command -v powershell.exe &>/dev/null; then
+    local win_home
+    win_home=$(powershell.exe -NoProfile -Command \
+      "[Environment]::GetFolderPath('UserProfile')" 2>/dev/null | tr -d '\r\n')
+    [ -n "$win_home" ] && unix_home="$(_win_home_to_unix "$win_home")"
+  elif [ -n "$HOMEDRIVE" ] && [ -n "$HOMEPATH" ]; then
+    unix_home="$(_win_home_to_unix "${HOMEDRIVE}${HOMEPATH}")"
+  elif [ -n "$USERPROFILE" ]; then
+    unix_home="$(_win_home_to_unix "$USERPROFILE")"
+  elif grep -qi microsoft /proc/version 2>/dev/null; then
+    local win_user
+    win_user=$(cmd.exe /C "echo %USERNAME%" 2>/dev/null | tr -d '\r' || true)
+    [ -n "$win_user" ] && unix_home="/mnt/c/Users/$win_user"
+  fi
+
+  if [ -n "$unix_home" ] && [ -f "$unix_home/.local/bin/claude" ]; then
+    echo "$unix_home/.local/bin/claude"
+    return
+  fi
+
+  # Native Linux / macOS fallback
+  if [ -n "$HOME" ] && [ -f "$HOME/.local/bin/claude" ]; then
+    echo "$HOME/.local/bin/claude"
+    return
+  fi
+
+  echo ""  # not found
+}
+
+# ---------------------------------------------------------------------------
+# Register MCP servers
+# ---------------------------------------------------------------------------
 echo ""
 echo "Registering MCP servers at user level..."
 
-CLAUDE_CMD=""
-if command -v claude &>/dev/null; then
-  CLAUDE_CMD="claude"
-elif [ -f "$HOME/.local/bin/claude" ]; then
-  CLAUDE_CMD="$HOME/.local/bin/claude"
-elif [ -n "$USERPROFILE" ] && [ -f "$USERPROFILE/.local/bin/claude" ]; then
-  CLAUDE_CMD="$USERPROFILE/.local/bin/claude"
-elif grep -qi microsoft /proc/version 2>/dev/null; then
-  # WSL: try to find claude.exe on Windows side
-  win_user=$(cmd.exe /C "echo %USERNAME%" 2>/dev/null | tr -d '\r' || true)
-  if [ -n "$win_user" ] && [ -f "/mnt/c/Users/$win_user/.local/bin/claude" ]; then
-    CLAUDE_CMD="/mnt/c/Users/$win_user/.local/bin/claude"
-  fi
+CLAUDE_CMD="$(_find_claude_cmd)"
+
+# Detect whether we need Windows cmd wrapper for npx
+# WINDIR is set in Git Bash and WSL-with-Windows-interop; absent on Linux/macOS
+if [ -n "$WINDIR" ] || grep -qi microsoft /proc/version 2>/dev/null; then
+  NPX_RUNNER="cmd /c npx -y"
+else
+  NPX_RUNNER="npx -y"
 fi
 
 if [ -n "$CLAUDE_CMD" ]; then
@@ -92,14 +159,14 @@ if [ -n "$CLAUDE_CMD" ]; then
   "$CLAUDE_CMD" mcp remove filesystem 2>/dev/null || true
   "$CLAUDE_CMD" mcp add -s user github \
     -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
-    -- cmd /c npx -y @modelcontextprotocol/server-github
+    -- $NPX_RUNNER @modelcontextprotocol/server-github
   "$CLAUDE_CMD" mcp add -s user filesystem \
-    -- cmd /c npx -y @modelcontextprotocol/server-filesystem .
+    -- $NPX_RUNNER @modelcontextprotocol/server-filesystem .
 else
   echo "WARNING: 'claude' CLI not found in PATH. MCP servers not registered."
   echo "  Run these manually after installing Claude Code:"
-  echo "    claude mcp add -s user github -e GITHUB_TOKEN=\$GITHUB_TOKEN -- cmd /c npx -y @modelcontextprotocol/server-github"
-  echo "    claude mcp add -s user filesystem -- cmd /c npx -y @modelcontextprotocol/server-filesystem ."
+  echo "    claude mcp add -s user github -e GITHUB_TOKEN=\$GITHUB_TOKEN -- npx -y @modelcontextprotocol/server-github"
+  echo "    claude mcp add -s user filesystem -- npx -y @modelcontextprotocol/server-filesystem ."
 fi
 
 echo ""

@@ -174,6 +174,8 @@ Artifacts created:
 
 Ready to implement? Run:
   /sdd-apply [change-name]
+
+Note: When the cycle completes, /sdd-archive will auto-update ai-context/ memory.
 ```
 
 Do NOT invoke `/sdd-apply` automatically. The user must trigger it explicitly.

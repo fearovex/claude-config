@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-02-28 — integrate-memory-into-sdd-cycle archived
+
+**Type**: Feature
+**Agent**: Claude Opus 4.6
+**Files modified**:
+- `skills/sdd-archive/SKILL.md` — Replaced Step 6 (manual "Suggest updating memory") with auto-update: reads `~/.claude/skills/memory-update/SKILL.md` and executes inline with non-blocking error handling; updated Output JSON: `next_recommended` changed from `["memory-update"]` to `[]`, summary includes `Memory: [updated|failed|skipped]`
+- `skills/sdd-ff/SKILL.md` — Added informational note in Step 5 summary: archive will auto-update ai-context/
+- `skills/sdd-new/SKILL.md` — Added "(auto-updates ai-context/ memory)" to archive entry in Step 6 remaining phases
+- `ai-context/architecture.md` — Added memory-update artifact row to communication table
+
+**Specs created**:
+- `openspec/specs/sdd-archive-execution/spec.md` — 5 requirements, 11 scenarios covering auto memory-update, non-blocking failure, output format, sdd-ff/sdd-new notes
+
+**Decisions made**:
+- Inline execution (not Task tool delegation) — follows convention that only sdd-ff/sdd-new use Task tool
+- Step 6 replacement (not Step 7 addition) — keeps step count at 6
+- Non-blocking: archive success is always independent of memory-update outcome
+- memory-update reads session context naturally — no structured parameter interface needed
+
+**Change**: integrate-memory-into-sdd-cycle | SDD cycle complete
+
+---
+
 ## 2026-02-28 — project-fix executed (colon separators + stale references)
 
 **Type**: Config

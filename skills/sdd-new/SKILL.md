@@ -239,7 +239,7 @@ Artifacts:
 Remaining phases:
   → /sdd-apply [change-name]   — implement the tasks
   → /sdd-verify [change-name]  — verify against specs
-  → /sdd-archive [change-name] — archive when done
+  → /sdd-archive [change-name] — archive when done (auto-updates ai-context/ memory)
 
 Ready to implement? Run:
   /sdd-apply [change-name]

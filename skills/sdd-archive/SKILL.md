@@ -165,7 +165,34 @@ When writing a `verify-report.md` as part of an SDD cycle, include this checkbox
 
 This checkbox is **not blocking** — you may archive even if unchecked.
 
-### Step 6 — Suggest updating memory
+### Step 6 — Auto-update memory
+
+After the archive is complete, I automatically update `ai-context/` with the decisions and changes from this cycle.
+
+**Process:**
+
+1. Read `~/.claude/skills/memory-update/SKILL.md`
+2. Execute the `/memory-update` process inline, using the archived change as session context:
+   - Change name: `<change-name>`
+   - Archive path: `openspec/changes/archive/YYYY-MM-DD-<change-name>/`
+   - Artifacts: proposal, specs, design, tasks, closure note
+3. Report the result
+
+**Non-blocking error handling:**
+
+- **On success**: report in the output:
+  ```
+  Memory updated: ai-context/ files refreshed with decisions from "[change-name]".
+  ```
+- **On failure** (skill not found, write error, any other issue): report a warning and continue:
+  ```
+  Warning: Memory update failed — [reason]. Archive completed successfully.
+  Suggestion: Run /memory-update manually to update ai-context/.
+  ```
+
+The archive is **always** considered successful regardless of the memory-update outcome.
+
+**Final output:**
 
 ```
 Change "[change-name]" successfully archived.
@@ -176,8 +203,7 @@ Master specs updated:
 Archived at:
   - openspec/changes/archive/2026-02-23-[name]/
 
-Recommendation: Run /memory-update to update
-ai-context/ with the decisions from this cycle.
+Memory: [updated | failed — reason]
 ```
 
 ---
@@ -187,12 +213,12 @@ ai-context/ with the decisions from this cycle.
 ```json
 {
   "status": "ok|warning|failed",
-  "summary": "Change [name] archived. [N] master specs updated.",
+  "summary": "Change [name] archived. [N] master specs updated. Memory: [updated|failed|skipped].",
   "artifacts": [
     "openspec/specs/<domain>/spec.md — updated",
     "openspec/changes/archive/YYYY-MM-DD-<name>/ — created"
   ],
-  "next_recommended": ["memory-update"],
+  "next_recommended": [],
   "risks": []
 }
 ```

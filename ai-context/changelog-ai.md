@@ -4,6 +4,25 @@
 
 ---
 
+### 2026-03-01 — sdd-cycle-prd-adr-integration archived
+
+**What was done**: Integrated PRD and ADR as optional auto-generated artifacts into the SDD cycle. `sdd-propose` now auto-creates a `prd.md` shell (idempotent, skips if template absent or file already exists). `sdd-design` now auto-creates an ADR file in `docs/adr/` when a keyword-significant architectural decision is detected in the Technical Decisions table (non-blocking, skips if template or README absent). Both `openspec/config.yaml` and `CLAUDE.md` were updated to document these as optional artifacts.
+**Modified files**:
+- `skills/sdd-propose/SKILL.md` — added Step 5: PRD shell auto-creation (idempotent, non-blocking)
+- `skills/sdd-design/SKILL.md` — added Step 5: ADR auto-creation (keyword heuristic, filesystem numbering, non-blocking)
+- `openspec/config.yaml` — added `optional_artifacts` section listing prd.md and docs/adr/NNN-*.md with producing skill annotations
+- `CLAUDE.md` — updated SDD Artifact Storage section: prd.md (optional) in change tree; docs/adr/NNN-*.md (optional, sdd-design) in overall tree
+- `ai-context/architecture.md` — added two new artifact table rows for prd.md and docs/adr/NNN-*.md auto-generation
+**Decisions made**:
+- PRD is idempotent and non-blocking: existing `prd.md` is never overwritten; missing template skips silently with a warning
+- ADR uses keyword heuristic (cross-cutting concern keywords, patterns absent from `ai-context/architecture.md`) — intentionally fuzzy; future cycles can formalize if needed
+- ADR numbering uses filesystem count of `docs/adr/` files to avoid collisions — no global counter state needed
+- Both steps return `status: ok` (or `status: warning`) on any failure path — never `status: blocked` or `status: failed`
+- Step 5 heading added to `sdd-design` for structural symmetry with `sdd-propose` — accepted deviation, improves readability
+**Notes**: Change-name delineation: `proposal-prd-and-adr-system` (previous cycle, 2026-03-01) created the templates and ADR index. This cycle (`sdd-cycle-prd-adr-integration`) wired those templates into the live SDD skill behavior.
+
+---
+
 ## 2026-03-01 — proposal-prd-and-adr-system applied
 
 **Type**: Feature / Documentation

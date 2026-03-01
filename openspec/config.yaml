@@ -51,6 +51,9 @@ testing:
     - "proposal.md"
     - "tasks.md"
     - "verify-report.md"
+  optional_artifacts:
+    - "prd.md"                  # created by sdd-propose if template exists and no prd.md present
+    - "docs/adr/NNN-*.md"       # created by sdd-design when a significant architectural decision is detected
   verify_report_requirements:
     - "At least one checklist item marked [x]"
     - "Explicitly states which test project was used"

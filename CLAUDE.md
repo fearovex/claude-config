@@ -259,12 +259,18 @@ openspec/
     ├── {change-name}/
     │   ├── exploration.md
     │   ├── proposal.md
+    │   ├── prd.md (optional)       ← optional; created by sdd-propose if template exists
     │   ├── specs/{domain}/spec.md
     │   ├── design.md
     │   ├── tasks.md
     │   └── verify-report.md
     └── archive/
         └── YYYY-MM-DD-{name}/
+
+docs/
+└── adr/
+    ├── README.md                   ← updated by sdd-design when a new ADR is created
+    └── NNN-<slug>.md               ← optional; created by sdd-design when a significant architectural decision is detected
 ```
 
 ---

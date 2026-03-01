@@ -98,7 +98,20 @@ Must be concrete: which files, which commands, which steps.]
 [Low (hours) / Medium (1-2 days) / High (several days)]
 ```
 
-### Step 5 — Summary to orchestrator
+### Step 5 — PRD Shell Generation
+
+This step is **non-blocking**: any failure produces a warning in the output, never `status: blocked` or `status: failed`.
+
+1. **Idempotency check**: if `openspec/changes/<change-name>/prd.md` already exists, skip this step entirely — leave the file untouched.
+2. **Template check**: if `docs/templates/prd-template.md` does not exist, log the warning `"PRD template not found — skipping PRD shell creation"` and skip.
+3. **Copy and fill frontmatter**: copy `docs/templates/prd-template.md` to `openspec/changes/<change-name>/prd.md` and fill the following frontmatter fields:
+   - `title`: derived from `<change-name>` (replace hyphens with spaces, title-case)
+   - `date`: today's date in `YYYY-MM-DD` format
+   - `related-change`: `openspec/changes/<change-name>/`
+4. **User note**: inform the user that `prd.md` is optional and intended for product-facing changes. It can be left blank or deleted if the change is purely technical.
+5. **Artifacts**: add `openspec/changes/<change-name>/prd.md` to the artifacts list **only** if it was created in this run (not if it already existed or was skipped).
+
+### Step 6 — Summary to orchestrator
 
 I return a clear executive summary:
 

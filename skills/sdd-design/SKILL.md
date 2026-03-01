@@ -119,6 +119,29 @@ interface RefreshTokenResponse {
 [If none: "None."]
 ```
 
+### Step 4 — ADR Detection and Generation
+
+This step is **non-blocking**: any failure produces a warning in the output, never `status: blocked` or `status: failed`.
+
+1. **Scan for significant decisions**: read the Technical Decisions table in the newly created `design.md`. For each row, check whether the text (across all columns) contains any of the following keywords (case-insensitive):
+   `pattern`, `convention`, `cross-cutting`, `replaces`, `introduces`, `architecture`, `global`, `system-wide`, `breaking`
+
+2. **No match → skip silently**: if no row matches any keyword, do nothing and produce no output for this step.
+
+3. **Match found → generate ADR**:
+   a. **Prerequisite check**: if `docs/templates/adr-template.md` does not exist OR `docs/adr/README.md` does not exist, log the warning `"ADR infrastructure not found (docs/templates/adr-template.md or docs/adr/README.md missing) — skipping ADR generation"` and stop this step.
+   b. **Determine next ADR number**: count existing files matching `docs/adr/[0-9][0-9][0-9]-*.md`. The next number is `count + 1`, zero-padded to 3 digits (e.g., `001`, `012`, `100`).
+   c. **Derive slug**: `<NNN>-<change-name>[-<first-matched-keyword>]`, all lowercase, spaces replaced with hyphens, non-alphanumeric characters (except hyphens) removed, truncated to 50 characters.
+   d. **Copy template**: copy `docs/templates/adr-template.md` to `docs/adr/<slug>.md`.
+   e. **Pre-fill content** in the new ADR file:
+      - Title (H1): derived from the slug (replace hyphens with spaces, title-case)
+      - Status: `Proposed`
+      - Context section: content from the **Justification** column of the first matched row
+      - Decision section: content from the **Choice** column of the first matched row
+   f. **Update index**: append a new row to the ADR index table in `docs/adr/README.md`:
+      `| [NNN] | [Title] | Proposed | [YYYY-MM-DD] | [brief one-line context] |`
+   g. **Artifacts**: add `docs/adr/<slug>.md` to the artifacts list.
+
 ---
 
 ## Examples of well-documented decisions
@@ -167,6 +190,10 @@ auth/
     ├── login.dto.ts
     └── refresh.dto.ts
 ```
+
+### Step 5 — Summary to orchestrator
+
+I return a clear executive summary to the orchestrator with all artifacts produced (design.md and any ADR file created in Step 4).
 
 ---
 

@@ -73,6 +73,8 @@ Skills that need to pass state to each other use **file artifacts**:
 | `docs/templates/prd-template.md` | proposal-prd-and-adr-system SDD cycle | humans / Claude sessions starting product-level changes | `docs/templates/` — optional PRD template; feeds into `proposal.md`, not a replacement |
 | `docs/templates/adr-template.md` | proposal-prd-and-adr-system SDD cycle | humans adding new ADRs | `docs/templates/` — Nygard format ADR template |
 | `docs/adr/README.md` + `docs/adr/NNN-*.md` | proposal-prd-and-adr-system SDD cycle | humans / Claude sessions making architectural decisions | `docs/adr/` — ADR index + individual decision records; must be updated when new ADRs are added |
+| `openspec/changes/*/prd.md` | sdd-propose (Step 5, optional) | humans / product-level change authors | `openspec/changes/<name>/` — auto-created shell when `docs/templates/prd-template.md` exists and no `prd.md` is present; idempotent (never overwrites existing file); non-blocking if template absent |
+| `docs/adr/NNN-<slug>.md` | sdd-design (Step 5, optional) | humans / architecture reviewers | `docs/adr/` — auto-created when Technical Decisions table in `design.md` contains a keyword-significant architectural decision; numbering via filesystem count; non-blocking if template or README.md absent |
 
 ## Key architectural decisions
 

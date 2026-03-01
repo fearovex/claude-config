@@ -92,7 +92,7 @@ The current `project-audit` SKILL.md assumes a package.json exists for stack det
 
 ## No automated test for skills
 
-Skills have no automated tests. The only validation is running `/project:audit` and manually verifying skill behavior in a test project. A future improvement would be a `/skill:test` meta-tool.
+Skills have no automated tests. The only validation is running `/project-audit` and manually verifying skill behavior in a test project. A future improvement would be a `/skill-test` meta-tool.
 
 ---
 

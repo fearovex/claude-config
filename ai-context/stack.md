@@ -29,7 +29,8 @@ claude-config/
 ├── skills/                # Skill catalog (~35 skills)
 │   ├── sdd-*/             # SDD phase skills (8 phases)
 │   ├── project-*/         # Meta-tools (setup, audit, fix, update)
-│   ├── memory-manager/    # Memory management
+│   ├── memory-init/       # Memory initialization (ai-context/ from scratch)
+│   ├── memory-update/     # Memory update (session decisions → ai-context/)
 │   ├── skill-creator/     # Skill creation tool
 │   └── [tech-skills]/     # Technology catalog (react-19, nextjs-15, etc.)
 ├── memory/                # Claude auto-memory (per-project notes)
@@ -46,12 +47,12 @@ claude-config/
 | Category | Count | Examples |
 |----------|-------|---------|
 | SDD phases | 8 | sdd-propose, sdd-spec, sdd-design, sdd-tasks, sdd-apply, sdd-verify, sdd-archive, sdd-explore |
-| Meta-tools | 6 | project-setup, project-audit, project-fix, project-update, memory-manager, skill-creator |
+| Meta-tools | 10 | project-setup, project-onboard, project-audit, project-analyze, project-fix, project-update, memory-init, memory-update, skill-creator, skill-add |
 | Tech — Frontend | 8 | react-19, nextjs-15, typescript, zustand-5, zod-4, tailwind-4, ai-sdk-5, react-native |
 | Tech — Backend | 4 | django-drf, spring-boot-3, hexagonal-architecture-java, java-21 |
 | Tech — Testing | 2 | playwright, pytest |
 | Tech — Tooling | 5 | github-pr, jira-task, jira-epic, elixir-antipatterns, electron |
-| Misc | 4 | claude-code-expert, excel-expert, openclaw-assistant, image-ocr |
+| Misc | 3 | claude-code-expert, excel-expert, image-ocr |
 
 ## Workflows
 

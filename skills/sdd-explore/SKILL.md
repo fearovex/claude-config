@@ -62,7 +62,7 @@ For each possible approach I generate a comparison table:
 
 ### Step 5 — Save if a change name was specified
 
-If invoked as `/sdd:explore <change-name>`, I save to:
+If invoked as `/sdd-explore <change-name>`, I save to:
 `openspec/changes/<change-name>/exploration.md`
 
 ```markdown

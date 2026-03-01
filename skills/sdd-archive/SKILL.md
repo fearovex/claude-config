@@ -46,7 +46,7 @@ The verification report has [N] critical issues:
 - [issue 1]
 - [issue 2]
 
-Resolve the issues and run /sdd:verify again before archiving.
+Resolve the issues and run /sdd-verify again before archiving.
 ```
 
 If there is no verification report, I inform the user and ask whether to proceed anyway.
@@ -176,7 +176,7 @@ Master specs updated:
 Archived at:
   - openspec/changes/archive/2026-02-23-[name]/
 
-Recommendation: Run /memory:update to update
+Recommendation: Run /memory-update to update
 ai-context/ with the decisions from this cycle.
 ```
 
@@ -192,7 +192,7 @@ ai-context/ with the decisions from this cycle.
     "openspec/specs/<domain>/spec.md — updated",
     "openspec/changes/archive/YYYY-MM-DD-<name>/ — created"
   ],
-  "next_recommended": ["memory:update"],
+  "next_recommended": ["memory-update"],
   "risks": []
 }
 ```

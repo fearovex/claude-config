@@ -28,7 +28,8 @@ claude-config/
 ├── skills/                # Skill catalog (~38 skills)
 │   ├── sdd-*/             # SDD phase skills (8 phases)
 │   ├── project-*/         # Meta-tool skills (setup, audit, fix, update)
-│   ├── memory-manager/    # Memory layer management
+│   ├── memory-init/       # Memory initialization (ai-context/ from scratch)
+│   ├── memory-update/     # Memory update (session decisions → ai-context/)
 │   ├── skill-creator/     # Skill scaffolding tool
 │   └── [tech-skills]/     # Technology catalog (react-19, nextjs-15, typescript, etc.)
 ├── hooks/                 # Claude Code event hooks
@@ -70,10 +71,11 @@ SKILL.md on demand and executes its instructions.
 | Skill | Description |
 |-------|-------------|
 | `project-setup` | Deploys SDD + memory structure in a new project |
-| `project-audit` | Audits a project's Claude config across 9 dimensions, generates `audit-report.md` |
+| `project-audit` | Audits a project's Claude config across 10 dimensions, generates `audit-report.md` |
 | `project-fix` | Reads `audit-report.md` and applies all corrections |
 | `project-update` | Updates the project `CLAUDE.md` with user-level changes |
-| `memory-manager` | Generates and updates `ai-context/` memory files |
+| `memory-init` | Generates `ai-context/` files by reading the project from scratch |
+| `memory-update` | Updates `ai-context/` with work done in the current session |
 | `skill-creator` | Scaffolds a new skill directory with a compliant `SKILL.md` |
 
 ### Technology Skills
@@ -124,7 +126,6 @@ SKILL.md on demand and executes its instructions.
 |-------|-------------|
 | `claude-code-expert` | CLAUDE.md config, custom skills, hooks, MCP, advanced workflows |
 | `excel-expert` | Excel file creation and analysis (ExcelJS, SheetJS, openpyxl, pandas) |
-| `openclaw-assistant` | OpenClaw self-hosted AI agent runtime setup and skill development |
 | `image-ocr` | OCR text extraction from images (Tesseract, EasyOCR, Claude Vision, etc.) |
 
 ---
@@ -172,7 +173,7 @@ git commit -m "chore: sync session changes"
 The meta-SDD cycle for this repo:
 
 ```
-/sdd:ff <change-name>  →  review artifacts  →  /sdd:apply  →  sync.sh  →  git commit
+/sdd-ff <change-name>  →  review artifacts  →  /sdd-apply  →  install.sh  →  git commit
 ```
 
 For breaking changes to the orchestrator or SDD phase skills, the full cycle is required:
@@ -188,30 +189,30 @@ Open a Claude Code session inside any project that has `~/.claude/` installed.
 
 | Command | Action |
 |---------|--------|
-| `/project:setup` | Deploy SDD + memory structure in the current project |
-| `/project:audit` | Audit the project's Claude config — generates `audit-report.md` (9 dimensions) |
-| `/project:fix` | Apply all corrections from `audit-report.md` |
-| `/project:update` | Update the project `CLAUDE.md` with user-level changes |
-| `/skill:create <name>` | Create a new skill (global or project-specific) |
-| `/skill:add <name>` | Add a skill from the global catalog to the current project |
-| `/memory:init` | Generate `ai-context/` files by reading the project from scratch |
-| `/memory:update` | Update `ai-context/` with work done in the current session |
+| `/project-setup` | Deploy SDD + memory structure in the current project |
+| `/project-audit` | Audit the project's Claude config — generates `audit-report.md` (10 dimensions) |
+| `/project-fix` | Apply all corrections from `audit-report.md` |
+| `/project-update` | Update the project `CLAUDE.md` with user-level changes |
+| `/skill-create <name>` | Create a new skill (global or project-specific) |
+| `/skill-add <name>` | Add a skill from the global catalog to the current project |
+| `/memory-init` | Generate `ai-context/` files by reading the project from scratch |
+| `/memory-update` | Update `ai-context/` with work done in the current session |
 
 ### SDD Development Cycle
 
 | Command | Action |
 |---------|--------|
-| `/sdd:new <change>` | Start a complete SDD cycle for a change |
-| `/sdd:ff <change>` | Fast-forward: propose → spec + design (parallel) → tasks |
-| `/sdd:explore <topic>` | Explore a topic without committing to changes |
-| `/sdd:propose <change>` | Create a proposal |
-| `/sdd:spec <change>` | Write delta specifications |
-| `/sdd:design <change>` | Create a technical design |
-| `/sdd:tasks <change>` | Break down a task plan |
-| `/sdd:apply <change>` | Implement the task plan |
-| `/sdd:verify <change>` | Verify implementation against specs |
-| `/sdd:archive <change>` | Archive a completed change |
-| `/sdd:status` | View the active SDD cycle status |
+| `/sdd-new <change>` | Start a complete SDD cycle for a change |
+| `/sdd-ff <change>` | Fast-forward: propose → spec + design (parallel) → tasks |
+| `/sdd-explore <topic>` | Explore a topic without committing to changes |
+| `/sdd-propose <change>` | Create a proposal |
+| `/sdd-spec <change>` | Write delta specifications |
+| `/sdd-design <change>` | Create a technical design |
+| `/sdd-tasks <change>` | Break down a task plan |
+| `/sdd-apply <change>` | Implement the task plan |
+| `/sdd-verify <change>` | Verify implementation against specs |
+| `/sdd-archive <change>` | Archive a completed change |
+| `/sdd-status` | View the active SDD cycle status |
 
 ---
 
@@ -242,7 +243,7 @@ explore (optional)
  archive
 ```
 
-The fast-forward shortcut `/sdd:ff <change>` runs propose → spec + design → tasks in one shot
+The fast-forward shortcut `/sdd-ff <change>` runs propose → spec + design → tasks in one shot
 and presents the full plan for approval before any code is written.
 
 SDD artifacts are stored in `openspec/changes/<change-name>/` and archived to
@@ -259,7 +260,7 @@ SDD artifacts are stored in `openspec/changes/<change-name>/` and archived to
 2. **Skill structure** — every skill is a directory with exactly one `SKILL.md` entry point.
    `SKILL.md` must contain: trigger definition, process steps, rules section.
 
-3. **SDD compliance** — every skill modification requires at minimum `/sdd:ff` before apply.
+3. **SDD compliance** — every skill modification requires at minimum `/sdd-ff` before apply.
    Every archived change must have a `verify-report.md` with at least one checked criterion.
 
 4. **Sync discipline** — always run `sync.sh` before committing. Never edit `~/.claude/`
@@ -269,12 +270,12 @@ SDD artifacts are stored in `openspec/changes/<change-name>/` and archived to
 
 ```bash
 # 1. Plan and spec the change
-/sdd:ff <change-name>
+/sdd-ff <change-name>
 
 # 2. Review the generated proposal, spec, design, and tasks in openspec/changes/<change-name>/
 
 # 3. Implement
-/sdd:apply <change-name>
+/sdd-apply <change-name>
 
 # 4. Sync and commit
 bash sync.sh

@@ -13,7 +13,9 @@ This spec describes the observable execution behavior of the `project-audit` ski
 
 ### Requirement: Batched shell discovery
 
-The `project-audit` skill MUST consolidate all shell-based discovery (file existence checks, line counts, directory listings, grep searches, orphaned change detection) into the minimum number of Bash tool calls achievable, with an absolute ceiling of 3 Bash calls per audit run.
+The `project-audit` skill MUST consolidate all shell-based discovery (file existence checks, line counts, directory listings, grep searches, orphaned change detection) into the minimum number of Bash tool calls achievable, with an absolute ceiling of 3 Bash calls per audit run. The Phase A script MUST emit a `LOCAL_SKILLS_DIR` key in addition to all other required keys.
+
+*(Modified in: 2026-02-27 by change "global-config-skill-audit" — added LOCAL_SKILLS_DIR key to Phase A output)*
 
 #### Scenario: Full audit run on a project with all files present
 
@@ -44,6 +46,34 @@ The `project-audit` skill MUST consolidate all shell-based discovery (file exist
 - **WHEN** Claude evaluates each of the 9 dimensions
 - **THEN** Claude MUST NOT issue individual `ls`, `grep`, `wc -l`, or `find` calls per dimension
 - **AND** Claude reads content files for dimension analysis using the Read, Glob, and Grep tools (already pre-approved), not via Bash
+
+#### Scenario: Discovery script output includes LOCAL_SKILLS_DIR key
+
+- **GIVEN** Claude is executing `/project-audit` on any project
+- **WHEN** the Phase A discovery Bash call completes
+- **THEN** its stdout includes a line `LOCAL_SKILLS_DIR=<value>` where `<value>` is either `skills` or `.claude/skills`
+- **AND** this line appears in the output regardless of whether the project is a global-config repo or a standard project
+- **AND** the key is always present and never conditionally absent
+
+#### Scenario: LOCAL_SKILLS_DIR resolves to "skills" on global-config repo
+
+- **GIVEN** the target project has both `install.sh` and `sync.sh` at its root
+- **WHEN** the `LOCAL_SKILLS_DIR` assignment logic executes within the Phase A script
+- **THEN** `LOCAL_SKILLS_DIR` is set to `skills`
+
+#### Scenario: LOCAL_SKILLS_DIR resolves to ".claude/skills" on a standard project
+
+- **GIVEN** the target project does NOT have both `install.sh` and `sync.sh` at root
+- **AND** `openspec/config.yaml` either does not exist or does not contain `Claude Code SDD meta-system`
+- **WHEN** the `LOCAL_SKILLS_DIR` assignment logic executes
+- **THEN** `LOCAL_SKILLS_DIR` is set to `.claude/skills`
+
+#### Scenario: Total Bash call count still does not exceed 3
+
+- **GIVEN** the Phase A script has been extended with the `LOCAL_SKILLS_DIR` logic
+- **WHEN** `/project-audit` runs end-to-end on any project
+- **THEN** the total number of Bash tool calls does not exceed 3
+- **AND** adding `LOCAL_SKILLS_DIR` does not introduce a new Bash call — it is part of the existing Phase A script block
 
 ---
 

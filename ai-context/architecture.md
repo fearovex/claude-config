@@ -48,7 +48,7 @@ A SKILL.md must contain:
 Any change to a skill or the global CLAUDE.md must go through:
 
 ```
-/sdd:ff <change-name>   →   review   →   /sdd:apply   →   sync.sh + git commit
+/sdd-ff <change-name>   →   review   →   /sdd-apply   →   install.sh + git commit
 ```
 
 Fast-forward is the minimum cycle. For breaking changes to core skills (orchestrator, SDD phases), full cycle is required.
@@ -64,7 +64,7 @@ Skills that need to pass state to each other use **file artifacts**:
 | `openspec/config.yaml` | project-setup / project-fix | all SDD phases | `openspec/` in project — also contains the optional `feature_docs:` top-level key (config-driven detection source for D10); when absent, project-audit falls back to heuristic detection |
 | `openspec/changes/*/proposal.md` | sdd-propose | sdd-spec, sdd-design | `openspec/changes/<name>/` |
 | `openspec/changes/*/tasks.md` | sdd-tasks | sdd-apply | `openspec/changes/<name>/` |
-| `ai-context/*.md` | memory-manager / project-fix | all skills | `ai-context/` in project |
+| `ai-context/*.md` | memory-init / memory-update / project-fix | all skills | `ai-context/` in project |
 | `ai-context/onboarding.md` | (human / project-fix) | humans / new project sessions | `ai-context/` in project — canonical external project onboarding sequence |
 | `ai-context/scenarios.md` | (human / project-onboard) | humans / new project sessions | `ai-context/` in project — 6-case onboarding guide, case-based entry point for users at different project states |
 | `ai-context/quick-reference.md` | (human) | humans | `ai-context/` in project — single-page SDD quick reference: situation table, command glossary, flow diagram |
@@ -111,7 +111,7 @@ Summary of drift vs. `architecture.md` + `stack.md` (baseline: 2026-02-23):
 - Skill count: documented ~35–37, observed 43 (natural growth)
 - `openspec/specs/` directory (7 subdirs) exists but not in stack.md directory tree
 - `README.md` at root not mentioned in documented structure
-- Command separator inconsistency: conventions.md uses `/sdd:ff` (colon) while runtime uses `/sdd-ff` (hyphen)
+- Command separator inconsistency: conventions.md previously used `/sdd:ff` (colon) — fixed to `/sdd-ff` (hyphen)
 
 All drift is informational. No structural mismatches detected.
 

@@ -181,7 +181,7 @@ type: update_file
 target: .claude/CLAUDE.md
 section: sdd_section
 ```
-If CLAUDE.md does not mention `/sdd:*`, I add this section at the end of CLAUDE.md:
+If CLAUDE.md does not mention `/sdd-*`, I add this section at the end of CLAUDE.md:
 ```markdown
 ## SDD — Spec-Driven Development
 
@@ -463,7 +463,7 @@ Files modified:   [list]
 SDD Status: [FULL / PARTIAL / NOT CONFIGURED]
   - openspec/config.yaml: [✅ created | ✅ already existed | ❌ pending]
   - Global SDD skills: [✅ complete | ⚠️ missing: list]
-  - CLAUDE.md mentions /sdd:*: [✅ yes | ✅ added]
+  - CLAUDE.md mentions /sdd-*: [✅ yes | ✅ added]
 
 To verify the result:
   → /project-audit  (should show a higher score)

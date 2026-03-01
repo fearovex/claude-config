@@ -7,9 +7,9 @@ description: >
 
 # project-audit
 
-> Deep diagnostic of Claude/SDD configuration. Read-only. Produces a structured report that /project:fix consumes as its spec.
+> Deep diagnostic of Claude/SDD configuration. Read-only. Produces a structured report that /project-fix consumes as its spec.
 
-**Triggers**: `/project:audit`, audit project, review claude config, sdd diagnostic, project health check
+**Triggers**: `/project-audit`, audit project, review claude config, sdd diagnostic, project health check
 
 ---
 
@@ -72,7 +72,7 @@ If detected as global-config:
 | Has Skills registry | Search for skills table | ⚠️ HIGH |
 | Has Unbreakable Rules | Search for `## Unbreakable Rules` or similar | ⚠️ MEDIUM |
 | Has Plan Mode Rules | Search for `## Plan Mode` | ℹ️ LOW |
-| Mentions SDD (`/sdd:new` or `/sdd:ff`) | Search for text `/sdd:` | ⚠️ HIGH |
+| Mentions SDD (`/sdd-new` or `/sdd-ff`) | Search for text `/sdd-` | ⚠️ HIGH |
 | References to ai-context/ are correct | Verify that mentioned paths exist | ⚠️ MEDIUM |
 
 **For the stack**: I read `package.json` (or equivalent), extract the 5-10 most important dependencies, and compare with what is declared in CLAUDE.md. I report specific discrepancies with declared version vs real version.
@@ -150,7 +150,7 @@ If any is missing → ❌ CRITICAL (SDD cannot function without the phases).
 #### 3c. CLAUDE.md mentions SDD
 | Check | Severity |
 |-------|-----------|
-| Contains `/sdd:new` or `/sdd:ff` | ⚠️ HIGH |
+| Contains `/sdd-new` or `/sdd-ff` | ⚠️ HIGH |
 | Has section explaining the SDD flow | ℹ️ LOW |
 
 #### 3d. Orphaned changes
@@ -590,7 +590,7 @@ skill_quality_actions:
 | **TOTAL** | **[X]** | **100** | |
 
 **SDD Readiness**: [FULL / PARTIAL / NOT CONFIGURED]
-- FULL: openspec/ exists, config.yaml valid, CLAUDE.md mentions /sdd:*, global skills present
+- FULL: openspec/ exists, config.yaml valid, CLAUDE.md mentions /sdd-*, global skills present
 - PARTIAL: Some SDD elements present but incomplete
 - NOT CONFIGURED: openspec/ does not exist
 
@@ -606,7 +606,7 @@ skill_quality_actions:
 | Stack vs package.json | ✅/⚠️/❌ | [specific discrepancies] |
 | Has Architecture section | ✅/⚠️/❌ | |
 | Skills registry present | ✅/⚠️/❌ | |
-| Mentions SDD (/sdd:*) | ✅/⚠️/❌ | |
+| Mentions SDD (/sdd-*) | ✅/⚠️/❌ | |
 
 **Stack Discrepancies:**
 [List each discrepancy: "Declares React 18, actual ^19.0.0"]
@@ -667,7 +667,7 @@ skill_quality_actions:
 [list or "none"]
 
 **Recommended global tech skills not installed:**
-[list with install command: /skill:add name]
+[list with install command: /skill-add name]
 
 ---
 

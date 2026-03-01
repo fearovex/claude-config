@@ -128,3 +128,41 @@ testing:
 #   # analysis_targets:
 #   #   - src/auth/service.ts
 #   #   - src/core/domain.ts
+
+# ---------------------------------------------------------------------------
+# tdd (optional) — TDD mode configuration for /sdd-apply
+# ---------------------------------------------------------------------------
+# Uncomment and configure to control TDD behavior during /sdd-apply.
+# Without this section, sdd-apply uses heuristic detection (testing skills
+# in CLAUDE.md + test file patterns) to decide whether to activate TDD mode.
+#
+# enabled: true              # explicitly activate TDD mode for this project
+#                            # when set, overrides heuristic detection entirely
+#
+# explicit_only: false       # if true, TDD mode activates ONLY when
+#                            # enabled: true is set above; heuristic detection
+#                            # is disabled. If false (default), heuristic
+#                            # detection is used as fallback when enabled is
+#                            # not set.
+#
+# tdd:
+#   enabled: true
+#   explicit_only: false
+
+# ---------------------------------------------------------------------------
+# coverage (optional) — Coverage threshold for /sdd-verify
+# ---------------------------------------------------------------------------
+# Uncomment and configure to enable coverage validation in /sdd-verify.
+# Without this section, the coverage validation step is skipped entirely.
+#
+# threshold: 80              # minimum coverage % — advisory only, never
+#                            # blocks archiving. sdd-verify reports PASS/FAIL
+#                            # but the verdict is not affected.
+#
+# tool: "auto"               # coverage tool to use when parsing output
+#                            # "auto" — detect from test runner output
+#                            # "jest" | "pytest-cov" | "c8" | etc.
+#
+# coverage:
+#   threshold: 80
+#   tool: "auto"

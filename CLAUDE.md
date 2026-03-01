@@ -99,7 +99,7 @@ When working on a skill change in plan mode:
 |---------|--------|
 | `/project-setup` | Deploys SDD + memory structure in the current project |
 | `/project-onboard` | Reads project state, detects onboarding case (1–6), recommends first command |
-| `/project-audit` | Audits project Claude config — generates audit-report.md (9 dimensions) |
+| `/project-audit` | Audits project Claude config — generates audit-report.md (10 dimensions) |
 | `/project-analyze` | Performs deep framework-agnostic codebase analysis — produces analysis-report.md and updates ai-context/ |
 | `/project-fix` | Implements the corrections from audit-report.md — APPLY phase of the meta-SDD |
 | `/project-update` | Updates the project CLAUDE.md with user-level changes |
@@ -144,8 +144,8 @@ When I receive a meta-tool command, I read the corresponding skill and execute i
 | `/sdd-status` | `~/.claude/skills/sdd-status/SKILL.md` |
 | `/skill-create` | `~/.claude/skills/skill-creator/SKILL.md` |
 | `/skill-add` | `~/.claude/skills/skill-add/SKILL.md` |
-| `/memory-init` | `~/.claude/skills/memory-manager/SKILL.md` |
-| `/memory-update` | `~/.claude/skills/memory-manager/SKILL.md` |
+| `/memory-init` | `~/.claude/skills/memory-init/SKILL.md` |
+| `/memory-update` | `~/.claude/skills/memory-update/SKILL.md` |
 
 ### SDD Orchestrator — Delegation Pattern
 
@@ -318,7 +318,8 @@ Each project has its memory layer in `ai-context/`:
 - `~/.claude/skills/project-update/SKILL.md`
 - `~/.claude/skills/skill-creator/SKILL.md`
 - `~/.claude/skills/skill-add/SKILL.md` — adds an existing global skill to the current project's CLAUDE.md registry
-- `~/.claude/skills/memory-manager/SKILL.md`
+- `~/.claude/skills/memory-init/SKILL.md` — generates all 5 ai-context/ files from scratch by reading the project
+- `~/.claude/skills/memory-update/SKILL.md` — updates ai-context/ with decisions and changes from the current session
 
 ### Technology Skills (global catalog — extracted from Gentleman-Skills)
 

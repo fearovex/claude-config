@@ -84,7 +84,7 @@ Orchestrator skills (sdd-ff, sdd-new) are first-class CLI entry points that repl
 
 **Minimum for any skill change:**
 ```
-/sdd:ff <change-name>   →   user approves   →   /sdd:apply   →   install.sh   →   git commit
+/sdd-ff <change-name>   →   user approves   →   /sdd-apply   →   install.sh   →   git commit
 ```
 
 **Required for breaking changes to orchestrator or SDD phase skills:**

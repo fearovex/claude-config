@@ -4,6 +4,43 @@
 
 ---
 
+## 2026-02-28 — project-fix executed (colon separators + stale references)
+
+**Type**: Config
+**Agent**: Claude Opus 4.6
+**Score before**: 95/100
+**Actions executed**: 0 critical, 0 high, 6 medium, 6 low
+**Files modified**:
+- `ai-context/stack.md` — Replaced `memory-manager/` with `memory-init/` + `memory-update/` in directory tree; updated Meta-tools count from 6 to 10 with correct skill list
+- `ai-context/architecture.md` — Fixed `/sdd:ff` and `/sdd:apply` to `/sdd-ff` and `/sdd-apply` in SDD meta-cycle; replaced `memory-manager` with `memory-init / memory-update` as ai-context producer; updated drift note
+- `ai-context/conventions.md` — Fixed `/sdd:ff` and `/sdd:apply` to `/sdd-ff` and `/sdd-apply` in SDD workflow
+- `ai-context/known-issues.md` — Fixed `/project:audit` to `/project-audit` and `/skill:test` to `/skill-test`
+- `CLAUDE.md` — Changed "9 dimensions" to "10 dimensions" in /project-audit description
+- `README.md` — Replaced all colon separators with hyphens (30+ occurrences); replaced `memory-manager` with `memory-init` + `memory-update`; changed "9 dimensions" to "10 dimensions"; removed stale `openclaw-assistant` entry
+- `skills/sdd-archive/SKILL.md` — Fixed `/sdd:verify` to `/sdd-verify`, `/memory:update` to `/memory-update`, `memory:update` to `memory-update`
+- `skills/project-audit/SKILL.md` — Fixed 7 colon separator occurrences (`/project:fix`, `/project:audit`, `/sdd:new`, `/sdd:ff`, `/sdd:*`, `/skill:add`)
+- `skills/project-fix/SKILL.md` — Fixed `/sdd:*` to `/sdd-*` in 2 locations
+- `skills/sdd-explore/SKILL.md` — Fixed `/sdd:explore` to `/sdd-explore`
+
+**SDD Readiness**: FULL → FULL
+**Notes**: Comprehensive cleanup of legacy colon separator notation and stale memory-manager references after the skill split into memory-init + memory-update.
+
+---
+
+## 2026-02-28 — project-fix executed
+
+**Type**: Config
+**Agent**: Claude Opus 4.6
+**Score before**: 97/100
+**Actions executed**: 0 critical, 0 high, 1 medium
+**Files modified**:
+- `ai-context/stack.md` — Removed stale `openclaw-assistant` reference from Misc category (skill directory does not exist)
+
+**SDD Readiness**: FULL → FULL
+**Notes**: Minimal fix session — only one broken cross-reference to correct.
+
+---
+
 ## 2026-02-27 — improve-project-analysis applied
 
 **Type**: Feature

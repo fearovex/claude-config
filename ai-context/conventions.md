@@ -90,6 +90,26 @@ Orchestrator skills (sdd-ff, sdd-new) are first-class CLI entry points that repl
 **Required for breaking changes to orchestrator or SDD phase skills:**
 Full cycle: explore → propose → spec + design → tasks → apply → verify → archive
 
+## PRD Convention
+
+A Product Requirements Document (PRD) is an optional upstream artifact that can precede the SDD cycle for user-facing or product-level changes.
+
+- **Optional for purely technical changes** — internal refactors, skill modifications, and infrastructure changes do not require a PRD.
+- **Recommended for user-facing or product-level changes** — any change that introduces or alters user-visible behavior, a new feature, or a product decision benefits from a PRD before starting the SDD cycle.
+- **PRD precedes `proposal.md` and feeds into it** — the PRD defines the "what and why" from a product perspective; `proposal.md` then captures the "what and how" for the SDD cycle. The PRD does NOT replace `proposal.md`.
+- **Template**: `docs/templates/prd-template.md`
+
+## ADR Convention
+
+Architectural Decision Records (ADRs) document significant architectural decisions using the Nygard format.
+
+- **Location**: `docs/adr/NNN-short-title.md` — zero-padded three-digit sequential number, lowercase kebab-case title
+- **Template**: `docs/templates/adr-template.md` — Nygard format: Title, Status, Context, Decision, Consequences
+- **Valid statuses**: Proposed, Accepted, Deprecated, Superseded; retroactive ADRs use `Accepted (retroactive)`
+- **Index**: `docs/adr/README.md` must be kept updated with every ADR (number, title, status)
+- **Scope**: ADRs capture significant, long-lived architectural choices. They complement `ai-context/architecture.md` (narrative) — they do NOT replace it
+- **When to write an ADR**: new skill architecture patterns, changes to install/sync direction, changes to inter-skill communication conventions, or any decision that future sessions would need to understand and respect
+
 ## Workflows
 
 ### Workflow A — Config changes (skills, CLAUDE.md, hooks, ai-context, openspec)

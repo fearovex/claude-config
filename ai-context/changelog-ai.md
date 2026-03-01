@@ -4,6 +4,35 @@
 
 ---
 
+## 2026-03-01 — proposal-prd-and-adr-system applied
+
+**Type**: Feature / Documentation
+**Agent**: Claude Sonnet 4.6
+**Files created**:
+- `docs/templates/prd-template.md` — PRD template with all 6 required sections (Problem Statement, Target Users, User Stories with MoSCoW tiers, Non-Functional Requirements, Acceptance Criteria, Notes); each section includes placeholder instructions
+- `docs/templates/adr-template.md` — ADR template following Nygard format with 4 required sections (Title, Status, Context, Decision, Consequences); includes all valid status values and placeholder instructions
+- `docs/adr/README.md` — ADR index with naming convention, numbering scheme, status vocabulary, lifecycle guidance, and table of all 5 ADRs
+- `docs/adr/001-skills-as-directories.md` — Retroactive ADR: skills are stored as directories with SKILL.md entry points
+- `docs/adr/002-artifacts-over-memory.md` — Retroactive ADR: all inter-skill state passed via named file artifacts, not conversation context
+- `docs/adr/003-orchestrator-delegates-everything.md` — Retroactive ADR: CLAUDE.md orchestrator never executes SDD phase work inline; always delegates via Task tool
+- `docs/adr/004-install-sh-repo-authoritative.md` — Retroactive ADR: install.sh is the sole authoritative deploy direction (repo → ~/.claude/); sync.sh is memory-only reverse
+- `docs/adr/005-skill-md-entry-point-convention.md` — Retroactive ADR: SKILL.md is the mandatory, uniquely-named entry point for every skill directory
+**Files modified**:
+- `ai-context/conventions.md` — appended "PRD Convention" section explaining PRD is optional for technical changes, recommended for product-level changes, precedes proposal.md, template at docs/templates/prd-template.md
+- `CLAUDE.md` — added "Documentation Conventions" subsection in Architecture section referencing docs/adr/README.md and docs/templates/prd-template.md
+- `docs/architecture-definition-report.md` — prepended HTML disambiguation comment clarifying "ADR" = Architecture Definition Report, not Architecture Decision Record
+
+**Decisions made**:
+- All 5 ADRs use `Accepted (retroactive)` status — decisions predate the ADR system
+- ADR content derived exclusively from ai-context/architecture.md — no new architectural claims invented
+- PRD is positioned as optional upstream artifact, not a replacement for proposal.md
+- docs/templates/ and docs/adr/ directories created as part of this change
+- docs/architecture-definition-report.md disambiguation uses HTML comment (invisible in rendered Markdown)
+
+**Change**: proposal-prd-and-adr-system | SDD cycle complete
+
+---
+
 ## 2026-02-28 — integrate-memory-into-sdd-cycle archived
 
 **Type**: Feature

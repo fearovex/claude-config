@@ -1,202 +1,128 @@
 # Audit Report — claude-config
-Generated: 2026-02-28 23:00
-Score: 95/100
+Generated: 2026-03-01 00:00
+Score: 91/100
 SDD Ready: YES
-Project Type: global-config
+
+Project Type: global-config (install.sh + sync.sh at root; openspec/config.yaml framework = "Claude Code SDD meta-system")
 
 ---
 
 ## FIX_MANIFEST
 <!-- This block is consumed by /project-fix — DO NOT modify manually -->
 ```yaml
-score: 95
+score: 91
 sdd_ready: true
-generated_at: "2026-02-28T23:00:00"
+generated_at: "2026-03-01T00:00:00"
 project_root: "C:/Users/juanp/claude-config"
 
 required_actions:
   critical: []
   high: []
   medium:
-    - id: "D6-stale-memory-manager-refs-ai-context"
+    - id: "D1-hook-not-registered"
+      type: "update_file"
+      target: "settings.json"
+      reason: "hooks/smart-commit-context.js exists but no hook is registered in settings.json. The UserPromptSubmit hook is silently unused."
+      template: ""
+  low:
+    - id: "D7-analysis-drift-minor"
       type: "update_file"
       target: "ai-context/stack.md"
-      reason: "References 'memory-manager/' directory (line 32) and 'memory-manager' in meta-tools count (line 49) — skill was split into memory-init + memory-update"
-    - id: "D6-stale-memory-manager-ref-architecture"
-      type: "update_file"
-      target: "ai-context/architecture.md"
-      reason: "Line 67 references 'memory-manager' as producer of ai-context/*.md — should reference 'memory-init / memory-update'"
-    - id: "D6-colon-separator-conventions"
-      type: "update_file"
-      target: "ai-context/conventions.md"
-      reason: "Line 87 uses '/sdd:ff' and '/sdd:apply' (colon separator) — should be '/sdd-ff' and '/sdd-apply' (hyphen)"
-    - id: "D6-colon-separator-architecture"
-      type: "update_file"
-      target: "ai-context/architecture.md"
-      reason: "Line 51 uses '/sdd:ff' and '/sdd:apply' (colon separator) — should be '/sdd-ff' and '/sdd-apply' (hyphen)"
-    - id: "D6-colon-separator-known-issues"
-      type: "update_file"
-      target: "ai-context/known-issues.md"
-      reason: "Line 95 uses '/project:audit' and '/skill:test' (colon separator) — should be '/project-audit' and '/skill-test'"
-    - id: "D1-dimensions-count-CLAUDE-md"
-      type: "update_file"
-      target: "CLAUDE.md"
-      reason: "Line 102 says '/project-audit' generates 'audit-report.md (9 dimensions)' — actual count is 10 scored dimensions (1,2,3,4,6,7,8,9,10,11)"
-  low:
-    - id: "D6-sdd-archive-colon-separator"
-      type: "update_file"
-      target: "skills/sdd-archive/SKILL.md"
-      reason: "Lines 179 and 195 use '/memory:update' and 'memory:update' (colon separator) — should be '/memory-update'"
-    - id: "D6-project-audit-colon-triggers"
-      type: "update_file"
-      target: "skills/project-audit/SKILL.md"
-      reason: "Lines 10, 12, 75, 153, 593, 609, 670 use colon separator (/project:fix, /project:audit, /sdd:new, /sdd:ff, /sdd:*, /skill:add) — should use hyphen"
-    - id: "D6-project-fix-colon-separator"
-      type: "update_file"
-      target: "skills/project-fix/SKILL.md"
-      reason: "Lines 184, 466 use '/sdd:*' (colon separator) — should use '/sdd-*' (hyphen)"
-    - id: "D6-sdd-explore-colon-separator"
-      type: "update_file"
-      target: "skills/sdd-explore/SKILL.md"
-      reason: "Line 65 uses '/sdd:explore' (colon separator) — should be '/sdd-explore' (hyphen)"
-    - id: "D6-sdd-archive-colon-verify"
-      type: "update_file"
-      target: "skills/sdd-archive/SKILL.md"
-      reason: "Line 49 uses '/sdd:verify' (colon separator) — should be '/sdd-verify' (hyphen)"
-    - id: "D6-stale-memory-manager-readme"
-      type: "update_file"
-      target: "README.md"
-      reason: "Lines 31 and 76 reference 'memory-manager' — skill was split into memory-init + memory-update"
-    - id: "D6-readme-9-dimensions"
-      type: "update_file"
-      target: "README.md"
-      reason: "Lines 73, 192 say '9 dimensions' — actual count is 10 scored dimensions"
-    - id: "D6-readme-colon-separator"
-      type: "update_file"
-      target: "README.md"
-      reason: "Line 192 uses '/project:audit' (colon separator) — should be '/project-audit'"
+      reason: "stack.md references 'openclaw-assistant' skill which does not exist on disk. Remove stale reference."
+      template: ""
 
 missing_global_skills: []
 
 orphaned_changes: []
 
 violations:
-  - file: "ai-context/stack.md"
-    line: 32
-    rule: "D6-stale-reference"
+  - file: "skills/pytest/SKILL.md"
+    line: 50
+    rule: "language-english-only"
     severity: "medium"
-  - file: "ai-context/stack.md"
-    line: 49
-    rule: "D6-stale-reference"
-    severity: "medium"
-  - file: "ai-context/architecture.md"
-    line: 51
-    rule: "D6-colon-separator"
-    severity: "medium"
-  - file: "ai-context/architecture.md"
-    line: 67
-    rule: "D6-stale-reference"
-    severity: "medium"
-  - file: "ai-context/conventions.md"
-    line: 87
-    rule: "D6-colon-separator"
-    severity: "medium"
-  - file: "ai-context/known-issues.md"
-    line: 95
-    rule: "D6-colon-separator"
-    severity: "medium"
-  - file: "CLAUDE.md"
-    line: 102
-    rule: "D1-stale-count"
-    severity: "medium"
-  - file: "skills/sdd-archive/SKILL.md"
-    line: 179
-    rule: "D6-colon-separator"
-    severity: "low"
-  - file: "skills/sdd-archive/SKILL.md"
-    line: 195
-    rule: "D6-colon-separator"
-    severity: "low"
-  - file: "skills/sdd-archive/SKILL.md"
-    line: 49
-    rule: "D6-colon-separator"
-    severity: "low"
+    detail: "Spanish comment found: '# Teardown automático' — must be translated to English per Unbreakable Rule #1"
   - file: "skills/project-audit/SKILL.md"
-    line: 10
-    rule: "D6-colon-separator"
-    severity: "low"
-  - file: "skills/project-fix/SKILL.md"
-    line: 184
-    rule: "D6-colon-separator"
-    severity: "low"
-  - file: "skills/sdd-explore/SKILL.md"
-    line: 65
-    rule: "D6-colon-separator"
-    severity: "low"
-  - file: "README.md"
-    line: 31
-    rule: "D6-stale-reference"
-    severity: "low"
-  - file: "README.md"
-    line: 73
-    rule: "D1-stale-count"
-    severity: "low"
-  - file: "skills/project-audit/SKILL.md"
-    line: 42
-    rule: "D11-count-consistency"
+    line: "gap between Dimension 4 (line 167) and Dimension 6 (line 212)"
+    rule: "D11-numbering-continuity"
     severity: "info"
+    detail: "Dimension 5 missing from sequence 1,2,3,4,6,7,8,9,10,11. Likely intentional but creates a numbering gap."
+  - file: "skills/memory-update/SKILL.md"
+    line: 69
+    rule: "D11-numbering-continuity"
+    severity: "info"
+    detail: "Step 4b used after Step 4 — sub-lettered step creates non-contiguous numeric sequence."
+  - file: "skills/sdd-archive/SKILL.md"
+    line: 154
+    rule: "D11-numbering-continuity"
+    severity: "info"
+    detail: "Step 5b used after Step 5 — sub-lettered step creates non-contiguous numeric sequence."
 
-skill_quality_actions: []
+skill_quality_actions:
+  - id: "D9-pytest-flag_language"
+    skill_name: "pytest"
+    local_path: "skills/pytest/SKILL.md"
+    global_counterpart: "~/.claude/skills/pytest/SKILL.md"
+    action_type: "flag_language_violation"
+    disposition: "update"
+    missing_sections: []
+    detail: "Spanish comment '# Teardown automático' at line 50. All SKILL.md content must be English per Unbreakable Rule #1."
+    severity: "warning"
 ```
 ---
 
 ## Executive Summary
 
-claude-config is in excellent shape with a fully operational SDD workflow and comprehensive skill catalog of 44 skills. The CLAUDE.md Skills Registry is perfectly synchronized with the skills on disk after the recent memory-manager split into memory-init and memory-update. The primary finding is that several ai-context/ files and a few skill files still contain stale references to the old "memory-manager" skill name and use the legacy colon separator (`:`) instead of the standard hyphen (`-`) in command notation. The CLAUDE.md Available Commands table also has a stale "9 dimensions" claim for /project-audit. All findings are MEDIUM or LOW severity -- no critical or high issues.
+`claude-config` is in excellent health and fully SDD-ready. All 44 skills exist on disk and are perfectly synchronized with the CLAUDE.md registry — bidirectional, zero gaps. All 18 archived SDD changes have `verify-report.md` files with at least one checked criterion. The ai-context memory layer is complete and substantive across all 5 required files plus 3 optional extras. The SDD orchestrator is fully operational with all 8 phase skills present.
+
+Two findings prevent a perfect score: (1) a single Spanish comment in `skills/pytest/SKILL.md` violating the Unbreakable Rule on language, and (2) `hooks/smart-commit-context.js` exists but is not registered in `settings.json`. Architecture drift from the analysis report is minor and informational only (-2 pts for D7). Score: **91/100**.
 
 ---
 
-## Score: 95/100
+## Score: 91/100
 
 | Dimension | Points | Max | Status |
 |-----------|--------|-----|--------|
-| CLAUDE.md complete and accurate | 18 | 20 | ⚠️ |
-| Memory initialized | 15 | 15 | ✅ |
-| Memory with substantial content | 8 | 10 | ⚠️ |
-| SDD Orchestrator operational | 20 | 20 | ✅ |
-| Skills registry complete and functional | 20 | 20 | ✅ |
-| Cross-references valid | 4 | 5 | ⚠️ |
-| Architecture compliance | 5 | 5 | ✅ |
-| Testing & Verification integrity | 5 | 5 | ✅ |
-| Project Skills Quality | N/A | N/A | ✅ |
-| Feature Docs Coverage | N/A | N/A | ✅ |
-| Internal Coherence | N/A | N/A | ⚠️ |
-| **TOTAL** | **95** | **100** | |
+| D1 — CLAUDE.md complete and accurate | 18 | 20 | ⚠️ |
+| D2 — Memory initialized | 15 | 15 | ✅ |
+| D2 — Memory with substantial content | 10 | 10 | ✅ |
+| D3 — SDD Orchestrator operational | 20 | 20 | ✅ |
+| D4 — Skills registry complete and functional | 20 | 20 | ✅ |
+| D6 — Cross-references valid | 5 | 5 | ✅ |
+| D7 — Architecture compliance | 3 | 5 | ⚠️ |
+| D8 — Testing & Verification integrity | 5 | 5 | ✅ |
+| D9 — Project Skills Quality | N/A | N/A | ⚠️ (info) |
+| D10 — Feature Docs Coverage | N/A | N/A | ✅ |
+| D11 — Internal Coherence | N/A | N/A | ⚠️ (info) |
+| **TOTAL** | **91** | **100** | |
 
 **SDD Readiness**: FULL
-- openspec/ exists, config.yaml valid, CLAUDE.md mentions /sdd-*, global skills present (8/8)
+- openspec/ exists with valid config.yaml (mode: openspec)
+- CLAUDE.md mentions /sdd-ff and /sdd-new with full phase DAG
+- All 8 global SDD phase skills present in skills/
+- All 18 archived changes have verify-reports with [x] criteria
 
 ---
 
 ## Dimension 1 — CLAUDE.md [WARNING]
 
 | Check | Status | Detail |
-|-------|--------|---------|
-| Exists root `CLAUDE.md` (global-config repo) | ✅ | Root CLAUDE.md present |
+|-------|--------|--------|
+| Exists root CLAUDE.md (global-config exception) | ✅ | 359 lines |
 | Has >50 lines | ✅ | 359 lines |
-| Stack documented | ✅ | Full Tech Stack table present |
-| Stack vs package.json | ✅ | N/A — no package.json (Markdown/YAML/Bash meta-system) |
-| Has Architecture section | ✅ | ## Architecture present |
-| Skills registry present | ✅ | Full registry with 44 skills listed |
-| Has Unbreakable Rules | ✅ | ## Unbreakable Rules present |
-| Has Plan Mode Rules | ✅ | ## Plan Mode Rules present |
-| Mentions SDD (/sdd-*) | ✅ | /sdd-ff, /sdd-new, /sdd-apply etc. referenced |
-| References to ai-context/ correct | ✅ | All 5 core files exist |
+| Has `## Tech Stack` section | ✅ | Present as table |
+| Stack vs package.json | ✅ | No package.json — Markdown/YAML/Bash project, N/A |
+| Has `## Architecture` section | ✅ | Present with ASCII diagram |
+| Has Skills registry | ✅ | Full registry, 44 entries in 3 categories |
+| Mentions SDD (/sdd-*) | ✅ | /sdd-ff, /sdd-new, /sdd-apply and full phase DAG |
+| Has Unbreakable Rules | ✅ | "## Unbreakable Rules" with 4 rules |
+| Has Plan Mode Rules | ✅ | "## Plan Mode Rules" present |
+| Hook registration in settings.json | ⚠️ | hooks/smart-commit-context.js present but no `hooks:` key in settings.json |
 
-**Issues:**
-- Line 102: `/project-audit` description says "9 dimensions" but the audit skill defines 10 dimension sections (1,2,3,4,6,7,8,9,10,11). Score deduction: -2
+**Stack Discrepancies:**
+None — pure Markdown/YAML/Bash project, no package.json. Stack declaration is accurate.
 
-**Score: 18/20**
+**Hook Gap (MEDIUM, -2 pts):**
+`hooks/smart-commit-context.js` is installed by `install.sh` but `settings.json` contains no `hooks` block. The UserPromptSubmit hook is therefore never invoked. To fix: add a `hooks` configuration to `settings.json` registering the hook for the `UserPromptSubmit` event.
 
 ---
 
@@ -204,34 +130,31 @@ claude-config is in excellent shape with a fully operational SDD workflow and co
 
 | File | Exists | Lines | Content | Coherence |
 |---------|--------|--------|-----------|------------|
-| stack.md | ✅ | 93 | ✅ | ⚠️ |
-| architecture.md | ✅ | 118 | ✅ | ⚠️ |
-| conventions.md | ✅ | 139 | ✅ | ⚠️ |
-| known-issues.md | ✅ | 110 | ✅ | ⚠️ |
-| changelog-ai.md | ✅ | 261 | ✅ | N/A |
+| stack.md | ✅ | 94 | ✅ | ✅ |
+| architecture.md | ✅ | 119 | ✅ | ✅ |
+| conventions.md | ✅ | 139 | ✅ | ✅ |
+| known-issues.md | ✅ | 110 | ✅ | ✅ |
+| changelog-ai.md | ✅ | 307 | ✅ | N/A |
 
-**Existence: 15/15** — All 5 files exist with substantial content.
+All 5 required files exceed minimum thresholds (94 > 30, 119 > 40, 139 > 30, 110 > 10, 307 > 5). Changelog most recent entry: `## 2026-02-28`.
 
-**Content quality: 8/10** — All files have real, substantial content. However coherence issues exist:
+**Optional user docs (informational, no score impact):**
+
+| File | Exists | Last verified | Status |
+|------|--------|---------------|--------|
+| quick-reference.md | ✅ | 2026-02-26 | ℹ️ 3 days ago — within 90-day window |
+| scenarios.md | ✅ | 2026-02-26 | ℹ️ 3 days ago — within 90-day window |
+| onboarding.md | ✅ | 2026-02-26 | ℹ️ 3 days ago — within 90-day window |
 
 **Coherence issues detected:**
-1. `stack.md` line 32: References `memory-manager/` directory which no longer exists (split into `memory-init/` + `memory-update/`)
-2. `stack.md` line 49: Lists "memory-manager" in Meta-tools count — should be "memory-init, memory-update"
-3. `stack.md` line 49: Says "Meta-tools | 6" but with the split there are now 8 meta-tool skills (project-setup, project-onboard, project-audit, project-analyze, project-fix, project-update, memory-init, memory-update) plus skill-creator and skill-add
-4. `architecture.md` line 51: Uses `/sdd:ff` and `/sdd:apply` (colon separator) instead of `/sdd-ff` and `/sdd-apply`
-5. `architecture.md` line 67: References `memory-manager` as producer of ai-context files — should be `memory-init / memory-update`
-6. `conventions.md` line 87: Uses `/sdd:ff` and `/sdd:apply` (colon separator)
-7. `known-issues.md` line 95: Uses `/project:audit` and `/skill:test` (colon separator)
-
-**User documentation freshness (informational):**
-- `ai-context/scenarios.md`: Last verified: 2026-02-26 (2 days ago) — ✅ fresh
-- `ai-context/quick-reference.md`: Last verified: 2026-02-26 (2 days ago) — ✅ fresh
+None. All directories and files referenced in architecture.md (skills/, hooks/, openspec/, ai-context/, memory/, install.sh, sync.sh) exist on disk.
 
 ---
 
 ## Dimension 3 — SDD Orchestrator [OK]
 
 **Global SDD Skills:**
+
 | Skill | Exists |
 |-------|--------|
 | sdd-explore | ✅ |
@@ -243,7 +166,10 @@ claude-config is in excellent shape with a fully operational SDD workflow and co
 | sdd-verify | ✅ |
 | sdd-archive | ✅ |
 
+All 8 SDD phase skills present.
+
 **openspec/ in project:**
+
 | Check | Status |
 |-------|--------|
 | `openspec/` exists | ✅ |
@@ -251,173 +177,211 @@ claude-config is in excellent shape with a fully operational SDD workflow and co
 | Config has `artifact_store.mode: openspec` | ✅ |
 | Config has project name and stack | ✅ |
 
-**CLAUDE.md mentions SDD:** ✅ (multiple references to /sdd-ff, /sdd-new, /sdd-apply, etc.)
+**CLAUDE.md mentions SDD:** ✅ (multiple /sdd-* references, full phase DAG diagram)
 
-**Orphaned changes:** none (0 active changes, 17 archived)
+**Orphaned changes:** None. `openspec/changes/` contains only `archive/` — all changes are completed.
+
+---
+
+## Dimension 4 — Skills Registry [OK]
+
+**4a. Registry vs disk (bidirectional):**
+
+| Metric | Count |
+|--------|-------|
+| Skills in CLAUDE.md registry | 44 |
+| Skills on disk (skills/) | 44 |
+| In registry but NOT on disk | 0 |
+| On disk but NOT in registry | 0 |
+
+Perfect bidirectional sync. No ghost entries, no undocumented skills.
+
+**4b. Minimum content:**
+
+- All 44 SKILL.md files: ✅ exist
+- All 44: ✅ have Triggers defined
+- All 44: ✅ have Rules section
+- 20/44 SDD/meta-tool skills: ✅ have explicit `## Process` / `### Step` sections
+- 24/44 tech/tool skills: ✅ use normalized format (`## When to Use`, `## Code Examples`, `## Rules`) — no `## Process` heading by design, acceptable per conventions
+
+**4c. Global tech skills coverage:**
+
+This IS the global catalog. All applicable global skills are by definition in the registry. Full credit: **10/10**.
 
 **Score: 20/20**
 
 ---
 
-## Dimension 4 — Skills [OK]
+## Dimension 6 — Cross-reference Integrity [OK]
 
-**Skills in registry but not on disk:** none
+All paths referenced in CLAUDE.md, ai-context/*.md, and openspec/config.yaml verified:
 
-**Skills on disk but not in registry:** none
+| Reference | Status |
+|-----------|--------|
+| install.sh | ✅ |
+| sync.sh | ✅ |
+| settings.json | ✅ |
+| hooks/smart-commit-context.js | ✅ |
+| openspec/config.yaml | ✅ |
+| All 5 ai-context/*.md files | ✅ |
+| analysis-report.md | ✅ |
+| All 44 skill paths in CLAUDE.md registry | ✅ |
 
-All 44 skills on disk are registered in CLAUDE.md. The registry accurately lists:
-- 3 SDD orchestrator skills (sdd-ff, sdd-new, sdd-status)
-- 8 SDD phase skills
-- 10 meta-tool skills (including memory-init, memory-update after the split)
-- 23 technology/tooling skills
-
-**Skills with insufficient content (<30 lines):** none (smallest is sdd-status at 103 lines)
-
-**D4c — Relevant global tech skills coverage:**
-No package.json or pyproject.toml exists — this is a Markdown/YAML/Bash meta-system. No relevant global tech skills apply. Full credit: 10/10.
-
-**Score: 20/20** (10 registry+content + 10 global skills coverage)
+No broken references. **Score: 5/5**
 
 ---
 
-## Dimension 6 — Cross-references [WARNING]
+## Dimension 7 — Architecture Compliance [WARNING]
 
-**Broken references:**
-| Source file | Reference | Problem |
-|-------------|-----------|---------|
-| ai-context/stack.md:32 | `memory-manager/` | Directory no longer exists — split into `memory-init/` + `memory-update/` |
-| ai-context/stack.md:49 | `memory-manager` in meta-tools list | Skill was split — stale reference |
-| ai-context/architecture.md:67 | `memory-manager` as producer | Should reference `memory-init / memory-update` |
-| ai-context/conventions.md:87 | `/sdd:ff`, `/sdd:apply` | Colon separator — should be hyphen |
-| ai-context/architecture.md:51 | `/sdd:ff`, `/sdd:apply` | Colon separator — should be hyphen |
-| ai-context/known-issues.md:95 | `/project:audit`, `/skill:test` | Colon separator — should be hyphen |
-| skills/sdd-archive/SKILL.md:179 | `/memory:update` | Colon separator — should be `/memory-update` |
-| skills/sdd-archive/SKILL.md:195 | `memory:update` | Colon separator — should be `memory-update` |
-| skills/sdd-archive/SKILL.md:49 | `/sdd:verify` | Colon separator — should be `/sdd-verify` |
-| skills/project-audit/SKILL.md:10,12 | `/project:fix`, `/project:audit` | Colon separator in triggers/description |
-| skills/project-fix/SKILL.md:184,466 | `/sdd:*` | Colon separator in SDD references |
-| skills/sdd-explore/SKILL.md:65 | `/sdd:explore` | Colon separator |
-| README.md:31 | `memory-manager/` | Stale directory reference |
-| README.md:76 | `memory-manager` | Stale skill reference |
-| README.md:73,192 | "9 dimensions" | Stale dimension count |
-| README.md:192 | `/project:audit` | Colon separator |
+**Input**: `analysis-report.md` present at project root. Last analyzed: 2026-02-28 (1 day old — within 7-day threshold, no staleness warning).
 
-**Score: 4/5** — Multiple stale references and colon separator inconsistencies found across ai-context/ files, skills, and README.md. None are critical (all commands still work due to skill routing), but they degrade documentation accuracy.
+| Condition | Points | Status |
+|-----------|--------|--------|
+| analysis-report.md present | — | ✅ |
+| ai-context/architecture.md present | — | ✅ |
+| Drift level: minor | 3/5 | ⚠️ |
+
+**Drift entries (from analysis-report.md):**
+
+| Item | Observation | Level |
+|------|-------------|-------|
+| `stack.md` references `openclaw-assistant` | No `skills/openclaw-assistant/` dir found | minor |
+| `stack.md` skill count ~35 | 43 skill directories observed (count stale) | minor |
+| `openspec/specs/` (7 subdirs) | Not mentioned in stack.md directory tree | minor |
+| `README.md` at root | Not mentioned in architecture.md | minor |
+| conventions.md uses `/sdd:ff` (colon) | Runtime uses `/sdd-ff` (hyphen) | minor |
+
+All drift is informational. No structural mismatches. **Score: 3/5**
+
+**FIX_MANIFEST note**: D7 violations go in `violations[]` only — /project-fix does not auto-fix architecture drift.
 
 ---
 
-## Dimension 7 — Architecture Compliance [OK]
+## Dimension 8 — Testing & Verification Integrity [OK]
 
-Analysis report found: YES
-Last analyzed: 2026-02-28 (0 days ago — current)
-Architecture drift status: minor
+**8a. openspec/config.yaml testing section:**
 
-Drift entries (from analysis-report.md):
-| Entry | Detail |
+| Check | Status |
 |-------|--------|
-| Skill count | Documented ~35-37, observed 43 (natural growth) |
-| openspec/specs/ | 7 subdirs exist but not in stack.md directory tree |
-| README.md | At root but not mentioned in documented structure |
-| Command separator | conventions.md uses `/sdd:ff` (colon) while runtime uses `/sdd-ff` (hyphen) |
+| `testing:` block present | ✅ |
+| `minimum_score_to_archive: 75` defined | ✅ |
+| `required_artifacts_per_change` defined | ✅ (proposal.md, tasks.md, verify-report.md) |
+| `verify_report_requirements` defined | ✅ |
+| `test_project` defined | ✅ (Audiio V3) |
 
-**Score: 5/5** — Drift is minor and informational. The analysis report is current (0 days old).
+**8b. Archived changes verify-reports:**
 
-Note: The analysis report correctly flagged drift items. The `openclaw-assistant` stale reference from the previous analysis has been fixed.
+| Metric | Result |
+|--------|--------|
+| Total archived changes | 18 |
+| With verify-report.md | 18/18 ✅ |
+| With at least one [x] item | 18/18 ✅ |
 
----
+All 18 archived changes fully compliant.
 
-## Dimension 8 — Testing & Verification [OK]
+**8c. Active changes:** None (openspec/changes/ contains only archive/).
 
-**openspec/config.yaml has testing block:** ✅
-- `strategy: "audit-as-integration-test"` defined
-- `minimum_score_to_archive: 75` defined
-- `required_artifacts_per_change` defined (proposal.md, tasks.md, verify-report.md)
-- `verify_report_requirements` defined (3 criteria)
-- `test_project` documented
-
-**Archived changes without verify-report.md:** none (all 17 have verify-report.md)
-
-**Archived changes with empty verify-report.md (without [x]):** none (all 17 have at least one [x])
-
-**Verify rules are executable:** ✅ — Rules reference `/project-audit`, concrete metrics (score >= previous), and specific artifact checks.
+**8d. Verify rules executability:** All 5 verify rules in config.yaml are concrete and measurable (metric-based or script-runnable). At least one mentions `/project-audit` with a score comparison criterion. ✅
 
 **Score: 5/5**
 
 ---
 
-## Dimension 9 — Project Skills Quality [OK]
+## Dimension 9 — Project Skills Quality [INFO]
 
-**Local skills directory**: skills — 44 skills found
+`LOCAL_SKILLS_DIR = "skills"` — directory exists, proceeding with D9-2 through D9-5.
 
-This is a global-config repo. All 44 subdirectories under `skills/` have matching counterparts in `~/.claude/skills/` because they are the same files deployed by `install.sh`. Disposition: `keep` for all — this is correct and expected (they are the source of truth, not duplicates).
+**D9-2. Duplicate detection:**
 
-| Check | Result |
-|-------|--------|
-| Duplicate detection | All 44 skills match global — expected for global-config source repo |
-| Structural completeness | All 44 SKILL.md files have >30 lines, all have process and rules sections |
-| Language compliance | All in English |
-| Stack relevance | N/A — technology skills are the global catalog, not project-specific |
+Global-config circular case applies: all 44 skills under `skills/` have counterparts in `~/.claude/skills/` because they ARE the source deployed by `install.sh`. Disposition: `keep` for all — correct and expected.
 
-**Skills with missing structural sections:** none
-**Language violations:** none
-**Stack relevance issues:** none
+**D9-3. Structural completeness:**
+
+All 44 skills have SKILL.md with Triggers and Rules. Tech skills use normalized structure (no `## Process` heading) — consistent with project conventions. No structural failures.
+
+**D9-4. Language compliance:**
+
+| Skill | Finding |
+|-------|---------|
+| pytest | ⚠️ Line 50: `# Teardown automático` — Spanish inline comment |
+| All other 43 skills | ✅ No non-English prose detected |
+
+**D9-5. Stack relevance:**
+
+All tech skills are documented in ai-context/stack.md as the global catalog offerings. Stack relevance passes for all skills.
 
 ---
 
-## Dimension 10 — Feature Docs Coverage [INFO — SKIPPED]
+## Dimension 10 — Feature Docs Coverage [OK]
 
-**Detection mode**: heuristic (feature_docs: key is commented out in config.yaml)
-**Features detected**: 0
+No `feature_docs:` key in openspec/config.yaml → heuristic detection.
 
-Heuristic detection found no feature directories — all skill directories under `skills/` are either SDD (`sdd-*`), meta-tool (`project-*`), memory (`memory-*`), or skill management (`skill-*`) prefixed, or are technology catalog skills. No `docs/features/`, `docs/modules/`, `src/features/`, `src/modules/`, or `app/` directories exist.
+**Heuristic Source 1** — non-SDD/meta skills in skills/:
+23 tech/tool skills detected as features.
 
-No feature directories detected — Dimension 10 skipped.
+| Feature | Doc found | Structure OK | Fresh | In Registry | Status |
+|---------|-----------|--------------|-------|-------------|--------|
+| ai-sdk-5 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| claude-code-expert | ✅ | ✅ | ✅ | ✅ | ✅ |
+| django-drf | ✅ | ✅ | ✅ | ✅ | ✅ |
+| electron | ✅ | ✅ | ✅ | ✅ | ✅ |
+| elixir-antipatterns | ✅ | ✅ | ✅ | ✅ | ✅ |
+| excel-expert | ✅ | ✅ | ✅ | ✅ | ✅ |
+| github-pr | ✅ | ✅ | ✅ | ✅ | ✅ |
+| hexagonal-architecture-java | ✅ | ✅ | ✅ | ✅ | ✅ |
+| image-ocr | ✅ | ✅ | ✅ | ✅ | ✅ |
+| java-21 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| jira-epic | ✅ | ✅ | ✅ | ✅ | ✅ |
+| jira-task | ✅ | ✅ | ✅ | ✅ | ✅ |
+| nextjs-15 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| playwright | ✅ | ✅ | ✅ | ✅ | ✅ |
+| pytest | ✅ | ✅ | ✅ | ✅ | ✅ |
+| react-19 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| react-native | ✅ | ✅ | ✅ | ✅ | ✅ |
+| smart-commit | ✅ | ✅ | ✅ | ✅ | ✅ |
+| spring-boot-3 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| tailwind-4 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| typescript | ✅ | ✅ | ✅ | ✅ | ✅ |
+| zod-4 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| zustand-5 | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+All 23 tech/tool skills pass all D10 checks. No D10 findings. Informational only — no score impact.
 
 ---
 
 ## Dimension 11 — Internal Coherence [INFO]
 
-**Skills scanned**: 44 from skills/
+**D11-a. Count Consistency:**
 
-**Notable findings:**
+| File | Claim | Actual | Result |
+|------|-------|--------|--------|
+| skills/project-audit/SKILL.md | "10 Dimensions" (line 42) | 10 `### Dimension N` headings | ✅ Match |
+| CLAUDE.md | No numeric heading claims | — | ✅ N/A |
 
-| File | Check | Finding |
-|------|-------|---------|
-| skills/project-audit/SKILL.md | D11-b Numbering | Dimension sections are ordered 1,2,3,4,6,8,7,9,10,11 — D8 appears before D7 (non-sequential) |
-| skills/project-audit/SKILL.md | D11-a Count | Heading says "10 Dimensions" — body has 10 dimension sections (1,2,3,4,6,7,8,9,10,11). Count matches but D5 is skipped. |
-| CLAUDE.md | D11-a Count | Line 102 says "9 dimensions" — actual dimension count in skill is 10. Stale claim. |
+**D11-b. Section Numbering Continuity:**
 
-**Inconsistencies found**: 2 across 2 files
+| File | Sequence | Numbers | Issue |
+|------|----------|---------|-------|
+| skills/project-audit/SKILL.md | Dimension N | 1,2,3,4,**—**,6,7,8,9,10,11 | ℹ️ Gap at 5 |
+| skills/sdd-ff/SKILL.md | Step N | 1,2,3,4,5 | ✅ |
+| skills/sdd-new/SKILL.md | Step N | 1,2,3,4,5,6 | ✅ |
+| skills/sdd-apply/SKILL.md | Step N | 1,2,3,4,5,6 | ✅ |
+| skills/sdd-archive/SKILL.md | Step N | 1,2,3,4,5,**5b**,6 | ℹ️ Sub-lettered 5b |
+| skills/memory-update/SKILL.md | Step N | 1,2,3,4,**4b**,5,6,7 | ℹ️ Sub-lettered 4b |
 
-*D11 findings are informational only — they do not affect the score and are not auto-fixed by /project-fix.*
+**D11-c. Frontmatter-Body Alignment:**
 
----
+No numeric claims in frontmatter `description` fields that could mismatch body content. All pass.
 
-## Required Actions
-
-### Critical (block SDD):
-none
-
-### High (degrade quality):
-none
-
-### Medium:
-1. Update `ai-context/stack.md` lines 32, 49 — replace `memory-manager` references with `memory-init` + `memory-update` after the skill split
-2. Update `ai-context/architecture.md` line 67 — replace `memory-manager` with `memory-init / memory-update` as producer
-3. Update `ai-context/architecture.md` line 51 — replace `/sdd:ff` and `/sdd:apply` with `/sdd-ff` and `/sdd-apply`
-4. Update `ai-context/conventions.md` line 87 — replace `/sdd:ff` and `/sdd:apply` with `/sdd-ff` and `/sdd-apply`
-5. Update `ai-context/known-issues.md` line 95 — replace `/project:audit` with `/project-audit` and `/skill:test` with `/skill-test`
-6. Update `CLAUDE.md` line 102 — change "9 dimensions" to correct count
-
-### Low (optional improvements):
-1. Update `skills/sdd-archive/SKILL.md` lines 49, 179, 195 — replace colon separators (`/memory:update`, `/sdd:verify`) with hyphen (`/memory-update`, `/sdd-verify`)
-2. Update `skills/project-audit/SKILL.md` lines 10, 12, 75, 153, 593, 609, 670 — replace colon separators with hyphens in trigger definitions and report templates
-3. Update `skills/project-fix/SKILL.md` lines 184, 466 — replace `/sdd:*` with `/sdd-*`
-4. Update `skills/sdd-explore/SKILL.md` line 65 — replace `/sdd:explore` with `/sdd-explore`
-5. Update `README.md` lines 31, 76 — replace `memory-manager` references with `memory-init` + `memory-update`
-6. Update `README.md` lines 73, 192 — change "9 dimensions" to correct count and fix `/project:audit` colon separator
+**All D11 findings are INFO severity — no score impact.**
 
 ---
 
-*To implement these corrections: run `/project-fix`*
-*This report was generated by `/project-audit` — do not modify the FIX_MANIFEST block manually*
+## Action Summary
+
+| Priority | ID | Action |
+|----------|----|--------|
+| MEDIUM | D1-hook-not-registered | Add `hooks` block to settings.json for smart-commit-context.js |
+| MEDIUM | D9-pytest | Fix Spanish comment line 50 in skills/pytest/SKILL.md |
+| LOW | D7-analysis-drift | Remove stale `openclaw-assistant` reference from ai-context/stack.md |
+| INFO | D11-numbering | Consider renumbering or noting Dimension 5 gap in project-audit SKILL.md |

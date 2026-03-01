@@ -39,6 +39,11 @@ SDD meta-cycle for this repo:
 /sdd-ff <change>  →  review  →  /sdd-apply  →  install.sh  →  git commit
 ```
 
+### Documentation Conventions
+
+- **ADRs (Architecture Decision Records)**: see `docs/adr/README.md` — naming, numbering, and status lifecycle for architectural decisions.
+- **PRDs (Product Requirements Documents)**: use template at `docs/templates/prd-template.md` — recommended for user-facing or product-level changes, created before `proposal.md`.
+
 ## Unbreakable Rules
 
 ### 1. Language

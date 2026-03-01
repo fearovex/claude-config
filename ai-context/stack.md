@@ -33,6 +33,10 @@ claude-config/
 │   ├── memory-update/     # Memory update (session decisions → ai-context/)
 │   ├── skill-creator/     # Skill creation tool
 │   └── [tech-skills]/     # Technology catalog (react-19, nextjs-15, etc.)
+├── docs/                  # Documentation artifacts
+│   ├── templates/         # prd-template.md, adr-template.md
+│   └── adr/               # Architecture Decision Records (Nygard format)
+│       └── README.md      # ADR index — must be kept current
 ├── memory/                # Claude auto-memory (per-project notes)
 ├── hooks/                 # Claude Code event hooks
 ├── openspec/              # SDD artifacts for this repo

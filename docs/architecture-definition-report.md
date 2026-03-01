@@ -1,3 +1,4 @@
+<!-- Note: "ADR" in this filename stands for "Architecture Definition Report", not "Architecture Decision Record". For architectural decision records, see docs/adr/. -->
 # Architecture Definition Report (ADR)
 # claude-config — SDD Meta-System
 

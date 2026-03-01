@@ -4,6 +4,45 @@
 
 ---
 
+### 2026-03-01 — audit-improvements archived
+
+**What was done**: SDD cycle for `audit-improvements` completed and archived. Delta specs merged into master specs for `audit-dimensions` and `audit-scoring`. Change folder moved to `openspec/changes/archive/2026-03-01-audit-improvements/`.
+**Modified files**:
+- `openspec/specs/audit-dimensions/spec.md` — ADDED sections for D2 placeholder detection, D3 hook script + conflict detection, D7 staleness penalty, D1 template path verification, D12 ADR Coverage, D13 Spec Coverage (7 requirements, 34 scenarios)
+- `openspec/specs/audit-scoring/spec.md` — ADDED sections for D7 staleness scoring, D12/D13 informational scoring, non-regression requirement; MODIFIED D7 from informational-only to score-impacting
+- `openspec/changes/archive/2026-03-01-audit-improvements/CLOSURE.md` — created
+**Decisions made**:
+- D12 and D13 are permanently registered in master specs as informational-only dimensions (N/A max points)
+- D7 staleness behavior change is a permanent spec modification — it now deducts points, not just warns
+**Notes**: All 18 tasks completed, 44 compliance scenarios verified. Live integration test on Audiio V3 recommended before next significant project-audit modification.
+
+---
+
+### 2026-03-01 — audit-improvements applied
+
+**Type**: Feature
+**Agent**: Claude Sonnet 4.6
+**Files modified**:
+- `skills/project-audit/SKILL.md` — extended with 7 new checks across 5 dimensions and 2 new informational dimensions
+
+**Summary of checks added**:
+- **D1 (CLAUDE.md Quality)**: Template path verification — reads `Documentation Conventions` section of CLAUDE.md, extracts `docs/templates/*.md` paths, and emits a MEDIUM finding per missing file on disk
+- **D2 (Memory Layer)**: Placeholder phrase detection — scans each `ai-context/*.md` file for unfilled placeholder phrases (`[To be filled]`, `TODO`, `[empty]`, `[TBD]`, `[placeholder]`, `[To confirm]`, `[Empty]`); treats files with placeholders as functionally empty (HIGH finding). Also adds version count check: emits MEDIUM finding if `stack.md` contains fewer than 3 versioned technology lines
+- **D3 (SDD Compliance)**: Hook script existence verification (sub-check 3e) — extracts all hook script paths from `settings.json`/`settings.local.json` and emits HIGH finding per missing script on disk. Active changes file conflict detection (sub-check 3f) — extracts File Change Matrix from each active `design.md`, computes path intersection across changes, emits MEDIUM finding per overlapping file path
+- **D7 (Architecture)**: Staleness score penalty tiers — if `analysis-report.md` is 31–60 days old, deducts 1 point from D7 score (floor 0); if older than 60 days, deducts 2 points (floor 0); no penalty when file is absent or 30 days old or fresher
+- **D12 (ADR Coverage)** — new informational dimension: checks `docs/adr/README.md` existence, scans each `docs/adr/NNN-*.md` for a `## Status` section; HIGH finding for missing README, MEDIUM per ADR missing Status; informational only — no score impact
+- **D13 (Spec Coverage)** — new informational dimension: activated when `openspec/specs/` is non-empty; checks each domain directory for a `spec.md`, scans referenced paths for existence; MEDIUM per missing `spec.md`, INFO for stale path references; informational only — no score impact
+
+**Decisions made**:
+- All new checks are conditional — projects without the relevant artifacts receive N/A or a skip message, never a penalty
+- D7 staleness penalty stacks with the drift penalty; combined floor is 0
+- D12 and D13 are informational (N/A in Max Points column); HIGH/MEDIUM findings ARE placed in `required_actions` and are actionable by `/project-fix`, but do not reduce the base 100-point score
+- D3 conflict detection normalizes paths with `lowercase + strip leading ./` before computing intersection
+
+**Change**: audit-improvements | SDD cycle complete
+
+---
+
 ### 2026-03-01 — sdd-cycle-prd-adr-integration archived
 
 **What was done**: Integrated PRD and ADR as optional auto-generated artifacts into the SDD cycle. `sdd-propose` now auto-creates a `prd.md` shell (idempotent, skips if template absent or file already exists). `sdd-design` now auto-creates an ADR file in `docs/adr/` when a keyword-significant architectural decision is detected in the Technical Decisions table (non-blocking, skips if template or README absent). Both `openspec/config.yaml` and `CLAUDE.md` were updated to document these as optional artifacts.

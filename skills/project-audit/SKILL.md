@@ -77,6 +77,18 @@ If detected as global-config:
 
 **For the stack**: I read `package.json` (or equivalent), extract the 5-10 most important dependencies, and compare with what is declared in CLAUDE.md. I report specific discrepancies with declared version vs real version.
 
+**Template path verification (D1 additive check):**
+
+1. Read CLAUDE.md and locate the `## Documentation Conventions` section (or equivalent section referencing `docs/templates/`).
+2. Extract all paths matching the pattern `docs/templates/*.md` from that section.
+3. For each extracted path, check whether the file exists on disk at `[project_root]/[path]`.
+4. Skip this check entirely if no `docs/templates/*.md` pattern is found in CLAUDE.md — no finding is emitted.
+
+**Scoring rule:**
+- For each missing template path: emit a MEDIUM finding — "Template path referenced in CLAUDE.md does not exist on disk: [path]"
+- Add each missing path to `required_actions.medium` in the FIX_MANIFEST with `type: create_file`, `target: [path]`, `reason: "Template path referenced in CLAUDE.md does not exist on disk"`
+- One finding per missing path (multiple missing paths produce multiple separate findings)
+
 ---
 
 ### Dimension 2 — Memory (ai-context/)
@@ -102,6 +114,29 @@ If detected as global-config:
 - **changelog-ai.md**: Does it have at least one entry with a date? I verify the format `## YYYY-MM-DD`.
 
 **Note on location**: The path can be `ai-context/` (without docs/) or `docs/ai-context/`. I check both.
+
+**Placeholder phrase detection (D2 additive check):**
+
+While reading each `ai-context/*.md` file (already read for line-count and content checks), scan the full file content for the following placeholder phrases:
+- `[To be filled]`, `[empty]`, `[TBD]`, `[placeholder]`, `[To confirm]`, `[Empty]` — case-insensitive match on bracket-enclosed variants (e.g., `[todo]` and `[TODO]` both match)
+- `TODO` — plain text, case-sensitive (exact uppercase match)
+
+**Scoring rule — placeholder detection:**
+- For each `ai-context/*.md` file whose content contains one or more of the above phrases: emit a HIGH finding — "[filename] appears to contain unfilled placeholder content"
+- Treat such a file as functionally empty even if it passes the line-count check (do not award content/coherence points for that file)
+- Add the finding to `required_actions.high` in the FIX_MANIFEST with `type: update_file`, `target: [ai-context/filename]`, `reason: "File contains placeholder content and has not been filled in"`
+
+**stack.md technology version count (D2 additive check):**
+
+After reading `ai-context/stack.md` (already read for content checks), count the number of lines that contain a version-like string matching any of these patterns:
+- `x.y` (e.g., `3.4`, `19.0`)
+- `x.y.z` (e.g., `19.0.0`, `5.4.2`)
+- `vX` where X is a digit (e.g., `v3`, `v21`)
+
+**Scoring rule — version count:**
+- If the count is fewer than 3: emit a MEDIUM finding — "stack.md lists fewer than 3 technologies with concrete versions — minimum is 3"
+- Add to `required_actions.medium` in the FIX_MANIFEST with `type: update_file`, `target: ai-context/stack.md`, `reason: "stack.md lists fewer than 3 technologies with concrete versions — minimum is 3"`
+- Skip this check if `stack.md` does not exist or contains placeholder content (already caught by the placeholder check above)
 
 **Additional sub-checks — User documentation freshness:**
 
@@ -161,6 +196,36 @@ I list:
 Orphaned changes detected:
   - change-name: last completed phase "tasks" (X days inactive)
 ```
+
+#### 3e. Hook script existence (D3 additive check)
+
+1. If `ROOT_SETTINGS_JSON_EXISTS=1`, read `settings.json` at project root.
+2. If `DOTCLAUDE_SETTINGS_JSON_EXISTS=1`, read `.claude/settings.json`.
+3. If `SETTINGS_LOCAL_JSON_EXISTS=1`, read `settings.local.json` at project root.
+4. For each file read above, locate the `hooks` key in the JSON content and extract all script path values (strings inside hook event arrays or as direct values within the `hooks` object).
+5. For each extracted script path, check whether the file exists on disk at `[project_root]/[path]`.
+6. Skip this entire check (emit no finding) when no file that was read contains a `hooks` key.
+
+**Scoring rule — hook script existence:**
+- For each script path that does NOT exist on disk: emit a HIGH finding — "Hook script referenced in [filename] not found on disk: [path]"
+- Add each missing script to `required_actions.high` in the FIX_MANIFEST with `type: create_file`, `target: [path]`, `reason: "Hook script referenced in [filename] not found on disk"`
+- Emit no finding when no `hooks` key is present in any settings file
+
+#### 3f. Active changes conflict detection (D3 additive check)
+
+1. List all directories in `openspec/changes/` that are NOT under `openspec/changes/archive/` — these are active (non-archived) changes.
+2. For each active change directory that contains a `design.md`: read the `design.md` and locate the `## File Change Matrix` section (or equivalent table with a `File` column).
+3. Extract all file paths from the `File` column of that table.
+4. Normalize each extracted path: convert to lowercase and strip any leading `./` prefix.
+5. Skip this entire step (emit no finding) if fewer than two active changes have a `design.md`.
+
+**Scoring rule — conflict detection:**
+- Compute the set intersection of normalized file paths across all active changes that have a `design.md`.
+- For each file path that appears in two or more active changes: emit a MEDIUM finding — "Concurrent file modification conflict detected: [path] is targeted by both [change-A] and [change-B]"
+- Add each conflicting path to `violations[]` in the FIX_MANIFEST (NOT to `required_actions`) with `rule: "D3-active-changes-conflict"`, `severity: "medium"`, and `file: [path]`
+- If no overlapping paths exist after intersection, emit no finding
+
+**Limitation note**: path normalization only handles `lowercase + strip leading ./`. Other format inconsistencies (e.g., absolute vs relative paths, different separators) are not caught.
 
 ---
 
@@ -282,10 +347,27 @@ I read the `rules.verify` block of `openspec/config.yaml` and evaluate:
 | Drift summary = `minor` | 3/5 | MEDIUM | List drift entries from `analysis-report.md` |
 | Drift summary = `significant` | 0/5 | HIGH | List drift entries from `analysis-report.md` |
 
-**Staleness check** (no score deduction):
-- Read the `Last analyzed:` date from `analysis-report.md`
-- If the date is more than 7 days before the current audit date → emit a warning: "analysis-report.md is [N] days old — consider re-running /project-analyze for up-to-date results."
-- The score is still computed from the existing report regardless of staleness.
+**Staleness penalty (D7 additive scoring modifier):**
+
+After computing the drift-based D7 score (using the scoring table above), apply the staleness penalty as follows:
+
+1. This penalty applies ONLY when `ANALYSIS_REPORT_EXISTS=1` (i.e., the file exists). When the file is absent, D7 is already 0/5 — no further deduction.
+2. Parse `ANALYSIS_REPORT_DATE` from Phase A. Compute the age in days: `current_audit_date − ANALYSIS_REPORT_DATE`.
+3. Apply the deduction:
+   - Age ≤ 30 days → no penalty; no staleness finding emitted
+   - Age 31–60 days → deduct 1 point from the drift-based score (floor: 0); emit a staleness warning: "analysis-report.md is [N] days old (> 30 days) — staleness penalty applied"
+   - Age > 60 days → deduct 2 points from the drift-based score (floor: 0); emit a staleness warning: "analysis-report.md is [N] days old (> 60 days) — staleness penalty applied"
+4. The staleness penalty stacks with the drift penalty: a `minor` drift score of 3/5 with a 40-day-old report becomes 2/5. The combined score floor is 0 — never negative.
+
+**Staleness scoring tiers:**
+
+| Age of analysis-report.md | Staleness deduction |
+|---------------------------|---------------------|
+| ≤ 30 days | None |
+| 31–60 days | −1 pt (floor: 0) |
+| > 60 days | −2 pts (floor: 0) |
+
+*Staleness penalty stacks with drift penalty; floor is 0.*
 
 **Drift entries**: When drift summary is `minor` or `significant`, read the `## Architecture Drift` section of `analysis-report.md` and list each entry in the D7 output block.
 
@@ -503,6 +585,67 @@ For each pattern:
 
 ---
 
+### Dimension 12 — ADR Coverage
+
+**Objective**: Audit the health and completeness of the ADR (Architecture Decision Record) system when the project references `docs/adr/`. Informational only — no impact on the 100-point score.
+
+**Activation condition**: Read CLAUDE.md (or `.claude/CLAUDE.md`). Check whether the string `docs/adr/` appears anywhere in the content.
+
+- If `docs/adr/` is NOT found in CLAUDE.md → emit INFO: "ADR Coverage check skipped — docs/adr/ not referenced in CLAUDE.md" and skip all sub-checks below. No findings are added to the FIX_MANIFEST.
+- If `docs/adr/` IS found in CLAUDE.md → proceed with the following checks.
+
+**D12-1. README existence check:**
+
+- Use `ADR_README_EXISTS` from Phase A output.
+- If `ADR_README_EXISTS=0`: emit a HIGH finding — "CLAUDE.md references docs/adr/ but docs/adr/README.md is missing"
+- Add to `required_actions.high` in the FIX_MANIFEST with `type: create_file`, `target: docs/adr/README.md`, `reason: "CLAUDE.md references docs/adr/ but docs/adr/README.md is missing"`
+
+**D12-2. Per-ADR Status field scan:**
+
+1. Use Glob to list all files matching `docs/adr/NNN-*.md` (where NNN is a 3-digit prefix, e.g., `001-`, `002-`).
+2. If no ADR files are found (only README.md or directory empty): emit INFO — "docs/adr/ contains no ADR files yet". No score impact.
+3. For each matched ADR file:
+   - Read the file content.
+   - Search for a `## Status` section (line starting with `## Status`) OR a frontmatter `status:` field.
+   - If neither is found: emit a MEDIUM finding — "ADR file [filename] is missing a valid status field"
+   - Add to `required_actions.medium` in the FIX_MANIFEST with `type: update_file`, `target: [docs/adr/filename]`, `reason: "ADR file is missing a valid status field"`
+   - Valid status values: `accepted`, `deprecated`, `superseded`. If a status field IS found, record its value for the output table; do not validate the value (custom statuses are allowed).
+
+**FIX_MANIFEST rule**: D12 HIGH findings go in `required_actions.high` (actionable by /project-fix). D12 MEDIUM findings go in `required_actions.medium`. D12 INFO findings go in `violations[]` with severity `info`. D12 does NOT reduce the base 100-point score.
+
+---
+
+### Dimension 13 — Spec Coverage
+
+**Objective**: Audit the health of the openspec/specs/ layer — verify that each domain directory has a spec.md and that path references within spec files still exist on disk. Informational only — no impact on the 100-point score.
+
+**Activation condition**: `OPENSPEC_SPECS_EXISTS=1` (from Phase A) AND the `openspec/specs/` directory is non-empty (contains at least one subdirectory).
+
+- If `OPENSPEC_SPECS_EXISTS=0` OR `openspec/specs/` is empty → emit INFO: "Spec Coverage check skipped — openspec/specs/ not found or empty" and skip all sub-checks. No findings are added to the FIX_MANIFEST.
+- If condition is met → proceed with the following checks.
+
+**D13-1. Per-domain spec.md existence check:**
+
+1. Use Glob or directory listing to identify all subdirectories of `openspec/specs/` — each represents a domain.
+2. For each domain directory:
+   - Check whether `openspec/specs/[domain]/spec.md` exists.
+   - If `spec.md` is missing: emit a MEDIUM finding — "Domain directory openspec/specs/[domain]/ exists but contains no spec.md file"
+   - Add to `required_actions.medium` in the FIX_MANIFEST with `type: create_file`, `target: openspec/specs/[domain]/spec.md`, `reason: "Domain directory exists but contains no spec.md file"`
+
+**D13-2. Per-spec path reference scan:**
+
+1. For each `spec.md` that exists (found in D13-1):
+   - Read the file content.
+   - Extract all path-like references: strings that look like file paths (contain `/` and no spaces, not inside URLs, not in fenced code block headers). Look for patterns like `src/[path]`, `lib/[path]`, `[dir]/[file].[ext]`.
+   - For each extracted path, check whether the file or directory exists at `[project_root]/[path]`.
+   - If a referenced path does NOT exist: emit an INFO finding — "Spec openspec/specs/[domain]/spec.md references a path that no longer exists: [path]"
+   - Add to `violations[]` in the FIX_MANIFEST with `rule: "D13-stale-path-reference"`, `severity: "info"`, `file: openspec/specs/[domain]/spec.md`
+2. INFO findings for stale paths are NOT added to `required_actions` — they are advisory only.
+
+**FIX_MANIFEST rule**: D13 MEDIUM findings (missing spec.md) go in `required_actions.medium` (actionable by /project-fix). D13 INFO findings (stale path references) go in `violations[]` only. D13 does NOT reduce the base 100-point score.
+
+---
+
 ## Report Format
 
 The report is saved in `.claude/audit-report.md` with this exact structure:
@@ -587,6 +730,8 @@ skill_quality_actions:
 | Project Skills Quality | N/A | N/A | ✅/ℹ️/— |
 | Feature Docs Coverage | N/A | N/A | ✅/ℹ️/— |
 | Internal Coherence | N/A | N/A | ✅/ℹ️/— |
+| ADR Coverage | N/A | N/A | ✅/ℹ️/— |
+| Spec Coverage | N/A | N/A | ✅/ℹ️/— |
 | **TOTAL** | **[X]** | **100** | |
 
 **SDD Readiness**: [FULL / PARTIAL / NOT CONFIGURED]
@@ -611,6 +756,13 @@ skill_quality_actions:
 **Stack Discrepancies:**
 [List each discrepancy: "Declares React 18, actual ^19.0.0"]
 
+**Template path verification:**
+| Template path | Exists |
+|--------------|--------|
+| docs/templates/prd-template.md | ✅/❌ |
+| docs/templates/adr-template.md | ✅/❌ |
+[or: "No docs/templates/*.md paths found in CLAUDE.md — check skipped"]
+
 ---
 
 ## Dimension 2 — Memory [OK|WARNING|CRITICAL]
@@ -625,6 +777,14 @@ skill_quality_actions:
 
 **Coherence issues detected:**
 [List specific issues with file + what is outdated]
+
+**Placeholder phrase detection:**
+| File | Phrase found | Severity |
+|------|-------------|----------|
+| stack.md | "[To be filled]" | ⚠️ HIGH |
+[or: "No placeholder phrases detected"]
+
+**stack.md technology count**: [N] version entries detected (minimum: 3) — ✅/⚠️
 
 ---
 
@@ -652,6 +812,19 @@ skill_quality_actions:
 **CLAUDE.md mentions SDD:** ✅/❌
 
 **Orphaned changes:** [none | list]
+
+**Hook script existence:**
+| Hook event | Script path | Exists |
+|-----------|-------------|--------|
+| [event] | [path] | ✅/❌ |
+[or: "No hooks key found in settings files — check skipped"]
+
+**Active changes — file conflict detection:**
+| File | Change A | Change B |
+|------|----------|----------|
+| [path] | [change-name] | [change-name] |
+[or: "No conflicts detected"]
+[or: "Fewer than two active changes have design.md — check skipped"]
 
 ---
 
@@ -683,7 +856,9 @@ skill_quality_actions:
 ## Dimension 7 — Architecture Compliance [OK|WARNING|CRITICAL]
 Analysis report found: YES/NO
 Last analyzed: [date or N/A]
+Report age: [N days | N/A]
 Architecture drift status: [none|minor|significant|N/A]
+Staleness penalty: [none | −1 pt (report is [N] days old, > 30 days) | −2 pts (report is [N] days old, > 60 days)]
 
 Drift entries: (when drift is present)
 | File/Pattern | Expected | Found |
@@ -754,6 +929,36 @@ Drift entries: (when drift is present)
 
 ---
 
+## Dimension 12 — ADR Coverage [OK|INFO|SKIPPED]
+
+**Condition**: CLAUDE.md references docs/adr/ — YES/NO
+**ADR README exists**: ✅/❌
+**ADRs scanned**: [N]
+
+| ADR | Status field found | Status value | Finding |
+|-----|-------------------|--------------|---------|
+| [001-example.md] | ✅/❌ | [accepted/deprecated/superseded/—] | clean/Missing ## Status section |
+[or: "ADR Coverage check skipped — docs/adr/ not referenced in CLAUDE.md"]
+[or: "docs/adr/ contains no ADR files yet"]
+
+*D12 findings are informational only — no score impact.*
+
+---
+
+## Dimension 13 — Spec Coverage [OK|INFO|SKIPPED]
+
+**Condition**: openspec/specs/ exists and is non-empty — YES/NO
+**Domains detected**: [list of domain names]
+
+| Domain | spec.md found | Stale paths | Status |
+|--------|---------------|-------------|--------|
+| [name] | ✅/❌ | [N] | ✅/⚠️/❌ |
+[or: "Spec Coverage check skipped — openspec/specs/ not found or empty"]
+
+*D13 findings are informational only — no score impact.*
+
+---
+
 ## Required Actions
 
 ### Critical (block SDD):
@@ -791,6 +996,8 @@ Drift entries: (when drift is present)
 | **Project Skills Quality** | Informational only — no score deduction in iteration 1. Flags duplicates, structural gaps, language violations, stack relevance issues. | N/A |
 | **Feature Docs Coverage** | Informational only — no score deduction. Detects feature/skill documentation gaps. | N/A |
 | **Internal Coherence** | Informational only — no score deduction. Validates count claims, section numbering, and frontmatter consistency within individual skill files. | N/A |
+| **ADR Coverage** | Informational only — no score deduction. Activated when CLAUDE.md references docs/adr/. Verifies README.md exists and each ADR file has a status field. HIGH/MEDIUM findings are actionable by /project-fix. | N/A |
+| **Spec Coverage** | Informational only — no score deduction. Activated when openspec/specs/ exists and is non-empty. Verifies spec.md exists per domain and spec path references are valid on disk. MEDIUM findings are actionable by /project-fix. | N/A |
 
 **Interpretation:**
 - 90-100: SDD fully operational, excellent maintenance
@@ -868,6 +1075,12 @@ Drift entries: (when drift is present)
    echo "FEATURE_DOCS_CONFIG_EXISTS=$(grep -l "feature_docs:" "$PROJECT/openspec/config.yaml" 2>/dev/null | wc -l | tr -d ' ')"
    echo "ANALYSIS_REPORT_EXISTS=$(f analysis-report.md)"
    echo "ANALYSIS_REPORT_DATE=$(head -5 "$PROJECT/analysis-report.md" 2>/dev/null | grep 'Last analyzed:' | awk '{print $3}' || echo '')"
+   echo "ROOT_SETTINGS_JSON_EXISTS=$(f settings.json)"
+   echo "DOTCLAUDE_SETTINGS_JSON_EXISTS=$(f .claude/settings.json)"
+   echo "SETTINGS_LOCAL_JSON_EXISTS=$(f settings.local.json)"
+   echo "ADR_DIR_EXISTS=$(d docs/adr)"
+   echo "ADR_README_EXISTS=$(f docs/adr/README.md)"
+   echo "OPENSPEC_SPECS_EXISTS=$(d openspec/specs)"
    ```
 
    **Output key schema** (each key is a `key=value` line in stdout):
@@ -891,6 +1104,12 @@ Drift entries: (when drift is present)
    - `FEATURE_DOCS_CONFIG_EXISTS` — 1 if `openspec/config.yaml` contains a `feature_docs:` key, 0 if absent or config not found
    - `ANALYSIS_REPORT_EXISTS` — 1 if `analysis-report.md` exists at project root, 0 if absent
    - `ANALYSIS_REPORT_DATE` — ISO date string from the `Last analyzed:` field of `analysis-report.md`, or empty string if absent
+   - `ROOT_SETTINGS_JSON_EXISTS` — 1 if `settings.json` exists at project root, 0 if absent
+   - `DOTCLAUDE_SETTINGS_JSON_EXISTS` — 1 if `.claude/settings.json` exists, 0 if absent
+   - `SETTINGS_LOCAL_JSON_EXISTS` — 1 if `settings.local.json` exists at project root, 0 if absent
+   - `ADR_DIR_EXISTS` — 1 if `docs/adr/` directory exists, 0 if absent
+   - `ADR_README_EXISTS` — 1 if `docs/adr/README.md` exists, 0 if absent
+   - `OPENSPEC_SPECS_EXISTS` — 1 if `openspec/specs/` directory exists, 0 if absent
 
    **Legacy commands/ detection (Phase A post-script check):**
 

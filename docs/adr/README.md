@@ -57,3 +57,4 @@ ADR files are append-only by convention: once accepted, the original Context, De
 | [003](003-orchestrator-delegates-everything.md) | Orchestrator (CLAUDE.md) never executes work inline | Accepted (retroactive) |
 | [004](004-install-sh-repo-authoritative.md) | install.sh is the single authoritative deploy direction | Accepted (retroactive) |
 | [005](005-skill-md-entry-point-convention.md) | SKILL.md is the mandatory, uniquely-named entry point for every skill directory | Accepted (retroactive) |
+| [006](006-audit-improvements-convention.md) | New audit dimensions default to informational-only until explicitly promoted to scored | Proposed |

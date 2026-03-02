@@ -37,11 +37,38 @@ skills/
     └── SKILL.md       # Instructions Claude reads and executes
 ```
 
-A SKILL.md must contain:
+A SKILL.md must contain (authoritative contract: `docs/format-types.md`):
 - **Trigger definition** — when to use this skill
-- **Process** — step-by-step instructions Claude follows
+- **Format-specific main section** — depends on the `format:` frontmatter field:
+  - `procedural` (default): `## Process` — step-by-step instructions
+  - `reference`: `## Patterns` or `## Examples` — technology patterns and code examples
+  - `anti-pattern`: `## Anti-patterns` — catalog of bad practices with fixes
 - **Rules** — constraints and invariants
-- **Output format** — what the skill produces
+
+### Skill format type system
+
+Every `SKILL.md` declares its structural type via the `format:` YAML frontmatter field:
+
+```yaml
+---
+name: react-19
+description: >
+  React 19 patterns with React Compiler...
+format: reference   # valid values: procedural | reference | anti-pattern
+---
+```
+
+| `format:` value | Required main section | Used for |
+|-----------------|----------------------|---------|
+| `procedural` (default when absent) | `## Process` | SDD phases, meta-tools, orchestrators |
+| `reference` | `## Patterns` or `## Examples` | Technology and library skills |
+| `anti-pattern` | `## Anti-patterns` | Anti-pattern catalog skills |
+
+- Absent `format:` defaults to `procedural` (backwards-compatible).
+- Unrecognized values default to `procedural` with an INFO audit finding.
+- `project-audit` D4b and D9-3 validate structural compliance per declared format.
+- `project-fix` Phase 5.3 generates format-correct stub sections.
+- `skill-creator` Step 1b prompts for format and generates the matching skeleton.
 
 ## SDD meta-cycle (applied to this repo itself)
 

@@ -3,6 +3,7 @@ name: sdd-explore
 description: >
   Investigates and analyzes an idea or codebase area before committing to changes. Pure research, no writes.
   Trigger: /sdd-explore <topic>, explore, investigate codebase, research feature, analyze before changing.
+format: procedural
 ---
 
 # sdd-explore

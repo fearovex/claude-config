@@ -29,7 +29,29 @@ No exceptions. Spanish or any other language is a violation.
 
 ## SKILL.md structure
 
-Every SKILL.md must have these sections in order:
+Every SKILL.md must declare a `format:` field in its YAML frontmatter and satisfy the section
+contract for that format. See `docs/format-types.md` for the full authoritative contract.
+
+```yaml
+---
+name: skill-name
+description: >
+  One-line description.
+format: procedural   # valid values: procedural | reference | anti-pattern
+---
+```
+
+**Format-to-required-section mapping:**
+
+| `format:` value | Required main section | `## Process` required? |
+|-----------------|----------------------|------------------------|
+| `procedural` (or absent) | `## Process` or `### Step N` | Yes |
+| `reference` | `## Patterns` or `## Examples` | No |
+| `anti-pattern` | `## Anti-patterns` | No |
+
+All formats always require `**Triggers**` and `## Rules`.
+
+**General structure (procedural example):**
 
 ```markdown
 # skill-name
@@ -40,13 +62,35 @@ Every SKILL.md must have these sections in order:
 
 ---
 
-## [Main process sections]
-[Step-by-step instructions]
+## Process
+
+### Step 1 — [step name]
+[Instructions]
 
 ---
 
 ## Rules
 [Constraints and invariants — always at the end]
+```
+
+**Reference skill example (no ## Process):**
+
+```markdown
+# react-19
+
+> React 19 patterns with React Compiler.
+
+**Triggers**: React, react-19, hooks
+
+---
+
+## Patterns
+
+### Pattern 1: Server Components
+[explanation + code]
+
+## Rules
+[constraints]
 ```
 
 ### Orchestrator skills

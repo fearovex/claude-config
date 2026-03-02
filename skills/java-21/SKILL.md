@@ -7,6 +7,7 @@ license: Apache-2.0
 metadata:
   author: diegnghrmr
   version: "1.0"
+format: reference
 ---
 
 ## When to Use

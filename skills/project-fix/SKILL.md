@@ -3,6 +3,7 @@ name: project-fix
 description: >
   Implements the corrections found by /project-audit. Reads audit-report.md as spec and executes each required action.
   Trigger: /project-fix, apply audit corrections, fix claude project.
+format: procedural
 ---
 
 # project-fix

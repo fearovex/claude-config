@@ -3,6 +3,7 @@ name: memory-init
 description: >
   Generates the 5 ai-context/ memory files from scratch by reading the current project.
   Trigger: /memory-init, initialize memory, generate ai-context.
+format: procedural
 ---
 
 # memory-init

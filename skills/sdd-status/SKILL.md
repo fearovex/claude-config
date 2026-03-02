@@ -3,6 +3,7 @@ name: sdd-status
 description: >
   Shows the status of all active SDD changes by inspecting openspec/changes/ on disk.
   Trigger: /sdd-status, show active changes, what changes are in progress, SDD status.
+format: procedural
 ---
 
 # sdd-status

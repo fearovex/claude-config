@@ -7,6 +7,7 @@ license: Apache-2.0
 metadata:
   author: gentleman-programming
   version: "1.0"
+format: reference
 ---
 
 **Triggers**: When building REST APIs with Django - ViewSets, Serializers, Filters.

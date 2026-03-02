@@ -3,6 +3,7 @@ name: project-onboard
 description: >
   Diagnoses the current project state and recommends the exact command sequence for one of 6 onboarding cases.
   Trigger: /project-onboard, what do I run first, project setup help, diagnose project state.
+format: procedural
 ---
 
 # project-onboard

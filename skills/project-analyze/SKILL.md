@@ -5,6 +5,7 @@ description: >
   Produces analysis-report.md at project root and updates ai-context/ [auto-updated] sections.
   Trigger: /project-analyze, analyze project, project analysis, understand project codebase.
   Also invoked by: project-audit Phase A extension (internal).
+format: procedural
 ---
 
 # project-analyze

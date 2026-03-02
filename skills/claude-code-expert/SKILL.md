@@ -3,6 +3,7 @@ name: claude-code-expert
 description: >
   Expert in Claude Code configuration, custom skills, hooks, MCP servers, and advanced workflows.
   Trigger: CLAUDE.md configuration, custom skills, hooks, MCP servers, Claude Code best practices.
+format: reference
 ---
 
 # Claude Code Expert

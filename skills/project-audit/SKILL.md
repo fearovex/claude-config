@@ -3,6 +3,7 @@ name: project-audit
 description: >
   Deep diagnostic of Claude/SDD configuration. Read-only. Produces audit-report.md consumed by /project-fix.
   Trigger: /project-audit, audit project, review claude config, project health check.
+format: procedural
 ---
 
 # project-audit

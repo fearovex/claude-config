@@ -3,6 +3,7 @@ name: sdd-ff
 description: >
   Fast-forward SDD cycle: runs propose → spec+design (parallel) → tasks automatically, then asks before apply.
   Trigger: /sdd-ff <change-name>, quick SDD cycle, fast-forward, skip explore phase.
+format: procedural
 ---
 
 # sdd-ff

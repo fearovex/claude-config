@@ -3,6 +3,7 @@ name: project-setup
 description: >
   Deploys the complete SDD architecture with hybrid memory layer (ai-context/) in the current project.
   Trigger: /project-setup, initialize new project, setup SDD, configure claude project.
+format: procedural
 ---
 
 # project-setup

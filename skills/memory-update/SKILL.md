@@ -3,6 +3,7 @@ name: memory-update
 description: >
   Updates ai-context/ memory files with the work done in the current session.
   Trigger: /memory-update, update memory, sync memory, record session.
+format: procedural
 ---
 
 # memory-update

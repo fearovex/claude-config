@@ -4,6 +4,27 @@
 
 ---
 
+## 2026-03-01 — skill-format-types applied
+
+**Change**: Formalized multiple SKILL.md format types to eliminate false-positive audit findings.
+**Problem solved**: 19 of 44 skills (all reference/technology skills) were incorrectly flagged by D4/D9 for missing `## Process` — a section they intentionally do not have.
+**Files created**:
+- `docs/format-types.md` — canonical contract document for 3 format types
+**Files modified**:
+- `CLAUDE.md` — Rule 2 updated to reference `docs/format-types.md` and the format system
+- `skills/project-audit/SKILL.md` — D4b and D9-3 now parse `format:` frontmatter before structural validation
+- `skills/project-fix/SKILL.md` — Phase 5.3 generates format-correct stub sections
+- `skills/skill-creator/SKILL.md` — Step 1b added: format-selection before skeleton generation
+- `ai-context/architecture.md` — Skill format type system documented
+- `ai-context/conventions.md` — SKILL.md structure convention updated with format mapping
+**Key decisions**:
+- `format:` absent defaults to `procedural` (backwards-compatible — no existing skills break)
+- 3 valid values: `procedural` | `reference` | `anti-pattern`
+- Migration of 44 existing skills to add `format:` declarations is a separate downstream change
+- ADR 007 generated: `docs/adr/007-skill-format-types-convention.md`
+
+---
+
 ## 2026-03-01 — project-fix executed
 
 **Score before**: 93/100

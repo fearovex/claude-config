@@ -1,6 +1,8 @@
 # Skills communicate via file artifacts, not conversation context
 
-**Status:** Accepted (retroactive)
+## Status
+
+Accepted (retroactive)
 
 > This decision predates the ADR system and is recorded retroactively.
 

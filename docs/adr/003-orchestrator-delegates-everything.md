@@ -1,6 +1,8 @@
 # Orchestrator (CLAUDE.md) never executes work inline
 
-**Status:** Accepted (retroactive)
+## Status
+
+Accepted (retroactive)
 
 > This decision predates the ADR system and is recorded retroactively.
 

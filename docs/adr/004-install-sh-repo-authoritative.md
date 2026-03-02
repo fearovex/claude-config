@@ -1,6 +1,8 @@
 # install.sh is the single authoritative deploy direction
 
-**Status:** Accepted (retroactive)
+## Status
+
+Accepted (retroactive)
 
 > This decision predates the ADR system and is recorded retroactively.
 

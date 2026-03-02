@@ -52,7 +52,11 @@ SDD meta-cycle for this repo:
 
 ### 2. Skill structure
 - Every skill is a directory with exactly one SKILL.md entry point
-- SKILL.md must have: trigger definition, process steps, rules section
+- SKILL.md must declare a `format:` field in its YAML frontmatter (valid values: `procedural` | `reference` | `anti-pattern`). Absent `format:` defaults to `procedural`.
+- Each SKILL.md must satisfy the section contract for its declared format (see `docs/format-types.md`):
+  - `procedural` (default): requires `**Triggers**`, `## Process`, `## Rules`
+  - `reference`: requires `**Triggers**`, `## Patterns` or `## Examples`, `## Rules`
+  - `anti-pattern`: requires `**Triggers**`, `## Anti-patterns`, `## Rules`
 
 ### 3. SDD compliance
 - Every skill modification requires at minimum /sdd-ff before apply

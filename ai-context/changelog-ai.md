@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-03-01 — project-fix executed
+
+**Score before**: 93/100
+**Actions executed**: 0 critical, 0 high, 5 medium (D12 ADR heading normalization)
+**Files modified**:
+- `docs/adr/001-skills-as-directories.md` — replaced `**Status:**` bold inline with `## Status` heading
+- `docs/adr/002-artifacts-over-memory.md` — replaced `**Status:**` bold inline with `## Status` heading
+- `docs/adr/003-orchestrator-delegates-everything.md` — replaced `**Status:**` bold inline with `## Status` heading
+- `docs/adr/004-install-sh-repo-authoritative.md` — replaced `**Status:**` bold inline with `## Status` heading
+- `docs/adr/005-skill-md-entry-point-convention.md` — replaced `**Status:**` bold inline with `## Status` heading
+**SDD Readiness**: FULL → FULL
+**Notes**: Cosmetic heading normalization only. ADRs 001–005 now use `## Status` heading consistent with ADR 006 and the D12 audit scanner requirement.
+
+---
+
 ### 2026-03-01 — audit-improvements archived
 
 **What was done**: SDD cycle for `audit-improvements` completed and archived. Delta specs merged into master specs for `audit-dimensions` and `audit-scoring`. Change folder moved to `openspec/changes/archive/2026-03-01-audit-improvements/`.

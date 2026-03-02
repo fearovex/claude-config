@@ -243,7 +243,27 @@ Orphaned changes detected:
 #### 4b. Minimum content
 For each skill file (`.md` or directory with `SKILL.md`):
 - Does it have more than 30 lines? → If not, it is probably a stub
-- Does it have some process/instructions section? → If not, it is not functional
+- **Format-aware structural check** (see `docs/format-types.md` for the authoritative contract):
+  1. Parse YAML frontmatter block (content between the first `---` pair at the start of the file). Extract `format:` value. If no frontmatter or no `format:` key → treat as `procedural`.
+  2. If `format:` value is not one of `procedural`, `reference`, `anti-pattern` → emit INFO finding: `"Unknown format value '[value]' in [skill-name] — defaulting to procedural check"` and treat as `procedural`.
+  3. Apply the check for the resolved format:
+
+| Resolved format | Required section | Accepted headings | Finding if absent |
+|-----------------|-----------------|------------------|-------------------|
+| `procedural` (or absent/unknown) | Process section | `## Process`, `### Step N` | MEDIUM: "procedural skill [name] missing ## Process section" |
+| `reference` | Patterns or Examples | `## Patterns`, `## Examples` | MEDIUM: "reference skill [name] missing ## Patterns or ## Examples section" |
+| `anti-pattern` | Anti-patterns | `## Anti-patterns` | MEDIUM: "anti-pattern skill [name] missing ## Anti-patterns section" |
+
+  4. Missing `**Triggers**` and missing `## Rules` remain MEDIUM findings for **all** format types (unchanged).
+  5. For a `reference` or `anti-pattern` skill: missing `## Process` is **not a finding**.
+
+Add each missing-section finding to `required_actions.medium` in the FIX_MANIFEST with:
+```
+type: skill_quality_action
+action_type: add_missing_section
+target: [skill path]
+missing_sections: ["[section heading]"]
+```
 
 #### 4c. Relevant global tech skills coverage (scored: 0–10 pts)
 I read the project stack (package.json) and identify which global technology skills in `~/.claude/skills/` are applicable but not yet installed in the project:
@@ -402,12 +422,22 @@ For each subdirectory `<name>` under `.claude/skills/`:
 
 **D9-3. Structural completeness**
 
-Read each local `.claude/skills/<name>/SKILL.md`. Search for:
-- `**Triggers**` or `## Triggers` — trigger definition
-- `## Process` or `### Step` — process section
-- `## Rules` or `## Execution rules` — rules section
+Read each local `.claude/skills/<name>/SKILL.md`. Apply the same format-aware check as D4b (see `docs/format-types.md` for the authoritative contract):
 
-If any section is absent:
+1. Parse YAML frontmatter block (content between the first `---` pair). Extract `format:` value. If absent → treat as `procedural`.
+2. If `format:` value is unrecognized → emit INFO finding and treat as `procedural`.
+3. Apply the format-to-required-section check:
+
+| Resolved format | Required section | Accepted headings | Finding if absent |
+|-----------------|-----------------|------------------|-------------------|
+| `procedural` (or absent/unknown) | Process section | `## Process`, `### Step N` | record as missing |
+| `reference` | Patterns or Examples | `## Patterns`, `## Examples` | record as missing |
+| `anti-pattern` | Anti-patterns | `## Anti-patterns` | record as missing |
+
+4. Missing `**Triggers**` and `## Rules` are checked for **all** format types (unchanged).
+5. For `reference` or `anti-pattern` skills: missing `## Process` is **not a finding**.
+
+If any required section is absent:
 - Record missing sections per skill
 - Assign disposition: `update`
 - Action: `add_missing_section`

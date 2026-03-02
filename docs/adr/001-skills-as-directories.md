@@ -1,6 +1,8 @@
 # Skills are directories, not single files
 
-**Status:** Accepted (retroactive)
+## Status
+
+Accepted (retroactive)
 
 > This decision predates the ADR system and is recorded retroactively.
 

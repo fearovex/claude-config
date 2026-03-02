@@ -328,10 +328,21 @@ For each action with `action_type: add_missing_section`:
 
 1. Check if the target file exists. If not: mark `failed (file not found)` and notify user. Continue.
 2. Read current content of local `SKILL.md`.
-3. For each section in `missing_sections[]`:
+3. **Determine format type**: parse YAML frontmatter block (content between first `---` pair). Extract `format:` value. If absent or unrecognized → treat as `procedural`. This step reads the skill file at repair time; do NOT rely solely on the FIX_MANIFEST entry for the format value.
+4. For each section in `missing_sections[]`:
    - Check if section heading already exists (idempotency guard) — if yes: mark `skipped (section already present)`.
    - Check for `<!-- AUDIT: stub added by project-fix` marker — if present: mark `skipped (stub already added)`.
-   - Otherwise: append the corresponding stub at the end of the file.
+   - Otherwise: select stub template matching the resolved format (see table below) and append it at the end of the file.
+
+**Format-aware stub selection** (authoritative contract in `docs/format-types.md`):
+
+| Resolved format | Missing section being added | Stub to insert |
+|-----------------|---------------------------|----------------|
+| `procedural` (or absent/unknown) | `## Process` | Process stub (see below) |
+| `reference` | `## Patterns` | Patterns stub (see below) |
+| `anti-pattern` | `## Anti-patterns` | Anti-patterns stub (see below) |
+| any format | `## Rules` | Rules stub (see below) |
+| any format | `**Triggers**` | Triggers stub (see below) |
 
 Stub templates:
 
@@ -344,13 +355,31 @@ For missing `## Rules`:
 > TODO: define constraints and invariants for this skill.
 ```
 
-For missing `## Process`:
+For missing `## Process` (format: procedural or absent):
 ```markdown
 <!-- AUDIT: stub added by project-fix [YYYY-MM-DD] -->
 
 ## Process
 
 > TODO: add step-by-step process instructions.
+```
+
+For missing `## Patterns` (format: reference):
+```markdown
+<!-- AUDIT: stub added by project-fix [YYYY-MM-DD] -->
+
+## Patterns
+
+> TODO: document core patterns and examples for this technology or library.
+```
+
+For missing `## Anti-patterns` (format: anti-pattern):
+```markdown
+<!-- AUDIT: stub added by project-fix [YYYY-MM-DD] -->
+
+## Anti-patterns
+
+> TODO: document anti-patterns to avoid and their corrections.
 ```
 
 For missing `**Triggers**`:

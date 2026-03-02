@@ -45,6 +45,41 @@ Are there specific code patterns, commands, or processes it should know about?
 
 If the user has already provided enough context in the command, skip obvious questions.
 
+### Step 1b — Select format type
+
+Before generating the skeleton, determine the skill's format type. Apply inference heuristics first,
+then always show the result to the user for confirmation.
+
+**Inference heuristics (apply in order; stop at first match):**
+
+1. Skill name matches `*-antipatterns` or `*-anti-patterns` → infer `anti-pattern`
+2. Skill name is a technology or library name (e.g., contains a known framework name, version suffix like `-19`, `-5`, `-4`, or a language name) → infer `reference`
+3. Skill name starts with an action verb or matches SDD/meta-tool patterns (e.g., `sdd-*`, `project-*`, `memory-*`, `deploy-*`, `run-*`) → infer `procedural`
+4. No match → no inference; ask the user directly
+
+**Always present the format to the user before proceeding:**
+
+```
+Format type for this skill:
+  Inferred: [procedural | reference | anti-pattern | none — please select]
+
+Available formats (full contract: docs/format-types.md):
+  1. procedural   — orchestrates a sequence of steps (SDD phases, meta-tools, workflows)
+  2. reference    — provides patterns and examples for a technology or library
+  3. anti-pattern — catalogs things to avoid (use for anti-pattern-focused skills)
+
+Confirm [1/2/3] or press Enter to accept inferred:
+```
+
+If `docs/format-types.md` does not exist:
+```
+⚠️ WARNING: docs/format-types.md not found — skill-format-types change may not be applied.
+Defaulting to procedural format.
+```
+Continue with `procedural` and do not block skill creation.
+
+Store the confirmed format as `$SELECTED_FORMAT` for use in Step 3.
+
 ### Step 2 — If project skill: analyze the code
 
 Read the existing project code to:
@@ -54,9 +89,20 @@ Read the existing project code to:
 
 ### Step 3 — Generate the skill
 
-**Standard SKILL.md format:**
+Generate the skeleton based on `$SELECTED_FORMAT` from Step 1b. Each skeleton includes
+`format: $SELECTED_FORMAT` in the YAML frontmatter and meets the section contract for that format.
+Full contracts are defined in `docs/format-types.md`.
+
+**If `$SELECTED_FORMAT` is `procedural`:**
 
 ```markdown
+---
+name: [skill-name]
+description: >
+  [one-line description]
+format: procedural
+---
+
 # [skill-name]
 
 > [One-line description. What it does and what it is for.]
@@ -65,12 +111,43 @@ Read the existing project code to:
 
 ---
 
-## When to use this skill
+## Process
 
-[Explanation of the contexts where it applies]
-[Specific conditions that activate it]
+### Step 1 — [step name]
 
-## Main Patterns
+[Explain what this step does.]
+
+### Step 2 — [step name]
+
+[Explain what this step does.]
+
+---
+
+## Rules
+
+- [constraint or invariant for this skill]
+- [another constraint]
+```
+
+**If `$SELECTED_FORMAT` is `reference`:**
+
+```markdown
+---
+name: [skill-name]
+description: >
+  [technology] patterns for [use case].
+format: reference
+---
+
+# [skill-name]
+
+> [technology] patterns for [use case].
+
+**Triggers**: [technology name], [use-case keyword]
+
+---
+
+## Patterns
 
 ### [Pattern 1]: [Descriptive name]
 [Explanation of the pattern]
@@ -86,13 +163,6 @@ Read the existing project code to:
 [example code]
 ```
 
-### [Pattern 3]: [Descriptive name]
-[Explanation]
-
-```[language]
-[example code]
-```
-
 ## Complete Examples
 
 ### [Scenario 1]
@@ -101,10 +171,42 @@ Read the existing project code to:
 ### [Scenario 2]
 [Complete, executable code]
 
-## Anti-Patterns — What to Avoid
+## Quick Reference
 
-### ❌ [Thing to avoid]
-[Why it is problematic]
+| Task | Pattern / Command |
+|------|------------------|
+| [common task] | [solution] |
+
+---
+
+## Rules
+
+- [constraint or anti-pattern to avoid]
+```
+
+**If `$SELECTED_FORMAT` is `anti-pattern`:**
+
+```markdown
+---
+name: [skill-name]
+description: >
+  [technology] anti-patterns: [brief description].
+format: anti-pattern
+---
+
+# [skill-name]
+
+> [technology] anti-patterns: [brief description].
+
+**Triggers**: [technology name] antipatterns, code review, refactoring
+
+---
+
+## Anti-patterns
+
+### ❌ [Anti-pattern 1]: [Descriptive name]
+
+**Why it is problematic**: [explanation]
 
 ```[language]
 // ❌ Bad
@@ -113,15 +215,18 @@ Read the existing project code to:
 
 ```[language]
 // ✅ Good
-[correct code]
+[corrected code]
 ```
 
-## Quick Reference
+### ❌ [Anti-pattern 2]: [Descriptive name]
 
-| Task | Pattern/Command |
-|------|----------------|
-| [common task] | [solution] |
-| [common task] | [solution] |
+**Why it is problematic**: [explanation]
+
+---
+
+## Rules
+
+- [scope or usage constraint for this skill]
 ```
 
 ### Step 4 — Preview and confirm
@@ -251,7 +356,10 @@ Current catalog available in `~/.claude/skills/`:
 
 - Always use real project code as examples when it is a project skill
 - Never invent patterns — extract them from existing code
-- Minimum 3 code examples per skill
-- Always include anti-patterns
+- Minimum 3 code examples per skill (reference and anti-pattern formats)
 - Preview and confirm before writing
 - Register the new skill in the corresponding CLAUDE.md
+- The format-selection step (Step 1b) MUST always run before skeleton generation — a skeleton is never written without a confirmed format type
+- The `format:` field MUST be present in the YAML frontmatter of every SKILL.md generated by this skill
+- If `docs/format-types.md` does not exist, default all new skills to `procedural` and emit WARNING: "docs/format-types.md not found — skill-format-types change may not be applied"
+- Inference is a convenience — the user MUST always confirm or override the inferred type before the skeleton is written

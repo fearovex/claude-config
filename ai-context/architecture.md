@@ -86,41 +86,40 @@ Skills that need to pass state to each other use **file artifacts**:
 4. **Orchestrator delegates everything** — the global CLAUDE.md never executes work itself, always spawns subagents via Task tool
 5. **install.sh is repo-authoritative** — all directories flow repo → ~/.claude/. The only reverse direction is `sync.sh`, which captures `memory/` only. Every other directory (skills/, CLAUDE.md, hooks/, openspec/, ai-context/) must always be edited in the repo — never in ~/.claude/ directly.
 
-<!-- [auto-updated]: structure-mapping — last run: 2026-02-28 -->
+<!-- [auto-updated]: structure-mapping — last run: 2026-03-01 -->
 ## Observed Structure (auto-detected)
 
 Organization pattern: **feature-based** (confidence: high)
 Each `skills/` subdirectory is a distinct capability with one `SKILL.md` entry point.
 
 ```
-claude-config/ (observed 2026-02-28)
-├── CLAUDE.md, README.md, settings.json, settings.local.json
-├── install.sh, sync.sh
-├── skills/          43 skill directories (see stack-detection for full list)
-│   ├── sdd-*/       11 SDD phase/orchestrator skills
+claude-config/ (observed 2026-03-01)
+├── CLAUDE.md, README.md, settings.json, install.sh, sync.sh
+├── skills/          44 skill directories (see stack-detection for full list)
+│   ├── sdd-*/       SDD phase/orchestrator skills
 │   ├── project-*/   6 meta-tool skills
-│   └── [others]     26 skills (tech catalog, tooling, memory, skill mgmt)
+│   ├── memory-*/    2 memory management skills
+│   ├── skill-*/     2 skill management skills
+│   └── [others]     tech catalog + smart-commit
 ├── hooks/           smart-commit-context.js
-├── openspec/        config.yaml + changes/ + specs/ (7 subdirs)
+├── openspec/        config.yaml + changes/ + specs/
 ├── ai-context/      8 files: stack, architecture, conventions, known-issues,
 │                    changelog-ai, onboarding, quick-reference, scenarios
+├── docs/            adr/ (6 ADRs) + templates/ (prd, adr)
 └── memory/          MEMORY.md + topic files
 ```
 
 <!-- [/auto-updated] -->
 
-<!-- [auto-updated]: drift-summary — last run: 2026-02-28 -->
+<!-- [auto-updated]: drift-summary — last run: 2026-03-01 -->
 ## Architecture Drift (auto-detected)
 
-Drift level: **minor** (5 informational entries)
+Drift level: **minor** (2 informational entries)
 
-Summary of drift vs. `architecture.md` + `stack.md` (baseline: 2026-02-23):
-- `openclaw-assistant` listed in stack.md Misc category but skill directory not found
-- Skill count: documented ~35–37, observed 43 (natural growth)
-- `openspec/specs/` directory (7 subdirs) exists but not in stack.md directory tree
-- `README.md` at root not mentioned in documented structure
-- Command separator inconsistency: conventions.md previously used `/sdd:ff` (colon) — fixed to `/sdd-ff` (hyphen)
+Summary of drift vs. `architecture.md` baseline (2026-02-23):
+- Skill count: documented ~35 in stack.md manual section, 44 observed (natural catalog growth)
+- `.claude/` local directory at repo root (audit artifact) — not in documented structure; expected, not committed
 
-All drift is informational. No structural mismatches detected.
+All drift is informational. No structural mismatches detected. Previous drift items from 2026-02-28 (openclaw-assistant reference, command separator inconsistency, openspec/specs/ omission) appear resolved or no longer applicable.
 
 <!-- [/auto-updated] -->

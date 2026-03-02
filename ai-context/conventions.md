@@ -127,11 +127,11 @@ bash sync.sh → git add memory/ && git commit
 Use this periodically to persist Claude's automatic memory updates (`~/.claude/memory/`) into the repo.
 This is the ONLY directory that flows `~/.claude/ → repo/`.
 
-<!-- [auto-updated]: observed-conventions — last run: 2026-02-28 -->
+<!-- [auto-updated]: observed-conventions — last run: 2026-03-01 -->
 ## Conventions Observed (auto-detected)
 
-Sample: 10 representative files across skills/, hooks/, root
-Method: auto-detected (5 SKILL.md files, 2 shell scripts, root files)
+Sample: 20 files across skills/, ai-context/
+Method: auto-detected (SKILL.md files + ai-context/ memory files)
 
 ### Naming
 - Skill directories: kebab-case — e.g. `project-audit`, `sdd-propose`, `react-19`
@@ -152,8 +152,10 @@ All sampled SKILL.md files follow this pattern:
 ### Error handling (observed)
 - Bash: `set -e` + `|| true` for expected-failures — e.g. `claude mcp remove github 2>/dev/null || true`
 - SKILL.md: guard clauses with explicit "Stop here if..." — e.g. "Stop here if argument is missing."
+- Sub-agent contracts: `status: ok|warning|blocked|failed` return codes
 
 ### Inter-skill communication
 File artifacts only — no in-memory passing. Examples: `audit-report.md`, `tasks.md`, `analysis-report.md`.
+Skills reference each other by absolute path: `~/.claude/skills/sdd-propose/SKILL.md`.
 
 <!-- [/auto-updated] -->

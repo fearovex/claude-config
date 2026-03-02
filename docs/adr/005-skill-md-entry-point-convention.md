@@ -1,6 +1,8 @@
 # SKILL.md is the mandatory, uniquely-named entry point for every skill directory
 
-**Status:** Accepted (retroactive)
+## Status
+
+Accepted (retroactive)
 
 > This decision predates the ADR system and is recorded retroactively.
 

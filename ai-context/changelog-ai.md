@@ -4,6 +4,47 @@
 
 ---
 
+## [2026-03-03] — smart-commit-auto-stage archived
+
+**Type**: Feature
+**Agent**: Claude Sonnet 4.6 (sdd-apply + sdd-verify + sdd-archive)
+**What was done**: Full SDD cycle for `smart-commit-auto-stage` completed and archived. Verification PASS (0 criticals, 0 warnings, 2 minor non-blocking observations). Step 1 of `skills/smart-commit/SKILL.md` rewritten to detect files from the full working tree via `git status --porcelain`, replacing the old `git diff --cached` guard. Auto-staging added to Step 5 — `git add` is issued per confirmed group immediately before `git commit`; skipped/aborted groups receive no `git add`. SR-10 through SR-13 added to master spec; SR-01 and SR-07 scope-extended. SKILL.md version bumped to 1.1. Change folder moved to `openspec/changes/archive/2026-03-03-smart-commit-auto-stage/`.
+**Modified files**:
+- `skills/smart-commit/SKILL.md` — Step 1 rewritten (full working-tree scan; three-category `git status --porcelain` parsing; staging-status tag `staged`/`unstaged`/`untracked` per file); Step 1b: staging-status tag travels through grouping; Step 1c: plan display annotates each file with `[staged]`, `[unstaged]`, or `[untracked]` before any `git add`; Step 5: per-group `git add` precondition for confirmed groups; skip/abort branches issue no `git add`; Rules: old "only staged files" rule removed, three replacement rules added; Anti-patterns: updated; YAML description and `metadata.version` bumped to `"1.1"`
+- `openspec/specs/smart-commit/spec.md` — SR-10 through SR-13 appended (full working-tree detection, staging-status annotation, selective auto-staging, skip-preserves-state invariant); SR-01 and SR-07 modification blocks appended (scope extended to full working tree)
+- `openspec/changes/archive/2026-03-03-smart-commit-auto-stage/CLOSURE.md` — created
+- `ai-context/changelog-ai.md` — this entry
+**Decisions made**:
+- `git status --porcelain` is the detection command (replaces `git diff --cached --stat` guard) — stable, machine-parseable, single-pass for all three file categories
+- Three-value staging-status model (`staged` / `unstaged` / `untracked`) — not a boolean; preserves precise annotation and correct `git add` decisions
+- Per-group, just-in-time staging: `git add` fires immediately before each confirmed group's `git commit`, never upfront — ensures rejected groups are never touched
+- Clean-tree halt fires only when `git status --porcelain` returns empty output (truly clean working tree)
+- Rename entries (`R old -> new`) split on arrow; both paths included in group to prevent silent omissions
+**Notes**: Verify verdict: PASS (0 criticals, 0 warnings). Two minor observations documented in verify-report.md: (1) SR-09 prose in master spec not updated to match new wording (documentation gap only); (2) `git diff --cached` retained in Step 1 for content analysis — intentional per design, acknowledged known limitation for unstaged/untracked diffs.
+
+---
+
+## [2026-03-03] — smart-commit-functional-split archived
+
+**Type**: Archive
+**Agent**: Claude Sonnet 4.6 (sdd-apply + sdd-verify + sdd-archive)
+**What was done**: SDD cycle for `smart-commit-functional-split` completed and archived. Verification PASS WITH WARNINGS (0 criticals, 1 non-blocking warning — design.md has a docs/config-infra priority order transposition vs. spec; implementation and spec are correct). New master spec created at `openspec/specs/smart-commit/spec.md` (SR-01 through SR-09). Change folder moved to `openspec/changes/archive/2026-03-03-smart-commit-functional-split/`.
+**Modified files**:
+- `skills/smart-commit/SKILL.md` — inserted Step 1b (priority-ordered grouping heuristic: test → config/infra → docs → directory prefix → misc fallback), Step 1c (multi-commit plan generation and pre-commit presentation), extended Step 5 (sequential per-group commit execution with "commit all", "step-by-step", "abort remaining" paths); updated Rules section to 9 rules
+- `openspec/specs/smart-commit/spec.md` — created (first master spec for this domain; all 9 SR requirements from the delta become the canonical spec)
+- `openspec/changes/archive/2026-03-03-smart-commit-functional-split/CLOSURE.md` — created
+- `ai-context/changelog-ai.md` — this entry
+**Decisions made**:
+- Grouping heuristic placement: new Step 1b between Step 1 and Step 2 — all commit logic stays in one SKILL.md; hook remains context-injection only
+- Priority order (spec-authoritative): test(1) → config/infra(2) → docs(3) → directory prefix(4) → misc fallback
+- Single-group fast-path: one group → fall through to existing Steps 2–5, zero behavior change
+- Full plan shown before first commit fires — user can abort before any side effect
+- Error blocking: any ERROR in any group halts the entire plan; WARNINGs are non-blocking
+- No external dependencies; only SKILL.md modified
+**Notes**: WARNING-01 (design.md priority table transposition) is documentation drift only; no functional defect. The design.md priority table lists `test → docs → config/infra` while spec and SKILL.md correctly use `test → config/infra → docs`. Recommended follow-up: correct design.md in a cleanup pass.
+
+---
+
 ## [2026-03-03] — claude-folder-audit-project-mode archived
 
 **Type**: Archive

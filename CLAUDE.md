@@ -290,15 +290,18 @@ Each project has its memory layer in `ai-context/`:
 | `conventions.md` | Code conventions, naming, team patterns |
 | `known-issues.md` | Known bugs, gotchas, current limitations |
 | `changelog-ai.md` | Log of changes made by AI |
+| `ai-context/features/*.md` | Feature-level domain knowledge: business rules, invariants, data model summary, integration points, decision log, known gotchas per bounded context |
 
 ### Skill Overlap — When to Use Which
 
 | Command | Purpose | When to use |
 |---------|---------|-------------|
-| `/memory-init` | Creates all 5 ai-context/ files from scratch | First-time setup — run before `/project-analyze` on projects with no `ai-context/` |
+| `/memory-init` | Creates all 5 ai-context/ files from scratch; also creates `ai-context/features/` stubs when the directory is absent | First-time setup — run before `/project-analyze` on projects with no `ai-context/` |
 | `/project-analyze` | Full codebase re-scan; updates `[auto-updated]` sections in ai-context/ | After significant codebase changes or when analysis-report.md is stale |
-| `/memory-update` | Records session-specific decisions and changes into ai-context/ | End of a work session — captures what happened, not what the codebase looks like |
+| `/memory-update` | Records session-specific decisions and changes into ai-context/; also updates `ai-context/features/<domain>.md` with session-acquired domain knowledge | End of a work session — captures what happened, not what the codebase looks like |
 | `/project-update` | Syncs CLAUDE.md and stack.md with global catalog and project deps | After adding/removing skills or updating the global config |
+
+> `project-analyze` does NOT write to `ai-context/features/` — only `memory-init` (scaffold) and `memory-update` (session updates) do.
 
 > `/project-analyze` complements `/memory-update` but does not replace it. Analyze observes the codebase; memory-update records session decisions.
 
@@ -371,6 +374,9 @@ Each project has its memory layer in `ai-context/`:
 
 **Languages:**
 - `~/.claude/skills/elixir-antipatterns/SKILL.md`
+
+**Domain Knowledge:**
+- `~/.claude/skills/feature-domain-expert/SKILL.md` — authors and consumes feature-level domain knowledge files in `ai-context/features/`; reference guide for bounded-context business rules, invariants, integration points, and known gotchas
 
 **Tools / Platforms:**
 - `~/.claude/skills/claude-code-expert/SKILL.md` — CLAUDE.md configuration, custom skills, hooks, MCP servers, and advanced Claude Code workflows

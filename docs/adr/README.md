@@ -50,19 +50,22 @@ ADR files are append-only by convention: once accepted, the original Context, De
 
 ## ADR Index
 
-| Number | Title | Status |
-|--------|-------|--------|
-| [001](001-skills-as-directories.md) | Skills are directories, not single files | Accepted (retroactive) |
-| [002](002-artifacts-over-memory.md) | Skills communicate via file artifacts, not conversation context | Accepted (retroactive) |
-| [003](003-orchestrator-delegates-everything.md) | Orchestrator (CLAUDE.md) never executes work inline | Accepted (retroactive) |
-| [004](004-install-sh-repo-authoritative.md) | install.sh is the single authoritative deploy direction | Accepted (retroactive) |
-| [005](005-skill-md-entry-point-convention.md) | SKILL.md is the mandatory, uniquely-named entry point for every skill directory | Accepted (retroactive) |
-| [006](006-audit-improvements-convention.md) | New audit dimensions default to informational-only until explicitly promoted to scored | Proposed |
-| [007](007-skill-format-types-convention.md) | Skill format types convention — `format:` frontmatter field distinguishes procedural, reference, and anti-pattern skills | Proposed |
-| [008](008-skill-scope-local-copy-default.md) | Local copy as the default placement for project-added skills | Proposed |
-| [009](009-claude-folder-audit-pattern.md) | Claude Folder Audit Pattern — standalone procedural skill for ~/.claude/ runtime auditing | Proposed |
-| [010](010-claude-folder-audit-project-mode-pattern.md) | Claude Folder Audit Project Mode Pattern — third execution mode for auditing project-local .claude/ configuration | Proposed |
-| [011](011-config-export-pattern.md) | Config Export Pattern — procedural SKILL.md skill for exporting Claude config to Copilot, Gemini, and Cursor formats | Proposed |
-| [012](012-smart-commit-functional-split-convention.md) | Smart Commit Functional Split Convention — priority-ordered grouping heuristic for staging files by functional area | Proposed |
-| [013](013-smart-commit-unstaged-detection-pattern.md) | Smart Commit Unstaged Detection Pattern — reuse grouping heuristic and build-artifact filter to surface related unstaged files before committing | Proposed |
-| [014](014-smart-commit-auto-stage-replaces.md) | Smart Commit Auto-Stage — Replaces Staged-Only Guard with Full Working-Tree Detection | Proposed |
+| Number | Title | Status | Date |
+|--------|-------|--------|------|
+| [001](001-skills-as-directories.md) | Skills are directories, not single files | Accepted (retroactive) | |
+| [002](002-artifacts-over-memory.md) | Skills communicate via file artifacts, not conversation context | Accepted (retroactive) | |
+| [003](003-orchestrator-delegates-everything.md) | Orchestrator (CLAUDE.md) never executes work inline | Accepted (retroactive) | |
+| [004](004-install-sh-repo-authoritative.md) | install.sh is the single authoritative deploy direction | Accepted (retroactive) | |
+| [005](005-skill-md-entry-point-convention.md) | SKILL.md is the mandatory, uniquely-named entry point for every skill directory | Accepted (retroactive) | |
+| [006](006-audit-improvements-convention.md) | New audit dimensions default to informational-only until explicitly promoted to scored | Proposed | |
+| [007](007-skill-format-types-convention.md) | Skill format types convention — `format:` frontmatter field distinguishes procedural, reference, and anti-pattern skills | Proposed | |
+| [008](008-skill-scope-local-copy-default.md) | Local copy as the default placement for project-added skills | Proposed | |
+| [009](009-claude-folder-audit-pattern.md) | Claude Folder Audit Pattern — standalone procedural skill for ~/.claude/ runtime auditing | Proposed | |
+| [010](010-claude-folder-audit-project-mode-pattern.md) | Claude Folder Audit Project Mode Pattern — third execution mode for auditing project-local .claude/ configuration | Proposed | |
+| [011](011-config-export-pattern.md) | Config Export Pattern — procedural SKILL.md skill for exporting Claude config to Copilot, Gemini, and Cursor formats | Proposed | |
+| [012](012-smart-commit-functional-split-convention.md) | Smart Commit Functional Split Convention — priority-ordered grouping heuristic for staging files by functional area | Proposed | |
+| [013](013-smart-commit-unstaged-detection-pattern.md) | Smart Commit Unstaged Detection Pattern — reuse grouping heuristic and build-artifact filter to surface related unstaged files before committing | Proposed | |
+| [014](014-smart-commit-auto-stage-replaces.md) | Smart Commit Auto-Stage — Replaces Staged-Only Guard with Full Working-Tree Detection | Proposed | |
+| [015](015-feature-domain-knowledge-layer-architecture.md) | Feature Domain Knowledge Layer — ai-context/features/ as a Named Memory Sub-Layer | Proposed | |
+| [016](016-enhance-claude-folder-audit-content-quality-convention.md) | Claude Folder Audit Content Quality Convention — Additive Sub-Phase Pattern for Project Mode | Accepted | 2026-03-03 |
+| [017](017-tech-skill-mapping-table-inline-convention.md) | Tech Skill Mapping Table — Inline Convention in sdd-apply | Proposed | 2026-03-03 |

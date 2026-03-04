@@ -3,7 +3,8 @@ name: project-claude-organizer
 description: >
   Reads the project .claude/ folder, compares observed contents against the canonical SDD
   structure, presents a dry-run reorganization plan, and applies it additively after user
-  confirmation. Never deletes or moves files. Produces claude-organizer-report.md.
+  confirmation. After successful migration, offers to delete source files from
+  .claude/<category>/ with explicit user confirmation. Produces claude-organizer-report.md.
   Trigger: /project-claude-organizer, organize .claude folder, fix project claude structure,
   align project .claude to canonical SDD layout.
 format: procedural
@@ -12,8 +13,8 @@ format: procedural
 # project-claude-organizer
 
 > Reads the project `.claude/` folder, compares it against the canonical SDD structure,
-> presents a reorganization plan, and applies it additively after explicit user confirmation.
-> Never deletes or moves files.
+> presents a reorganization plan, applies migrations after user confirmation, and optionally
+> deletes source files from `.claude/` after successful migration with explicit user confirmation.
 
 **Triggers**: `/project-claude-organizer`, organize .claude folder, fix project claude structure, align .claude to canonical SDD layout, project claude organizer
 
@@ -163,11 +164,255 @@ Files matching neither signal remain in `UNEXPECTED` — no false promotion.
 
 ---
 
+### Step 3b — Legacy Directory Intelligence
+
+After the DOCUMENTATION_CANDIDATES classification completes, run a second pass over the remaining
+items in `UNEXPECTED`. For each item whose name matches a known legacy directory or file pattern,
+reclassify it into `LEGACY_MIGRATIONS` and remove it from `UNEXPECTED`. Items that match no known
+pattern are left in `UNEXPECTED` unchanged — the existing "review manually" behavior is preserved
+for genuinely unknown items.
+
+```
+LEGACY_MIGRATIONS = []
+```
+
+Items reclassified into `LEGACY_MIGRATIONS` are removed from `UNEXPECTED`. Each entry in
+`LEGACY_MIGRATIONS` carries: `source` (absolute path), `destination` (one or more proposed
+destination paths), `strategy` (see table below), and `confirmation_required = true`.
+
+**LEGACY_PATTERN_TABLE** — quick-scan index (match order top-to-bottom, name match first):
+
+| Pattern name | Match condition | Migration strategy | Destination summary |
+|---|---|---|---|
+| `commands/` | Directory named `commands` (case-insensitive) | `delegate` — advisory only | Skill creation advisory via `/skill-create` per qualifying `.md` file; no files written |
+| `docs/` | Directory named `docs` (case-insensitive) | `copy` — per `.md` file | `ai-context/features/<name>.md` for each `.md` at immediate `docs/` level |
+| `system/` | Directory named `system` (case-insensitive) | `append` — route by filename | `architecture.md` → `ai-context/architecture.md`; `database.md` + `api-overview.md` → `ai-context/stack.md` |
+| `plans/` | Directory named `plans` (case-insensitive) | `copy` — route by status | Active plans → `openspec/changes/<plan-name>/`; archived plans → `openspec/changes/archive/<plan-name>/` |
+| `requirements/` | Directory named `requirements` (case-insensitive) | `scaffold` — idempotent | `openspec/changes/<YYYY-MM-DD>-<slug>/proposal.md` per `.md` file at immediate level |
+| `sops/` | Directory named `sops` (case-insensitive) | `user-choice` — per file | Option A: append section to `ai-context/conventions.md`; Option B: copy to `docs/sops/<filename>` |
+| `templates/` | Directory named `templates` (case-insensitive) | `copy` | `docs/templates/<filename>` for each file at immediate `templates/` level |
+| `project.md` | Root-level `.md` file named `project.md` (case-insensitive) | `section-distribute` | Sections routed to `ai-context/stack.md`, `ai-context/architecture.md`, `ai-context/known-issues.md` by heading signal |
+| `readme.md` | Root-level `.md` file named `readme.md` (case-insensitive) | `section-distribute` | Sections routed to `ai-context/stack.md`, `ai-context/architecture.md`, `ai-context/known-issues.md` by heading signal |
+
+**Classification loop:**
+
+For each item in `UNEXPECTED`:
+- Match item name (case-insensitive) against `LEGACY_PATTERN_TABLE` (top-to-bottom):
+  - **On hit**: add entry to `LEGACY_MIGRATIONS` (`source`, `destination(s)`, `strategy`, `confirmation_required = true`); remove item from `UNEXPECTED`.
+  - **On miss**: item stays in `UNEXPECTED` — "review manually" behavior unchanged.
+
+> **Scope rule**: Only top-level items (directories and root-level files enumerated in
+> `OBSERVED_ITEMS`) are evaluated. Step 3b MUST NOT recurse into subdirectories — a directory
+> named `commands/` nested inside another unexpected directory (e.g. `extra/commands/`) is NOT
+> matched by the pattern.
+
+#### Pattern detail blocks
+
+##### Pattern: `commands/`
+
+- **Match condition**: Directory named `commands` (case-insensitive)
+- **Strategy**: `delegate` — SKILL_ADVISORY
+- **Destination**: Advisory only — no file writes under any circumstance
+
+**Content analysis procedure** (runs when `commands/` category is confirmed in Step 5.7):
+
+1. List all `.md` files at the **immediate** `commands/` level only (no recursion into subdirectories).
+2. If no `.md` files are found → output:
+   `commands/ — no .md files found at immediate level; nothing to advise`
+   Stop; no further processing for this category.
+3. For each `.md` file found, apply the **4 qualifying markers** (any one marker is sufficient to qualify):
+   - **(a) Step-numbered sections**: the file contains lines matching `### Step N`, `- Step N`, or `N.` where N is a number (numbered/bulleted process sections)
+   - **(b) Trigger / invocation patterns**: the file contains lines starting with `/command-name` (slash-command references) or lines containing `**Triggers**` or `trigger:` (trigger definitions)
+   - **(c) Process headings**: the file contains a section heading that is exactly `## Process`, `## Steps`, `## How to`, or `## Instructions`
+   - **(d) Filename-stem keyword match**: the file's stem (case-insensitive) matches one of: `deploy`, `rollback`, `setup`, `onboard`, `audit`, `install`, `release`, `build`, `migrate`, `sync`
+4. **Qualifying file** (at least one marker matched):
+   Output advisory:
+   `<filename> — qualifying workflow detected. Suggested skill name: <stem>. Suggested format: procedural. To scaffold: /skill-create <stem>`
+   Do NOT create any file or directory. Do NOT invoke `/skill-create`.
+5. **Non-qualifying file** (no marker matched):
+   Record: `<filename> — non-qualifying (no structured workflow detected). Recommend manual archival.`
+   Do NOT create or modify any file.
+
+> **Invariant**: The delegate strategy produces **zero file writes**. Any write operation during `commands/` processing is a violation of this invariant. Source files are NEVER deleted, moved, or modified.
+
+---
+
+##### Pattern: `docs/`
+
+- **Match condition**: Directory named `docs` (case-insensitive)
+- **Strategy**: `copy` — per `.md` file
+- **Destination**: `PROJECT_ROOT/ai-context/features/<name>.md` for each `*.md` file at the immediate `docs/` level
+
+**Copy procedure** (runs when `docs/` category is confirmed in Step 5.7):
+
+1. List all `.md` files at the **immediate** `docs/` level only (no recursion).
+2. Ensure `PROJECT_ROOT/ai-context/features/` directory exists; create it if absent before copying.
+3. For each `.md` file:
+   - Derive `<name>` = filename including `.md` extension.
+   - Destination = `PROJECT_ROOT/ai-context/features/<name>.md`.
+   - **If destination exists**: record `<name> — skipped (destination exists)`. Do NOT overwrite.
+   - **If destination does not exist**: copy source to destination; record `<name> — copied to ai-context/features/<name>.md`.
+4. Source files are NEVER deleted, moved, or modified.
+
+---
+
+##### Pattern: `system/`
+
+- **Match condition**: Directory named `system` (case-insensitive)
+- **Strategy**: `append` — route by filename to appropriate `ai-context/` file
+- **Routing table**:
+  - `architecture.md` → `PROJECT_ROOT/ai-context/architecture.md`
+  - `database.md` → `PROJECT_ROOT/ai-context/stack.md`
+  - `api-overview.md` → `PROJECT_ROOT/ai-context/stack.md`
+  - All other files at the immediate `system/` level → record as `<filename> — no routing rule; skipped`
+
+**Append procedure** (runs when `system/` category is confirmed in Step 5.7):
+
+1. List all files at the **immediate** `system/` level only (no recursion).
+2. For each file matched by the routing table:
+   - Destination = the mapped `ai-context/` file.
+   - **If destination does not exist**: create it with the appended content.
+   - **Merge strategy**: append the entire file content to the destination, preceded by the labeled separator:
+     `<!-- appended from .claude/system/<filename> YYYY-MM-DD -->`
+     (Replace `YYYY-MM-DD` with the current date at apply time.)
+   - Record: `<filename> — appended to <destination> (separator added)`.
+3. Source files are NEVER deleted, moved, or modified.
+
+---
+
+##### Pattern: `plans/`
+
+- **Match condition**: Directory named `plans` (case-insensitive)
+- **Strategy**: `copy` — route by active / archived status
+- **Routing**:
+  - Active plans → `PROJECT_ROOT/openspec/changes/<plan-name>/`
+  - Archived plans → `PROJECT_ROOT/openspec/changes/archive/<plan-name>/`
+
+**Active vs. archived determination**: The skill does NOT apply any heuristic to classify a plan item as active or archived. For **each item** at the immediate `plans/` level, the skill MUST ask the user at apply time:
+`Is "<plan-name>" an active plan or an archived plan? (active/archived)`
+
+**Copy procedure** (runs when `plans/` category is confirmed in Step 5.7):
+
+1. List all items at the **immediate** `plans/` level only (no recursion).
+2. For each item, prompt the user to classify it as active or archived (per item).
+3. Determine destination directory:
+   - Active → `PROJECT_ROOT/openspec/changes/<plan-name>/`
+   - Archived → `PROJECT_ROOT/openspec/changes/archive/<plan-name>/`
+4. **If destination directory already exists**: record `<plan-name> — skipped (destination exists)`. Do NOT overwrite.
+5. **If destination directory does not exist**: create the directory; copy the item's contents into it; record `<plan-name> — copied to <destination>`.
+6. Source files and directories are NEVER deleted, moved, or modified.
+
+---
+
+##### Pattern: `requirements/`
+
+- **Match condition**: Directory named `requirements` (case-insensitive)
+- **Strategy**: `scaffold` — idempotent
+- **Destination**: `openspec/changes/<YYYY-MM-DD>-<slug>/proposal.md` — one proposal stub per `.md` file at the immediate `requirements/` level. `<slug>` is derived from the filename stem (filename without the `.md` extension). `<YYYY-MM-DD>` is the current date at apply time.
+
+**Scaffold procedure** (runs when `requirements/` category is confirmed in Step 5.7):
+
+1. List all `.md` files at the **immediate** `requirements/` level only (no recursion into subdirectories).
+2. For each `.md` file:
+   - Derive `<slug>` = filename stem (case-preserved, e.g. `auth-requirements.md` → `auth-requirements`).
+   - Construct scaffold path: `PROJECT_ROOT/openspec/changes/<YYYY-MM-DD>-<slug>/proposal.md`.
+   - **If `proposal.md` already exists at that path**: record `<slug> — scaffold skipped (proposal.md already exists)`. Do NOT overwrite.
+   - **If `proposal.md` does not exist**: create the directory `openspec/changes/<YYYY-MM-DD>-<slug>/` and write the following minimal scaffold:
+
+     ```markdown
+     # Proposal: <slug>
+
+     ## Problem Statement
+
+     <!-- Describe the problem to be solved. -->
+
+     ## Proposed Solution
+
+     <!-- Describe the proposed approach. -->
+
+     ## Success Criteria
+
+     - [ ]
+     ```
+
+   - Record: `<slug> — scaffolded to openspec/changes/<date>-<slug>/proposal.md`.
+3. Source files are NEVER deleted, moved, or modified.
+
+---
+
+##### Pattern: `sops/`
+
+- **Match condition**: Directory named `sops` (case-insensitive)
+- **Strategy**: `user-choice` — per file
+- **Destinations**:
+  - **Option A**: Append file content as a named section to `PROJECT_ROOT/ai-context/conventions.md`. Section heading: `## <stem>` (filename stem). If `ai-context/conventions.md` does not exist, create it. Append under labeled separator: `<!-- appended from .claude/sops/<filename> YYYY-MM-DD -->`.
+  - **Option B**: Copy file to `PROJECT_ROOT/docs/sops/<filename>`. Create `docs/sops/` directory if absent. If destination already exists: record `<filename> — skipped (destination exists)`. Do NOT overwrite.
+
+**User-choice procedure** (runs when `sops/` category is confirmed in Step 5.7):
+
+1. List all `.md` files at the **immediate** `sops/` level only (no recursion).
+2. Present the list to the user with both destination options.
+3. The user selects per file, or can use global shortcuts:
+   - `apply option A to all` — applies Option A to all files in `sops/`
+   - `apply option B to all` — applies Option B to all files in `sops/`
+4. Execute the selection for each file according to the chosen option.
+5. Source files are NEVER deleted, moved, or modified.
+
+---
+
+##### Pattern: `templates/`
+
+- **Match condition**: Directory named `templates` (case-insensitive)
+- **Strategy**: `copy`
+- **Destination**: `PROJECT_ROOT/docs/templates/<filename>` — one copy per file at the immediate `templates/` level (no recursion into subdirectories of `templates/`).
+
+**Copy procedure** (runs when `templates/` category is confirmed in Step 5.7):
+
+1. List all files at the **immediate** `templates/` level only (no recursion).
+2. Ensure `PROJECT_ROOT/docs/templates/` directory exists; create it if absent before copying.
+3. For each file:
+   - Destination = `PROJECT_ROOT/docs/templates/<filename>`.
+   - **If destination exists**: record `<filename> — skipped (destination exists)`. Do NOT overwrite.
+   - **If destination does not exist**: copy source to destination; record `<filename> — copied to docs/templates/<filename>`.
+4. Source files are NEVER deleted, moved, or modified.
+
+---
+
+##### Pattern: `project.md` and `readme.md`
+
+- **Match condition**: Root-level `.md` file named `project.md` or `readme.md` (case-insensitive match on the full filename).
+- **Strategy**: `section-distribute`
+- **Section routing heuristic**: read the file's section headings and route each section to a destination using the following signal lists:
+
+  ```
+  STACK_HEADING_SIGNALS    = ["## Tech Stack", "## Stack", "## Dependencies", "## Tools"]
+  ARCH_HEADING_SIGNALS     = ["## Architecture", "## System Design", "## Overview"]
+  ISSUES_HEADING_SIGNALS   = ["## Known Issues", "## Issues", "## Gotchas", "## Limitations"]
+  ```
+
+  - A heading matching any entry in `STACK_HEADING_SIGNALS` → routes that section to `ai-context/stack.md`
+  - A heading matching any entry in `ARCH_HEADING_SIGNALS` → routes that section to `ai-context/architecture.md`
+  - A heading matching any entry in `ISSUES_HEADING_SIGNALS` → routes that section to `ai-context/known-issues.md`
+  - Headings matching no signal list are not routed and not appended to any file.
+
+**Section-distribute procedure** (runs when `project.md` / `readme.md` category is confirmed in Step 5.7):
+
+1. Read the file's section headings.
+2. For each heading matched by a signal list, extract the section content (from the heading to the next same-level or higher heading).
+3. **Per-section user confirmation**: present each matched section's content to the user and request explicit confirmation before appending. Do NOT append any section that the user does not confirm.
+4. **Append strategy**: append each confirmed section to the destination file under the labeled separator:
+   `<!-- appended from .claude/<filename> YYYY-MM-DD -->`
+   (Replace `<filename>` with the actual filename, e.g. `project.md`. Replace `YYYY-MM-DD` with the current date.)
+   If the destination file does not exist, create it with the appended content.
+5. Source file is NEVER deleted or modified.
+
+---
+
 ### Step 4 — Build and present dry-run plan
 
 Build the reorganization plan from the three categories above.
 
-**If `MISSING_REQUIRED` is empty AND `UNEXPECTED` is empty AND `DOCUMENTATION_CANDIDATES` is empty:**
+**If `MISSING_REQUIRED` is empty AND `UNEXPECTED` is empty AND `DOCUMENTATION_CANDIDATES` is empty AND `LEGACY_MIGRATIONS` is empty:**
 
 Output:
 ```
@@ -192,6 +437,25 @@ Documentation to migrate → ai-context/:
 
   Note: individual files can be excluded before confirmation — list them as
   exclusions when responding to the prompt below.
+
+Legacy migrations (source files offered for deletion after successful migration):
+  ~ commands/    — strategy: delegate — advisory for /skill-create per qualifying .md file
+  ~ docs/        — strategy: copy — each .md file → ai-context/features/<name>.md
+  ~ system/      — strategy: append — architecture.md → ai-context/architecture.md;
+                   database.md + api-overview.md → ai-context/stack.md
+  ~ plans/       — strategy: copy — active → openspec/changes/<name>/;
+                   archived → openspec/changes/archive/<name>/
+  ~ requirements/ — strategy: scaffold — openspec/changes/<date>-<slug>/proposal.md per .md file
+  ~ sops/        — strategy: user-choice — Option A: ai-context/conventions.md section;
+                   Option B: docs/sops/<filename>
+  ~ templates/   — strategy: copy — each file → docs/templates/<filename>
+  ~ project.md   — strategy: section-distribute → ai-context/stack.md,
+                   ai-context/architecture.md, ai-context/known-issues.md
+
+  Note: each legacy migration category requires explicit per-category confirmation in Step 5.7
+  before any write occurs. Source files are offered for deletion after successful migration —
+  deletion requires explicit user confirmation. delegate and section-distribute strategies
+  are exempt from cleanup prompts.
 
 Unexpected items (will be flagged, NOT deleted or moved):
   ! commands/    — not part of canonical SDD .claude/ structure (review manually)
@@ -309,6 +573,236 @@ For each item in `PRESENT`:
 - No operation performed.
 - Record it as `<name> — already correct (no change)`.
 
+**5.7 — Apply legacy migrations (per-category confirmation gates):**
+
+Process categories in strategy execution order: delegate → section-distribute → copy → append → scaffold → user-choice.
+
+For each category in `LEGACY_MIGRATIONS` (grouped by strategy, processed in the order above):
+1. Present the full list of files in the category and their proposed destinations.
+2. Prompt: `Apply <category> migrations? (yes/no/all)`
+3. If the user responds `no`: skip the category entirely; record `<category> — skipped by user (no files written)`. Do NOT write any files for this category.
+4. If the user responds `yes` or `all`: apply the strategy for this category (see sub-steps below). The `all` response also confirms all remaining unprocessed categories — no further per-category prompts are required for those.
+
+**5.7.1 — delegate strategy (`commands/`):**
+
+1. List all `.md` files at the **immediate** `commands/` level (no recursion into subdirectories).
+2. If no `.md` files are found at the immediate level:
+   Output: `commands/ — no .md files found at immediate level; nothing to advise`
+   Stop processing this category.
+3. For each `.md` file found, apply the **4 qualifying markers** (any one is sufficient to qualify):
+   - **(a) Step-numbered sections**: the file contains lines matching `### Step N`, `- Step N`, or `N.` where N is a number
+   - **(b) Trigger / invocation patterns**: the file contains lines starting with `/command-name` or lines containing `**Triggers**` or `trigger:`
+   - **(c) Process headings**: the file contains a section heading that is exactly `## Process`, `## Steps`, `## How to`, or `## Instructions`
+   - **(d) Filename-stem keyword match**: the file's stem (case-insensitive) matches one of: `deploy`, `rollback`, `setup`, `onboard`, `audit`, `install`, `release`, `build`, `migrate`, `sync`
+4. **Qualifying file** (at least one marker matched):
+   Output advisory: `<filename> — qualifying workflow detected. Suggested skill name: <stem>. Suggested format: procedural. To scaffold: /skill-create <stem>`
+   Do NOT create any file or directory. Do NOT invoke `/skill-create`.
+5. **Non-qualifying file** (no marker matched):
+   Record: `<filename> — non-qualifying (no structured workflow detected). Recommend manual archival.`
+   Do NOT create or modify any file.
+
+> **Invariant**: The delegate strategy produces **zero file writes**. Source files are NEVER touched.
+
+**5.7.2 — section-distribute strategy (`project.md`, `readme.md`):**
+
+1. Read the file's section headings.
+2. Map each heading to a destination file using the signal lists:
+   - `STACK_HEADING_SIGNALS = ["## Tech Stack", "## Stack", "## Dependencies", "## Tools"]` → `ai-context/stack.md`
+   - `ARCH_HEADING_SIGNALS = ["## Architecture", "## System Design", "## Overview"]` → `ai-context/architecture.md`
+   - `ISSUES_HEADING_SIGNALS = ["## Known Issues", "## Issues", "## Gotchas", "## Limitations"]` → `ai-context/known-issues.md`
+   - Headings matching no signal list are not routed.
+3. **Per-section user confirmation**: for each mapped section, present the section content to the user and request explicit confirmation before appending. Do NOT append any section the user does not confirm.
+4. **Append strategy**: append each confirmed section to the destination file under the labeled separator:
+   `<!-- appended from .claude/<filename> YYYY-MM-DD -->`
+   (Replace `<filename>` with the actual filename, e.g. `project.md`. Replace `YYYY-MM-DD` with the current date.)
+   If the destination file does not exist, create it with the appended content.
+5. Source file is NEVER deleted or modified.
+
+**5.7.3 — copy strategy (`docs/` and `templates/`):**
+
+For **`docs/`**:
+1. List all `.md` files at the **immediate** `docs/` level only (no recursion).
+2. Ensure `PROJECT_ROOT/ai-context/features/` directory exists; create it if absent before copying.
+3. For each `.md` file:
+   - Destination = `PROJECT_ROOT/ai-context/features/<name>.md`.
+   - **If destination exists**: record `<name>.md — skipped (destination exists)`. Do NOT overwrite.
+   - **If destination does not exist**: copy source to destination; record `<name>.md — copied to ai-context/features/<name>.md`.
+4. Source files are NEVER deleted, moved, or modified.
+
+For **`templates/`**:
+1. List all files at the **immediate** `templates/` level only (no recursion).
+2. Ensure `PROJECT_ROOT/docs/templates/` directory exists; create it if absent before copying.
+3. For each file:
+   - Destination = `PROJECT_ROOT/docs/templates/<filename>`.
+   - **If destination exists**: record `<filename> — skipped (destination exists)`. Do NOT overwrite.
+   - **If destination does not exist**: copy source to destination; record `<filename> — copied to docs/templates/<filename>`.
+4. Source files are NEVER deleted, moved, or modified.
+
+**5.7.3-cleanup — source file cleanup after copy strategy (`docs/` and `templates/`):**
+
+For each category processed by 5.7.3 (`docs/` and `templates/`):
+
+1. **Guard — strategy eligibility**: copy strategy is eligible for cleanup. Proceed.
+2. **Guard — success count**: count files with outcome "copied to ...". If count = 0 (all files were skipped or failed), skip cleanup for this category — do NOT present a prompt.
+3. **Build lists**:
+   - `WILL_DELETE` = files whose outcome was "copied to ..." (successful migration)
+   - `WILL_PRESERVE` = files whose outcome was "skipped (destination exists)", "failed", or any non-success outcome
+4. **Present both lists to the user**:
+   ```
+   Cleanup available for .claude/<category>/:
+     Will be deleted (successfully migrated): <filename>, <filename>, ...
+     Will be preserved (skipped — destination exists): <filename>, ...
+   ```
+5. **Prompt**: `Delete source files from .claude/<category>/? (yes/no)`
+6. **If user responds `yes`**: delete each file in `WILL_DELETE` from its source path under `PROJECT_CLAUDE_DIR/<category>/`. Record each deletion as `.claude/<category>/<filename> — deleted`. Do NOT delete the parent directory.
+7. **If user responds `no`**: record `<category>/ — cleanup declined by user`. Do NOT delete any file.
+
+> **Invariant**: Only files in `WILL_DELETE` (confirmed successful migration) may be deleted. `WILL_PRESERVE` files are NEVER deleted regardless of user input.
+
+**5.7.4 — append strategy (`system/`):**
+
+1. List all files at the **immediate** `system/` level only (no recursion).
+2. Apply routing table:
+   - `architecture.md` → `PROJECT_ROOT/ai-context/architecture.md`
+   - `database.md` → `PROJECT_ROOT/ai-context/stack.md`
+   - `api-overview.md` → `PROJECT_ROOT/ai-context/stack.md`
+   - All other files → record as `<filename> — no routing rule; skipped`
+3. For each file matched by the routing table:
+   - **If destination does not exist**: create it with the appended content.
+   - **Append block**: append the entire file content to the destination, preceded by:
+     `<!-- appended from .claude/system/<filename> YYYY-MM-DD -->`
+     (Replace `YYYY-MM-DD` with the current date at apply time.)
+   - Record: `<filename> — appended to <destination> (separator added)`.
+4. Source files are NEVER deleted, moved, or modified.
+
+**5.7.4-cleanup — source file cleanup after append strategy (`system/`):**
+
+1. **Guard — strategy eligibility**: append strategy is eligible for cleanup. Proceed.
+2. **Guard — success count**: count files with outcome "appended to ...". If count = 0, skip cleanup — do NOT present a prompt.
+3. **Build lists**:
+   - `WILL_DELETE` = files whose outcome was "appended to ... (separator added)"
+   - `WILL_PRESERVE` = files whose outcome was "no routing rule; skipped" or any non-success outcome
+4. **Present both lists to the user**:
+   ```
+   Cleanup available for .claude/system/:
+     Will be deleted (successfully appended): <filename>, ...
+     Will be preserved (no routing rule or skipped): <filename>, ...
+   ```
+5. **Prompt**: `Delete source files from .claude/system/? (yes/no)`
+6. **If user responds `yes`**: delete each file in `WILL_DELETE` from `PROJECT_CLAUDE_DIR/system/<filename>`. Record each deletion as `.claude/system/<filename> — deleted`. Do NOT delete the `system/` directory itself.
+7. **If user responds `no`**: record `system/ — cleanup declined by user`. Do NOT delete any file.
+
+> **Invariant**: Only files in `WILL_DELETE` (confirmed successful append) may be deleted. `WILL_PRESERVE` files are NEVER deleted.
+
+**5.7.5 — scaffold strategy (`requirements/`):**
+
+1. List all `.md` files at the **immediate** `requirements/` level only (no recursion).
+2. For each `.md` file:
+   - Derive `<slug>` = filename stem (filename without the `.md` extension).
+   - Construct scaffold path: `PROJECT_ROOT/openspec/changes/<YYYY-MM-DD>-<slug>/proposal.md` (use current date).
+   - **If `proposal.md` already exists at that path**: record `<slug> — scaffold skipped (proposal.md already exists)`. Do NOT overwrite.
+   - **If `proposal.md` does not exist**: create the directory `openspec/changes/<YYYY-MM-DD>-<slug>/` and write the following minimal scaffold:
+
+     ```markdown
+     # Proposal: <slug>
+
+     ## Problem Statement
+
+     <!-- Describe the problem to be solved. -->
+
+     ## Proposed Solution
+
+     <!-- Describe the proposed approach. -->
+
+     ## Success Criteria
+
+     - [ ]
+     ```
+
+   - Record: `<slug> — scaffolded to openspec/changes/<date>-<slug>/proposal.md`.
+3. Source files are NEVER deleted, moved, or modified.
+
+**5.7.5-cleanup — source file cleanup after scaffold strategy (`requirements/`):**
+
+1. **Guard — strategy eligibility**: scaffold strategy is eligible for cleanup. Proceed.
+2. **Guard — success count**: count files with outcome "scaffolded to ...". If count = 0, skip cleanup — do NOT present a prompt.
+3. **Build lists**:
+   - `WILL_DELETE` = files whose outcome was "scaffolded to ..."
+   - `WILL_PRESERVE` = files whose outcome was "scaffold skipped (proposal.md already exists)" or any non-success outcome
+4. **Present both lists to the user**:
+   ```
+   Cleanup available for .claude/requirements/:
+     Will be deleted (successfully scaffolded): <filename>.md, ...
+     Will be preserved (scaffold skipped — proposal already exists): <filename>.md, ...
+   ```
+5. **Prompt**: `Delete source files from .claude/requirements/? (yes/no)`
+6. **If user responds `yes`**: delete each file in `WILL_DELETE` from `PROJECT_CLAUDE_DIR/requirements/<filename>`. Record each deletion as `.claude/requirements/<filename> — deleted`. Do NOT delete the `requirements/` directory itself.
+7. **If user responds `no`**: record `requirements/ — cleanup declined by user`. Do NOT delete any file.
+
+> **Invariant**: Only files in `WILL_DELETE` (confirmed successful scaffold) may be deleted. `WILL_PRESERVE` files are NEVER deleted.
+
+**5.7.6 — user-choice strategy (`sops/`):**
+
+1. List all `.md` files at the **immediate** `sops/` level only (no recursion).
+2. Present the list to the user with both destination options:
+   - **Option A**: Append file content as a named section (`## <stem>`) to `ai-context/conventions.md` under labeled separator `<!-- appended from .claude/sops/<filename> YYYY-MM-DD -->`; create `ai-context/conventions.md` if absent.
+   - **Option B**: Copy file to `docs/sops/<filename>`; create `docs/sops/` directory if absent; skip if destination exists and record.
+3. The user selects per file, or can use global shortcuts:
+   - `apply option A to all` — applies Option A to all files in `sops/`
+   - `apply option B to all` — applies Option B to all files in `sops/`
+4. Execute the selection for each file according to the chosen option. Record each operation outcome.
+5. Source files are NEVER deleted, moved, or modified.
+
+**5.7.6-cleanup — source file cleanup after user-choice strategy (`sops/`):**
+
+1. **Guard — strategy eligibility**: user-choice strategy is eligible for cleanup. Proceed.
+2. **Guard — success count**: count files with outcome "copied to ..." (Option B) or "appended to ..." (Option A). If count = 0, skip cleanup — do NOT present a prompt.
+3. **Build lists**:
+   - `WILL_DELETE` = files whose outcome was "copied to ..." or "appended to ..."
+   - `WILL_PRESERVE` = files whose outcome was "skipped (destination exists)" or any non-success outcome
+4. **Present both lists to the user**:
+   ```
+   Cleanup available for .claude/sops/:
+     Will be deleted (successfully processed): <filename>.md, ...
+     Will be preserved (skipped — destination exists): <filename>.md, ...
+   ```
+5. **Prompt**: `Delete source files from .claude/sops/? (yes/no)`
+6. **If user responds `yes`**: delete each file in `WILL_DELETE` from `PROJECT_CLAUDE_DIR/sops/<filename>`. Record each deletion as `.claude/sops/<filename> — deleted`. Do NOT delete the `sops/` directory itself.
+7. **If user responds `no`**: record `sops/ — cleanup declined by user`. Do NOT delete any file.
+
+> **Invariant**: Only files in `WILL_DELETE` (confirmed successful user-choice migration) may be deleted. `WILL_PRESERVE` files are NEVER deleted.
+
+**5.7.7 — copy strategy (`plans/`):**
+
+1. List all items at the **immediate** `plans/` level only (no recursion).
+2. For each item, present it to the user and ask:
+   `Is "<plan-name>" an active plan or an archived plan? (active/archived)`
+3. Determine destination directory:
+   - Active → `PROJECT_ROOT/openspec/changes/<plan-name>/`
+   - Archived → `PROJECT_ROOT/openspec/changes/archive/<plan-name>/`
+4. **If destination directory already exists**: record `<plan-name> — skipped (destination exists)`. Do NOT overwrite.
+5. **If destination directory does not exist**: create the directory; copy the item's contents into it; record `<plan-name> — copied to <destination>`.
+6. Source files and directories are NEVER deleted, moved, or modified.
+
+**5.7.7-cleanup — source file cleanup after copy strategy (`plans/`):**
+
+1. **Guard — strategy eligibility**: copy strategy is eligible for cleanup. Proceed.
+2. **Guard — success count**: count items with outcome "copied to ...". If count = 0 (all items were skipped), skip cleanup — do NOT present a prompt.
+3. **Build lists**:
+   - `WILL_DELETE` = items whose outcome was "copied to ..." (successful migration)
+   - `WILL_PRESERVE` = items whose outcome was "skipped (destination exists)" or any non-success outcome
+4. **Present both lists to the user**:
+   ```
+   Cleanup available for .claude/plans/:
+     Will be deleted (successfully migrated): <plan-name>, <plan-name>, ...
+     Will be preserved (skipped — destination exists): <plan-name>, ...
+   ```
+5. **Prompt**: `Delete source files from .claude/plans/? (yes/no)`
+6. **If user responds `yes`**: delete each item in `WILL_DELETE` from `PROJECT_CLAUDE_DIR/plans/<plan-name>`. Record each deletion as `.claude/plans/<plan-name> — deleted`. Do NOT delete the parent `plans/` directory.
+7. **If user responds `no`**: record `plans/ — cleanup declined by user`. Do NOT delete any file.
+
+> **Invariant**: Only items in `WILL_DELETE` (confirmed successful migration) may be deleted. `WILL_PRESERVE` items are NEVER deleted regardless of user input.
+
 ---
 
 ### Step 6 — Write report
@@ -323,7 +817,7 @@ Use this format:
 Run date: <YYYY-MM-DD>
 Project root: <PROJECT_ROOT>
 Target: <PROJECT_CLAUDE_DIR>
-Summary: <N> item(s) created, <N> documentation file(s) copied to ai-context/, <N> unexpected item(s) flagged, <N> item(s) already correct
+Summary: <N> item(s) created, <N> documentation file(s) copied, <N> legacy migration(s) applied, <N> unexpected item(s) flagged, <N> already correct
 
 ---
 
@@ -346,6 +840,50 @@ Summary: <N> item(s) created, <N> documentation file(s) copied to ai-context/, <
 - `stack.md` — copied to ai-context/stack.md
 - `architecture.md` — skipped (destination exists — review manually)
 - `notes.md` — excluded by user
+
+### Legacy migrations
+
+<!-- Omit this subsection entirely when LEGACY_MIGRATIONS was empty for the run. -->
+<!-- List each legacy category processed with per-file outcome lines. -->
+<!-- Valid outcome labels: applied, skipped, advisory, non-qualifying, user-skipped -->
+
+**commands/** (strategy: delegate — advisory only):
+- `deploy.md` — qualifying workflow detected. Suggested skill name: deploy. To scaffold: /skill-create deploy
+- `misc.md` — non-qualifying (no structured workflow detected). Recommend manual archival.
+
+**docs/** (strategy: copy):
+- `auth.md` — copied to ai-context/features/auth.md
+- `payments.md` — skipped (destination exists)
+
+**system/** (strategy: append):
+- `architecture.md` — appended to ai-context/architecture.md (separator added)
+- `database.md` — appended to ai-context/stack.md (separator added)
+
+**requirements/** (strategy: scaffold):
+- `auth-requirements` — scaffolded to openspec/changes/2026-03-04-auth-requirements/proposal.md
+
+**sops/** (strategy: user-choice):
+- `deployment.md` — copied to docs/sops/deployment.md (Option B)
+
+**templates/** (strategy: copy):
+- `prd-template.md` — copied to docs/templates/prd-template.md
+
+**project.md** (strategy: section-distribute):
+- `## Tech Stack` section — appended to ai-context/stack.md
+- `## Architecture` section — appended to ai-context/architecture.md
+
+<!-- Source-preservation footer — CONDITIONAL:
+     - When NO files were deleted: display the preservation note below.
+     - When files WERE deleted: omit the preservation note; the "Deleted from .claude/" subsection below serves as the deletion summary. -->
+> All source files in legacy categories were preserved — no files were deleted or moved
+
+### Deleted from .claude/
+
+<!-- Omit this subsection entirely when no cleanup prompts were presented during the run. -->
+<!-- List each deleted file and each declined cleanup category. -->
+
+- `.claude/docs/auth.md` — deleted
+- `templates/ — cleanup declined by user`
 
 ### Unexpected items (not modified)
 
@@ -372,6 +910,21 @@ Summary: <N> item(s) created, <N> documentation file(s) copied to ai-context/, <
 3. Review skipped documentation files — a file was skipped because its destination in
    ai-context/ already exists. Compare source and destination manually and merge if needed.
 4. Project .claude/ structure is now aligned with the canonical SDD layout.
+
+<!-- Legacy migration conditional guidance — include only when the condition was true for this run: -->
+<!-- If commands/ delegate advisories were produced: -->
+5. Review the commands/ advisory list above — invoke /skill-create <name> for each qualifying
+   file to scaffold a new skill.
+<!-- If section-distribute applied to project.md or readme.md: -->
+6. Review the distributed sections in the destination ai-context/ files — verify content is
+   correctly placed.
+<!-- If append applied to system/: -->
+7. Review the appended content in the ai-context/ destination file(s) — merge or deduplicate
+   manually if the appended section overlaps with existing content.
+<!-- If scaffold produced proposals from requirements/: -->
+8. Populate the scaffold proposals in openspec/changes/ before running /sdd-apply.
+<!-- If sops/ was processed: -->
+9. Verify the conventions section or docs/sops/ directory was correctly populated.
 
 <!-- For a no-op run where nothing was missing: -->
 <!-- No action required — .claude/ is already canonical. -->
@@ -411,3 +964,8 @@ Use the expanded absolute path (no tilde or relative segments).
    The inline expected set defined in Step 3 is the single source of truth for this skill.
    Whenever `claude-folder-audit` Check P8 expected items are updated, this skill's inline
    set MUST be updated in sync to prevent false-positive MEDIUM findings.
+
+5. **Source files MUST NOT be deleted without BOTH conditions being true:**
+   **(a)** The file was successfully migrated (copied, appended, scaffolded, or user-choice applied) AND **(b)** the user explicitly confirmed the deletion prompt for that category.
+   The `delegate` strategy (`commands/`) and the `section-distribute` strategy (`project.md`, `readme.md`) are permanently exempt from cleanup prompts — their source files are unconditionally preserved.
+   Any file whose migration outcome was "skipped", "failed", or "excluded" MUST NOT be offered for deletion regardless of user input.

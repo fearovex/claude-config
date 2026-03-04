@@ -69,3 +69,5 @@ ADR files are append-only by convention: once accepted, the original Context, De
 | [015](015-feature-domain-knowledge-layer-architecture.md) | Feature Domain Knowledge Layer — ai-context/features/ as a Named Memory Sub-Layer | Proposed | |
 | [016](016-enhance-claude-folder-audit-content-quality-convention.md) | Claude Folder Audit Content Quality Convention — Additive Sub-Phase Pattern for Project Mode | Accepted | 2026-03-03 |
 | [017](017-tech-skill-mapping-table-inline-convention.md) | Tech Skill Mapping Table — Inline Convention in sdd-apply | Proposed | 2026-03-03 |
+| [018](018-project-claude-folder-organizer-convention.md) | Project Claude Folder Organizer Convention — inline canonical item set with cross-reference coupling | Proposed | 2026-03-04 |
+| [019](019-project-claude-organizer-memory-layer-conventi.md) | Project Claude Organizer Memory Layer Convention — skip-on-destination-exists idempotency for documentation candidate copy operations | Proposed | 2026-03-04 |

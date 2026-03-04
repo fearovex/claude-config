@@ -116,6 +116,7 @@ When working on a skill change in plan mode:
 | `/skill-add <name>` | Adds a skill from the global catalog to the current project |
 | `/memory-init` | Generates ai-context/ files by reading the project from scratch |
 | `/memory-update` | Updates ai-context/ with the work done in the current session |
+| `/project-claude-organizer` | Reads the project .claude/ folder, compares against canonical SDD structure, and applies reorganization after user confirmation |
 
 ### SDD Phases — Development Cycle
 
@@ -155,6 +156,7 @@ When I receive a meta-tool command, I read the corresponding skill and execute i
 | `/skill-add` | `~/.claude/skills/skill-add/SKILL.md` |
 | `/memory-init` | `~/.claude/skills/memory-init/SKILL.md` |
 | `/memory-update` | `~/.claude/skills/memory-update/SKILL.md` |
+| `/project-claude-organizer` | `~/.claude/skills/project-claude-organizer/SKILL.md` |
 
 ### SDD Orchestrator — Delegation Pattern
 
@@ -386,3 +388,4 @@ Each project has its memory layer in `ai-context/`:
 
 ### System Audits
 - `~/.claude/skills/claude-folder-audit/SKILL.md` — audits the ~/.claude/ runtime folder for installation drift, skill deployment gaps, orphaned artifacts, and scope tier compliance
+- `~/.claude/skills/project-claude-organizer/SKILL.md` — reads project .claude/ folder, compares against canonical SDD structure, and applies additive reorganization after user confirmation

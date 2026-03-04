@@ -1,12 +1,12 @@
 ---
-title: Solid Ddd Quality Enforcement
+title: Config Export Token Optimization
 status: Draft
 author: <!-- Your name or team -->
 date: 2026-03-04
-related-change: openspec/changes/solid-ddd-quality-enforcement/
+related-change: openspec/changes/config-export-token-optimization/
 ---
 
-# PRD: Solid Ddd Quality Enforcement
+# PRD: Config Export Token Optimization
 
 ## Problem Statement
 
@@ -14,9 +14,7 @@ related-change: openspec/changes/solid-ddd-quality-enforcement/
      Answer: What is broken or missing? Who is affected? What is the current pain point?
      Be specific — avoid vague statements like "improve experience". -->
 
-- [ ] <!-- Criterion 1 -->
-- [ ] <!-- Criterion 2 -->
-- [ ] <!-- Criterion 3 -->
+- As a ..., I want ... so that ...
 
 ## Target Users
 

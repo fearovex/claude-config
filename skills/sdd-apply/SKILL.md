@@ -61,6 +61,7 @@ I match detected keywords (case-insensitive substring match) against the followi
 
 | Keyword(s) | Skill path |
 |------------|------------|
+| always (non-doc changes) | `~/.claude/skills/solid-ddd/SKILL.md` |
 | react native, expo | `~/.claude/skills/react-native/SKILL.md` |
 | react | `~/.claude/skills/react-19/SKILL.md` |
 | next, nextjs, next.js | `~/.claude/skills/nextjs-15/SKILL.md` |
@@ -84,6 +85,8 @@ I match detected keywords (case-insensitive substring match) against the followi
 | ocr, image text, image ocr | `~/.claude/skills/image-ocr/SKILL.md` |
 
 > Note: `react native` and `expo` are matched before `react` to avoid the shorter keyword absorbing the longer one. Match order in the table is top-to-bottom; once a keyword matches a row, that row's skill is queued for loading.
+
+> Note: The `always (non-doc changes)` row is evaluated after the scope guard. If `scope_guard_triggered` is `true` (documentation-only change), this row is also skipped — along with all other rows in the table.
 
 #### Skill loading
 
@@ -207,14 +210,32 @@ And I mark each completed task:
 
 ---
 
-## Code standards
+## Quality Gate
 
 ### I always follow project conventions
 If `ai-context/conventions.md` exists, I apply it strictly.
 If not, I observe the existing code and follow its patterns.
 
 ### I load technology skills if applicable
-Technology skills are loaded automatically in Step 0 — Technology Skill Preload. No manual judgment is required here.
+Technology skills and `solid-ddd` are loaded automatically in Step 0 — Technology Skill Preload. No manual judgment is required here.
+
+### Quality Gate checklist
+
+Before marking any code task `[x]`, I evaluate each criterion below. For each item I mark one of: ✅ (satisfied) | ❌ VIOLATION | N/A — [reason].
+
+1. **Single Responsibility (SRP)**: Does each new or modified class, function, or module have exactly one reason to change? Signal: can it be described in one sentence without using "and"? If not → `QUALITY_VIOLATION: SRP — <description>`.
+2. **Abstraction appropriateness (OCP)**: Is new behavior added via extension (new file/class/interface) rather than modification of existing stable code? Are abstractions justified by actual reuse or testability need today — not speculatively? Premature abstractions with no current consumer → `QUALITY_VIOLATION: OCP — <description>`.
+3. **Dependency direction (DIP)**: Do high-level modules depend on abstractions (interfaces/ports), not on concrete implementations? Dependencies pointing inward toward stable abstractions → PASS. Outward dependencies on volatile implementations → `QUALITY_VIOLATION: DIP — <description>`.
+4. **Domain model integrity**: Is business logic inside domain objects (entities, aggregates, value objects), not leaked into services or controllers? An anemic domain model (domain objects with only getters/setters and no behavior) → `QUALITY_VIOLATION: Domain model — <description>`. Mark N/A if the task does not touch domain model code.
+5. **Layer separation**: Does the code respect the architectural layers defined in the design (e.g., domain → application → infrastructure)? Cross-layer leakage (e.g., infrastructure detail in a domain entity) → `QUALITY_VIOLATION: Layer separation — <description>`.
+6. **No scope creep**: Does the implementation stay strictly within the task's defined scope (tasks.md + design.md)? Files or features outside the scope → `QUALITY_VIOLATION: Scope creep — <description>`, escalated to `DEVIATION` if it contradicts an observable behavior in the spec.
+7. **Naming clarity**: Do names (classes, functions, variables) reveal intent without requiring a comment to explain them? If a name needs a comment to be understood, rename it first → `QUALITY_VIOLATION: Naming — <description>`.
+
+**Reporting rules:**
+- `N/A — [one-line reason]`: the criterion does not apply to this task (e.g., "task adds a CLI flag — no domain model touched").
+- `QUALITY_VIOLATION: <principle> — <description>`: criterion fails. Fix the code BEFORE marking `[x]`. If fixing requires scope outside this task, report as `DEVIATION: <principle> — <description>` and set `status: warning`.
+- Non-contradicting violations do NOT block the apply phase. The orchestrator MUST surface all `QUALITY_VIOLATION` notes in the phase summary.
+- A violation that contradicts a scenario in the spec MUST be escalated to `DEVIATION` and MUST set `status: warning`.
 
 ### No over-engineering
 - I implement the minimum necessary to pass the spec's scenarios

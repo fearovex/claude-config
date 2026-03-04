@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-03-04 — solid-ddd-quality-enforcement
+
+### Summary
+Introduced SOLID principles and DDD tactical patterns enforcement into the SDD apply workflow.
+
+### Changes
+- **Created** `skills/solid-ddd/SKILL.md` — new reference skill covering all 5 SOLID principles and 7 DDD tactical patterns (Entity, Value Object, Aggregate, Repository, Domain Service, Application Service, Domain Event) with concrete bad/good examples and anti-pattern detection signals
+- **Modified** `skills/sdd-apply/SKILL.md`:
+  - Added `solid-ddd` as unconditional preload row (first row) in Stack-to-Skill Mapping Table — loaded for all non-documentation code changes
+  - Replaced `## Code standards` section with `## Quality Gate` — 7-item checklist (SRP, OCP, DIP, domain integrity, no anemic model, layer separation, naming clarity) that must be evaluated before marking any task [x]
+- **Updated** `CLAUDE.md` (project + runtime) — added `### Design Principles` section to Skills Registry
+
+### Motivation
+Tech skills (react-19, typescript, etc.) covered framework patterns but no SOLID or DDD principles. The sdd-apply Code Standards section was too vague, resulting in low-quality code with poor separation of concerns, anemic domain models, and mixed responsibilities.
+
+### ADR
+`docs/adr/022-solid-ddd-quality-enforcement-pattern.md`
+
+---
+
 ## [2026-03-04] — project-claude-organizer-cleanup-after-migrate (verify + archive)
 
 **Type**: SDD cycle closure

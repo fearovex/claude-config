@@ -171,7 +171,7 @@ claude-config/ (observed 2026-03-03)
 └── memory/          MEMORY.md + topic files
 ```
 
-Active SDD changes: `config-export`, `enhance-claude-folder-audit`, `feature-domain-knowledge-layer` (all have proposal.md + tasks.md; verify-report.md present for config-export and feature-domain-knowledge-layer).
+Active SDD changes: none — `config-export`, `enhance-claude-folder-audit`, and `feature-domain-knowledge-layer` all archived as of 2026-03-03.
 
 <!-- [/auto-updated] -->
 

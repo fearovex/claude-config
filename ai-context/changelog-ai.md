@@ -4,6 +4,40 @@
 
 ---
 
+## [2026-03-03] — enhance-claude-folder-audit archived
+
+**Type**: Enhancement
+**Agent**: Claude Sonnet 4.6 (sdd-ff + sdd-apply + sdd-verify + sdd-archive)
+**What was done**: Completed full SDD cycle for `enhance-claude-folder-audit`. Extended the `claude-folder-audit` skill's project mode from 5 shallow structural checks to 8 meaningful audit dimensions. Added CLAUDE.md content quality sub-checks (P1 Phase C), SKILL.md frontmatter and section contract sub-checks (P2/P3 Phase C), ai-context/ memory layer check (P6), ai-context/features/ domain knowledge layer check (P7, ADR-015 V2), and .claude/ folder inventory check (P8). Created ADR-016. Change folder archived at `openspec/changes/archive/2026-03-03-enhance-claude-folder-audit/`. Verification: PASS WITH WARNINGS (0 critical, 2 cosmetic warnings).
+**Modified files**:
+- `skills/claude-folder-audit/SKILL.md` — added P1 Phase C, P2/P3 Phase C sub-checks, Check P6, P7, P8; extended report template and Rules section
+- `ai-context/architecture.md` — added "claude-folder-audit: Check Inventory (project mode)" table documenting all 8 checks, Phase C sub-checks, section detection rule, and ADR-016 reference
+- `docs/adr/016-enhance-claude-folder-audit-content-quality-convention.md` — created; Phase C sub-check convention
+- `docs/adr/README.md` — ADR-016 row added
+- `openspec/specs/folder-audit-execution/spec.md` — synced: P1 Phase C, P2/P3 Phase C, P6, P7, P8, modified "checks MUST all execute" (now covers P1–P8)
+- `openspec/specs/folder-audit-reporting/spec.md` — synced: P6/P7/P8 section headers, report summary, Findings Summary, Recommended Next Steps, INFO collapsing
+- `openspec/changes/claude-folder-audit-deep-inspection/` — removed (empty orphan directory)
+**Decisions made**:
+- Content quality checks are additive Phase C sub-checks inside existing checks, not new top-level check numbers — avoids identifier breaking changes (ADR-016 convention)
+- All new content quality findings capped at MEDIUM; P7 features layer capped at LOW; P7 absence produces INFO only (per ADR-015 non-blocking design intent)
+- `name:` field NOT validated in P2/P3 frontmatter sub-checks — only `format:` field validity matters for audit purposes (documented deviation from spec, tasks.md 5.3)
+- Section detection: line-prefix matching (`## heading`; `**Triggers**` accepted for Triggers) — consistent with all other skill content scanning in the system
+**Notes**: Verify PASS WITH WARNINGS. Warnings were cosmetic only: stale "15/17" tasks.md header (actual count is 15/15) and documented `name:` field spec deviation. Both are non-blocking. User docs review checkbox absent (pre-dates requirement).
+
+## [2026-03-03] — config-export archived
+
+**Type**: Feature
+**Agent**: Claude Sonnet 4.6 (sdd-ff + sdd-apply + sdd-verify + sdd-archive)
+**What was done**: Full SDD cycle for `config-export` completed and archived. Verification PASS (8/8 tasks, all spec scenarios COMPLIANT, no critical issues). New `config-export` skill enables cross-tool portability of Claude configuration: reads CLAUDE.md + ai-context/ and uses LLM in-context transformation to generate tool-specific instruction files for GitHub Copilot, Google Gemini, and Cursor. Two new master specs created.
+**Modified files**:
+- `skills/config-export/SKILL.md` — new procedural skill (Steps 1–5: source collection, target selection, dry-run preview, file writing, summary; embedded transformation prompts for all 3 targets)
+- `CLAUDE.md` — skills registry entry added under "Tools / Platforms"
+- `openspec/specs/config-export-skill/spec.md` — new master spec (invocation contract, source collection, dry-run, idempotency)
+- `openspec/specs/config-export-targets/spec.md` — new master spec (content requirements, strip/retain rules for all 3 targets)
+**Key decisions**: procedural SKILL.md only (no helper scripts); Claude in-context transformation (no external API); canonical tool-expected output paths; dry-run default; `globs: ""` enforced; Claude target deferred to V2.
+
+---
+
 ## [2026-03-03] — feature-domain-knowledge-layer archived
 
 **Type**: Feature

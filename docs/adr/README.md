@@ -74,3 +74,4 @@ ADR files are append-only by convention: once accepted, the original Context, De
 | [020](020-project-claude-organizer-smart-migration-patt.md) | Project Claude Organizer Smart Migration Pattern — Legacy Directory Intelligence layer with 8 known patterns and advisory delegation model | Proposed | 2026-03-04 |
 | [021](021-project-claude-organizer-cleanup-after-migrate-conv.md) | Project Claude Organizer Cleanup Convention — Confirmed-Deletion Post-Migration Pattern | Proposed | 2026-03-04 |
 | [022](022-solid-ddd-quality-enforcement-pattern.md) | Solid Ddd Quality Enforcement Pattern — unconditional solid-ddd preload and Quality Gate checklist in sdd-apply | Proposed | 2026-03-04 |
+| [023](023-project-claude-organizer-commands-scaffold.md) | Project Claude Organizer Commands Scaffold Pattern — active SKILL.md generation for commands/ and skills audit sub-step | Proposed | 2026-03-04 |

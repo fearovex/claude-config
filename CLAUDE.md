@@ -391,4 +391,4 @@ Each project has its memory layer in `ai-context/`:
 
 ### System Audits
 - `~/.claude/skills/claude-folder-audit/SKILL.md` — audits the ~/.claude/ runtime folder for installation drift, skill deployment gaps, orphaned artifacts, and scope tier compliance
-- `~/.claude/skills/project-claude-organizer/SKILL.md` — reads project .claude/ folder, compares against canonical SDD structure, and applies additive reorganization after user confirmation
+- `~/.claude/skills/project-claude-organizer/SKILL.md` — reads project .claude/ folder, compares against canonical SDD structure, and applies additive reorganization after user confirmation; actively scaffolds SKILL.md skeletons per qualifying file in commands/ (strategy: scaffold); performs a skills audit pass over .claude/skills/ detecting scope-overlap (HIGH), broken-shell (MEDIUM), and suspicious-name (LOW) findings

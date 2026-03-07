@@ -4,6 +4,42 @@
 
 ---
 
+## [2026-03-06] — narrow-project-claude-organizer-scope (apply)
+
+**Type**: SDD apply
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Narrowed the top-level contract of `project-claude-organizer` so the command now exposes an explicit organizer kernel, scope boundaries, and compatibility policy.
+
+### Changes
+- `skills/project-claude-organizer/SKILL.md` — added `## Organizer Kernel`, `## Scope Boundaries`, and `## Compatibility Policy`; clarified that unexpected structures remain advisory-first, skills audit does not expand mutation scope, and cleanup deletion is a follow-up opt-in step rather than organizer core behavior.
+- `openspec/specs/project-claude-organizer/spec.md` — updated the cumulative organizer master spec with the narrowed-scope requirements.
+- `openspec/changes/narrow-project-claude-organizer-scope/verify-report.md` — created verification artifact for the SDD cycle.
+
+### Decisions
+- This phase intentionally narrows the organizer contract without deleting the existing migration handlers.
+- The cumulative `project-claude-organizer` spec remains the master spec domain; this cycle adds scope-control requirements to it rather than creating a new standalone master domain.
+- `install.sh` was run successfully after the skill change; MCP registration remained skipped because the `claude` CLI is not in PATH.
+
+---
+
+## [2026-03-06] — narrow-project-claude-organizer-scope (archive)
+
+**Type**: SDD archive
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Archived the organizer scope rewrite after promoting the narrowed-scope contract into the cumulative `project-claude-organizer` master spec and moving the active change into `openspec/changes/archive/`.
+
+### Changes
+- `openspec/specs/project-claude-organizer/spec.md` — updated cumulative organizer master spec with explicit kernel, scope-boundary, and advisory-first requirements.
+- `openspec/changes/archive/2026-03-06-narrow-project-claude-organizer-scope/` — archived change folder created.
+- `openspec/changes/archive/2026-03-06-narrow-project-claude-organizer-scope/CLOSURE.md` — created.
+
+### Decisions
+- The organizer rewrite sequence is now complete at the contract level: memory-layer extension, commands conversion, and scope narrowing all live in the same cumulative master spec.
+- The cycle closed as `PASS WITH WARNINGS` because there is still no automated test suite for skill changes and runtime deployment still depends on a missing `claude` CLI for MCP registration.
+- Any future organizer work should focus on reducing or extracting handlers rather than adding more scope to the live skill.
+
+---
+
 ## [2026-03-06] — project-claude-organizer-commands-conversion (apply)
 
 **Type**: SDD apply

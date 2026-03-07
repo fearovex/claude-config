@@ -1,6 +1,6 @@
 # Known Issues & Gotchas — claude-config
 
-> Last updated: 2026-02-26
+> Last updated: 2026-03-06
 
 ## CRLF line endings break bash scripts on Windows (FIXED)
 
@@ -27,40 +27,31 @@ sed -i 's/\r$//' sync.sh install.sh
 
 ---
 
-## ~~sync.sh overwrites repo edits if run before install.sh~~ (FIXED 2026-02-26)
+## sync.sh is memory-only
 
-`sync.sh` copies **`~/.claude/ → repo/`**. If edits are made in the repo and `sync.sh` is run before `install.sh`, the edits are silently overwritten by the old `~/.claude/` content.
+`sync.sh` no longer syncs the full runtime directory. It only copies `~/.claude/memory/` into `repo/memory/`.
 
-**Correct workflow after editing repo files:**
+**Correct workflows:**
 ```
-edit repo files  →  bash install.sh  →  bash sync.sh  →  git commit
+config changes   →  edit repo files  →  bash install.sh  →  git commit
+memory capture   →  bash sync.sh     →  git add memory/  →  git commit
 ```
-Never run `sync.sh` as the first step after editing repo files.
+
+Never run `sync.sh` expecting it to deploy or recover skill/config changes.
 
 ---
 
-## rsync not available on Windows
+## sync.sh no longer depends on rsync
 
-`sync.sh` uses `rsync` which is not installed by default on Windows/Git Bash.
-
-**Workaround**: Use `cp -r` manually:
-```bash
-cp ~/.claude/CLAUDE.md ~/claude-config/CLAUDE.md
-cp ~/.claude/settings.json ~/claude-config/settings.json
-cp -r ~/.claude/skills/. ~/claude-config/skills/
-cp -r ~/.claude/memory/. ~/claude-config/memory/
-cp -r ~/.claude/hooks/. ~/claude-config/hooks/
-```
-
-**Fix needed**: Update `sync.sh` to use `cp -r` with a delete step, or detect OS and use the right tool.
+`sync.sh` now uses `cp -r` for `memory/` only, so the old Windows/Git Bash `rsync` limitation no longer applies.
 
 ---
 
 ## install.sh is one-directional
 
-`install.sh` copies FROM repo TO `~/.claude/`. If Claude modified skills during a session and `sync.sh` wasn't run, those changes are lost when `install.sh` is next executed.
+`install.sh` copies FROM repo TO `~/.claude/`. If runtime skills or config were modified directly in `~/.claude/`, those changes are lost when `install.sh` is next executed.
 
-**Rule**: Always `sync.sh` → `git commit` after any Claude session that modified skills or CLAUDE.md.
+**Rule**: Make skill and config changes in the repo, then run `install.sh`.
 
 ---
 
@@ -80,7 +71,9 @@ cp -r ~/.claude/hooks/. ~/claude-config/hooks/
 
 ## Skills modified via Claude Code don't auto-sync
 
-When a Claude Code session modifies `~/.claude/skills/` directly (not via the repo), those changes do NOT appear in `~/claude-config/` until `sync.sh` is run. This happened in the 2026-02-23 session (project-audit rewrite + project-fix creation were done in `~/.claude/` before sync).
+When a Claude Code session modifies `~/.claude/skills/` directly (not via the repo), those changes do NOT appear in `~/claude-config/` via `sync.sh`, because `sync.sh` is memory-only. This happened in the 2026-02-23 session before the workflow was tightened.
+
+**Correct approach**: edit repo files directly, or manually copy runtime changes back before running `install.sh`.
 
 ---
 

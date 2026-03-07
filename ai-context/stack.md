@@ -1,10 +1,10 @@
 # Stack — claude-config
 
-> Last updated: 2026-02-23
+> Last updated: 2026-03-06
 
 ## What this project is
 
-`claude-config` is the source-of-truth repository for the global Claude Code configuration. It is synced to `~/.claude/` via `install.sh` and captured back via `sync.sh`.
+`claude-config` is the source-of-truth repository for the global Claude Code configuration. It is deployed to `~/.claude/` via `install.sh`, while `sync.sh` captures `memory/` only.
 
 ## File types
 
@@ -24,9 +24,9 @@ claude-config/
 ├── CLAUDE.md              # Global orchestrator instructions
 ├── settings.json          # Claude Code user settings
 ├── settings.local.json    # Local overrides (not committed)
-├── install.sh             # Restore ~/.claude/ from this repo
-├── sync.sh                # Capture ~/.claude/ back into this repo
-├── skills/                # Skill catalog (~35 skills)
+├── install.sh             # Deploy this repo into ~/.claude/
+├── sync.sh                # Capture ~/.claude/memory/ back into repo/memory/
+├── skills/                # Skill catalog
 │   ├── sdd-*/             # SDD phase skills (8 phases)
 │   ├── project-*/         # Meta-tools (setup, audit, fix, update)
 │   ├── memory-init/       # Memory initialization (ai-context/ from scratch)
@@ -91,7 +91,7 @@ Source: openspec/config.yaml + file-extension sampling
 | Hooks runtime | Node.js | file: hooks/smart-commit-context.js (.js extension) |
 | Version control | Git | .git directory |
 
-Observed skill count: **47 directories** under `skills/` (up from 44 on 2026-03-01 — natural catalog growth: config-export, feature-domain-expert, and one additional skill added).
+Observed skill count: **49 directories** under `skills/`.
 File extension distribution: `.md` (83), `.json` (3), `.sh` (2), `.yaml` (1), `.js` (1).
 No standard package manifests (package.json, pyproject.toml, etc.) — expected for a Markdown/YAML/Bash meta-system.
 

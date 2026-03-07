@@ -4,6 +4,177 @@
 
 ---
 
+## [2026-03-06] — project-claude-organizer-commands-conversion (apply)
+
+**Type**: SDD apply
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Completed the active organizer rewrite by formalizing commands/ scaffolding, project-local skills audit reporting, emoji-normalized section distribution, and explicit `readme.md` migration handling.
+
+### Changes
+- `skills/project-claude-organizer/SKILL.md` — exposes active `commands/` scaffolding, `### Step 3c — Skills Audit`, emoji-normalized `section-distribute`, explicit `readme.md` user-choice migration, and report sections for `### Commands scaffolded`, `### Skills audit`, and `### readme.md migration`.
+- `openspec/specs/project-claude-organizer/spec.md` — promoted the active delta requirements into the master organizer spec without removing earlier memory-layer and cleanup requirements.
+- `openspec/changes/project-claude-organizer-commands-conversion/verify-report.md` — created verification artifact for the cycle.
+
+### Decisions
+- The organizer keeps the additive-first safety model: `commands/` can scaffold new skills, but source files under `.claude/commands/` remain non-deletable.
+- Skills audit remains advisory-only even when it reports HIGH findings; organizer does not gain permission to rewrite or delete local skills automatically.
+- `install.sh` was run successfully after the artifact updates; MCP registration remained skipped because the `claude` CLI is not in PATH.
+
+---
+
+## [2026-03-06] — project-claude-organizer-commands-conversion (archive)
+
+**Type**: SDD archive
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Archived the organizer commands-conversion cycle after promoting its requirements into the cumulative `project-claude-organizer` master spec and moving the active change into `openspec/changes/archive/`.
+
+### Changes
+- `openspec/specs/project-claude-organizer/spec.md` — updated as the cumulative master organizer spec, now including commands/ scaffold behavior, skills audit, emoji normalization, and `readme.md` migration requirements.
+- `openspec/changes/archive/2026-03-06-project-claude-organizer-commands-conversion/` — archived change folder created.
+- `openspec/changes/archive/2026-03-06-project-claude-organizer-commands-conversion/CLOSURE.md` — created.
+
+### Decisions
+- The organizer master spec remains cumulative because this skill already had an established domain that now carries multiple behavioral extensions.
+- The cycle closed as `PASS WITH WARNINGS` because there is still no automated test suite for skill changes and runtime deployment still depends on a missing `claude` CLI for MCP registration.
+- The next organizer rewrite, if pursued, should be a narrower scope reduction pass rather than another feature-expansion cycle.
+
+---
+
+## [2026-03-06] — simplify-project-fix-action-model (apply)
+
+**Type**: SDD apply
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Reworked the top-level contract of `project-fix` so the command now exposes an explicit execution model, action classes, and compatibility policy.
+
+### Changes
+- `skills/project-fix/SKILL.md` — added `## Execution Model`, `## Action Classes`, and `## Compatibility Policy`; clarified action normalization in Step 1; added an explicit rule that unknown or deprecated action types never gain automatic side effects.
+- `openspec/changes/simplify-project-fix-action-model/` — created proposal, PRD shell, spec, design, tasks, and verify artifacts for the SDD cycle.
+
+### Decisions
+- This phase intentionally rewrites the command contract, not the detailed logic of every Phase 1-5 handler.
+- The existing `project-fix-behavior` and `fix-setup-behavior` specs remain valid detailed behavior specs; the new `project-fix-action-model` domain acts as the umbrella contract.
+- `install.sh` was run successfully after the skill change; MCP registration remained skipped because the `claude` CLI is not in PATH.
+
+---
+
+## [2026-03-06] — simplify-project-fix-action-model (archive)
+
+**Type**: SDD archive
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Archived the `simplify-project-fix-action-model` cycle after promoting the new `project-fix-action-model` master spec and moving the active change into `openspec/changes/archive/`.
+
+### Changes
+- `openspec/specs/project-fix-action-model/spec.md` — created as the new umbrella master spec for `project-fix`.
+- `openspec/changes/archive/2026-03-06-simplify-project-fix-action-model/` — archived change folder created.
+- `openspec/changes/archive/2026-03-06-simplify-project-fix-action-model/CLOSURE.md` — created.
+
+### Decisions
+- The new `project-fix-action-model` spec complements `project-fix-behavior` and `fix-setup-behavior`; it does not replace them.
+- The cycle closed as `PASS WITH WARNINGS` because the repo still has no automated tests for skill changes and the `format:` validator mismatch remains external to this change.
+- No user-doc update was needed because command names and onboarding workflows were unchanged.
+
+## [2026-03-06] — rewrite-project-audit-core (apply)
+
+**Type**: SDD apply
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Reworked the top-level contract of `project-audit` so the command now exposes an explicit audit kernel, dimension classes, and compatibility policy.
+
+### Changes
+- `skills/project-audit/SKILL.md` — added `## Audit Kernel`, `## Dimension Classes`, and `## Compatibility Policy`; changed the top-level process heading to `## Audit Process`; clarified that legacy `## Execution rules` acceptance is transitional compatibility only; added an explicit compatibility rule in `## Rules`.
+- `openspec/changes/rewrite-project-audit-core/` — created proposal, PRD shell, spec, design, tasks, and verify artifacts for the SDD cycle.
+
+### Decisions
+- This phase intentionally rewrites the command contract, not the detailed logic of every dimension.
+- The existing `audit-execution`, `audit-dimensions`, and `audit-scoring` specs remain valid cross-cutting detail specs; the new `project-audit-core` domain acts as the umbrella contract.
+- `install.sh` was run successfully after the skill change; MCP registration remained skipped because the `claude` CLI is not in PATH.
+
+---
+
+## [2026-03-06] — rewrite-project-audit-core (archive)
+
+**Type**: SDD archive
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Archived the `rewrite-project-audit-core` cycle after promoting the new `project-audit-core` master spec and moving the active change into `openspec/changes/archive/`.
+
+### Changes
+- `openspec/specs/project-audit-core/spec.md` — created as the new umbrella master spec for `project-audit`.
+- `openspec/changes/archive/2026-03-06-rewrite-project-audit-core/` — archived change folder created.
+- `openspec/changes/archive/2026-03-06-rewrite-project-audit-core/CLOSURE.md` — created.
+
+### Decisions
+- The new `project-audit-core` spec complements `audit-execution`, `audit-dimensions`, and `audit-scoring`; it does not replace them.
+- The cycle closed as `PASS WITH WARNINGS` because the repo still has no automated tests for skill changes and the `format:` validator mismatch remains external to this change.
+- No user-doc update was needed because command names and onboarding workflows were unchanged.
+
+## [2026-03-06] — Project skills portfolio review
+
+**Type**: Audit / Portfolio review
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Reviewed the `skills/project-*` catalog as a portfolio and assigned explicit disposition recommendations: keep, rewrite, merge, or deprecate.
+
+### Changes
+- `project-skills-portfolio-review.md` — created: portfolio review for `project-setup`, `project-onboard`, `project-audit`, `project-analyze`, `project-fix`, `project-update`, and `project-claude-organizer`.
+
+### Decisions
+- The `project-*` portfolio should be preserved as a group; no immediate merge or deprecate action is recommended.
+- `project-audit`, `project-fix`, and `project-claude-organizer` are the three rewrite candidates because they concentrate the highest complexity and maintenance churn.
+- `project-setup`, `project-onboard`, `project-analyze`, and `project-update` still have sufficiently distinct boundaries to keep without structural change.
+
+---
+
+## [2026-03-06] — Project skills rewrite roadmap
+
+**Type**: Design / Roadmap
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Converted the portfolio review into an implementation-order roadmap for rewriting the three highest-cost `project-*` skills.
+
+### Changes
+- `project-skills-rewrite-roadmap.md` — created: rewrite goals, principles, sequencing, and suggested SDD change names for `project-audit`, `project-fix`, and `project-claude-organizer`.
+
+### Decisions
+- `project-audit` should be rewritten first because it defines the diagnostic contract consumed by the rest of the project-health flow.
+- `project-fix` should be rewritten second against the stabilized audit contract, with a reduced action taxonomy.
+- `project-claude-organizer` should be rewritten last with a narrower, more conservative migration scope.
+
+## [2026-03-06] — Content and relevance audit for SDD and project skills
+
+**Type**: Audit / Analysis
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Reviewed `skills/sdd-*` and `skills/project-*` for purpose, relevance, overlap, and contract consistency.
+
+### Changes
+- `sdd-project-skills-audit-report.md` — created: content and relevance audit focused on SDD phase skills and `project-*` meta-tool skills.
+
+### Decisions
+- The main debt in the SDD and `project-*` layer is not missing files but consistency debt: mixed trigger syntax, mixed procedural-section contracts, and audit rules that still accept legacy structure.
+- The current SDD and `project-*` catalog is operationally relevant as a group; no immediate candidate for removal was identified in this pass.
+- Future cleanup should prioritize command normalization and contract alignment before any merge/deprecate decisions.
+
+---
+
+## [2026-03-06] — Repository consistency corrections after full audit
+
+**Type**: Documentation / Configuration
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Corrected active repository inconsistencies found during the full-project audit.
+
+### Changes
+- `README.md` — corrected `sync.sh` semantics to memory-only, updated contribution workflow to use `install.sh` for config changes, and removed stale session-sync guidance.
+- `ai-context/known-issues.md` — removed obsolete full-runtime sync and `rsync` guidance; clarified the current split between `install.sh` and `sync.sh`.
+- `ai-context/stack.md` — aligned the project description and directory comments with the memory-only `sync.sh` model; updated observed skill count to 49.
+- `skills/project-fix/SKILL.md` — renamed the final `## Execution rules` section to canonical `## Rules`.
+- `memory/MEMORY.md` — translated to English, removed outdated command forms, and updated the skill references.
+- `.github/copilot-instructions.md` — updated the skill count and replaced the obsolete `rsync` note with the current cross-platform `sync.sh` behavior.
+- `GEMINI.md` — updated the skill count and replaced the obsolete `rsync` note with the current cross-platform `sync.sh` behavior.
+- `repo-audit-report.md` — preserved as the audit baseline and annotated to reflect the initial correction pass.
+
+### Decisions
+- `sync.sh` remains documented strictly as `~/.claude/memory/ -> repo/memory/`; no active file should describe it as a general runtime sync.
+- Hardcoded skill counts are kept only where they add value and must reflect the current catalog size.
+- `memory/MEMORY.md` remains versioned in the repo for now, but its content must still follow the English-only repository rule.
+
+---
+
 ## [2026-03-04] — project-claude-organizer-commands-conversion (apply phases 1–5)
 
 **Type**: SDD apply

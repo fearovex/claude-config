@@ -48,8 +48,8 @@ any skill that describes an ordered procedure.
 | Section | Accepted headings | Required? |
 |---------|------------------|-----------|
 | Trigger definition | `**Triggers**` or `## Triggers` | ✅ Required |
-| Process | `## Process` or `### Step N` (at least one step heading) | ✅ Required |
-| Rules | `## Rules` or `## Execution rules` | ✅ Required |
+| Process | `## Process` | ✅ Required |
+| Rules | `## Rules` | ✅ Required |
 
 **Structural check** (D4b / D9-3):
 - Missing `## Process` → MEDIUM finding: `"procedural skill missing ## Process section"`
@@ -113,7 +113,7 @@ documents "how to use X correctly" with concrete code patterns.
 |---------|------------------|-----------|
 | Trigger definition | `**Triggers**` or `## Triggers` | ✅ Required |
 | Patterns or Examples | `## Patterns` **or** `## Examples` (at least one) | ✅ Required |
-| Rules | `## Rules` or `## Execution rules` | ✅ Required |
+| Rules | `## Rules` | ✅ Required |
 | Process | `## Process` | ❌ Not required — its absence is not a finding |
 
 **Structural check** (D4b / D9-3):
@@ -193,7 +193,7 @@ skills are better served by Format B (which may include an anti-patterns section
 |---------|------------------|-----------|
 | Trigger definition | `**Triggers**` or `## Triggers` | ✅ Required |
 | Anti-patterns | `## Anti-patterns` | ✅ Required |
-| Rules | `## Rules` or `## Execution rules` | ✅ Required |
+| Rules | `## Rules` | ✅ Required |
 | Process | `## Process` | ❌ Not required — its absence is not a finding |
 
 > **Note**: If Format C does not suit your skill (e.g., it mixes patterns and anti-patterns),

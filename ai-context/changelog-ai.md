@@ -4,6 +4,45 @@
 
 ---
 
+## [2026-03-06] — normalize-skill-contract-debt (apply)
+
+**Type**: SDD apply
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Normalized the active SDD and `project-*` skill contract so command triggers, procedural section headings, and audit validation now describe the same live structure.
+
+### Changes
+- `skills/sdd-explore/SKILL.md`, `skills/sdd-propose/SKILL.md`, `skills/sdd-spec/SKILL.md`, `skills/sdd-design/SKILL.md`, `skills/sdd-tasks/SKILL.md`, `skills/sdd-apply/SKILL.md`, `skills/sdd-verify/SKILL.md`, `skills/sdd-archive/SKILL.md` — replaced legacy `sdd:phase` trigger markers with slash-command triggers.
+- `skills/sdd-ff/SKILL.md`, `skills/sdd-new/SKILL.md`, `skills/project-setup/SKILL.md`, `skills/project-fix/SKILL.md`, `skills/project-audit/SKILL.md` — normalized the top-level procedural section to literal `## Process`; `sdd-ff` and `sdd-new` now nest step headings beneath that section.
+- `skills/project-update/SKILL.md` and `skills/project-setup/SKILL.md` — expose slash-command triggers.
+- `skills/project-audit/SKILL.md` — tightened compatibility wording and active validation to require canonical `## Process` and `## Rules` headings.
+- `docs/format-types.md`, `.github/copilot-instructions.md`, and `ai-context/conventions.md` — aligned active documentation with the canonical contract.
+- `openspec/specs/skill-format-types/spec.md`, `openspec/specs/project-audit-core/spec.md`, and `openspec/specs/audit-execution/spec.md` — promoted the normalized contract into the active master specs.
+
+### Decisions
+- The repo now treats slash commands as the canonical trigger form for active SDD and `project-*` skills; natural-language trigger phrases remain allowed as secondary discoverability aids.
+- Active procedural skills use a literal `## Process` heading; `### Step N` remains nested content inside that section rather than an alternative top-level structure.
+- `## Execution rules` remains historical terminology only; active-catalog validation uses `## Rules` as the canonical terminal rules heading.
+- `bash install.sh` completed successfully after the contract normalization; MCP registration remained skipped because the `claude` CLI is not in PATH.
+
+---
+
+## [2026-03-06] — normalize-skill-contract-debt (archive)
+
+**Type**: SDD archive
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Archived the skill-contract debt cleanup after promoting the normalized trigger and heading contract into the active master specs and moving the change into `openspec/changes/archive/`.
+
+### Changes
+- `openspec/specs/skill-format-types/spec.md` — updated to describe canonical active `## Process` and `## Rules` headings.
+- `openspec/specs/project-audit-core/spec.md` — updated so compatibility policy no longer implies legacy heading equivalence for active validation.
+- `openspec/specs/audit-execution/spec.md` — updated so the batching constraint lives in the canonical `## Rules` section.
+- `openspec/changes/archive/2026-03-06-normalize-skill-contract-debt/` — archived change folder created.
+- `openspec/changes/archive/2026-03-06-normalize-skill-contract-debt/CLOSURE.md` — created.
+
+### Decisions
+- The active repository contract is now stricter than the historical archive: archived references may still mention older labels, but live skills, live docs, and live validation no longer preserve them as equivalent forms.
+- The cycle closed as `PASS WITH WARNINGS` because automated tests for skill content still do not exist and MCP registration still depends on the missing `claude` CLI.
+
 ## [2026-03-06] — narrow-project-claude-organizer-scope (apply)
 
 **Type**: SDD apply

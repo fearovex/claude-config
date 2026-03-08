@@ -45,7 +45,7 @@ format: procedural   # valid values: procedural | reference | anti-pattern
 
 | `format:` value | Required main section | `## Process` required? |
 |-----------------|----------------------|------------------------|
-| `procedural` (or absent) | `## Process` or `### Step N` | Yes |
+| `procedural` (or absent) | `## Process` | Yes |
 | `reference` | `## Patterns` or `## Examples` | No |
 | `anti-pattern` | `## Anti-patterns` | No |
 
@@ -192,7 +192,7 @@ All sampled SKILL.md files follow this pattern:
 2. H1 heading (`# skill-name`)
 3. Blockquote description (`> ...`)
 4. Bold triggers (`**Triggers**: ...`)
-5. Format-specific main section: `## Process` / `### Step N` (procedural), `## Patterns` or `## Examples` (reference), `## Anti-patterns` (anti-pattern)
+5. Format-specific main section: `## Process` with nested `### Step N` headings (procedural), `## Patterns` or `## Examples` (reference), `## Anti-patterns` (anti-pattern)
 6. `## Rules` section last
 
 ### Error handling (observed)

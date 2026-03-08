@@ -171,7 +171,7 @@ bash sync.sh → git add memory/ && git commit
 Use this periodically to persist Claude's automatic memory updates (`~/.claude/memory/`) into the repo.
 This is the ONLY directory that flows `~/.claude/ → repo/`.
 
-<!-- [auto-updated]: observed-conventions — last run: 2026-03-03 -->
+<!-- [auto-updated]: observed-conventions — last run: 2026-03-08 -->
 ## Conventions Observed (auto-detected)
 
 Sample: 20 files across skills/, ai-context/

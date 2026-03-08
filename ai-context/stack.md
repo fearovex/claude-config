@@ -76,7 +76,7 @@ git clone <repo> && bash install.sh
 `install.sh` is repo-authoritative: copies everything repo → `~/.claude/`.
 `sync.sh` captures memory/ only: `~/.claude/memory/ → repo/memory/`. Never run it expecting to capture skill or config changes.
 
-<!-- [auto-updated]: stack-detection — last run: 2026-03-03 -->
+<!-- [auto-updated]: stack-detection — last run: 2026-03-08 -->
 ## Stack (auto-detected)
 
 Source: openspec/config.yaml + file-extension sampling
@@ -92,7 +92,7 @@ Source: openspec/config.yaml + file-extension sampling
 | Version control | Git | .git directory |
 
 Observed skill count: **49 directories** under `skills/`.
-File extension distribution: `.md` (83), `.json` (3), `.sh` (2), `.yaml` (1), `.js` (1).
+File extension distribution: `.md` (100), `.json` (3), `.sh` (2), `.yaml` (1), `.js` (1), `.ps1` (1).
 No standard package manifests (package.json, pyproject.toml, etc.) — expected for a Markdown/YAML/Bash meta-system.
 
 <!-- [/auto-updated] -->

@@ -4,6 +4,21 @@
 
 ---
 
+## [2026-03-08] — settings-write-permissions-for-project-tools
+
+**Type**: Config update
+**Agent**: GitHub Copilot (GPT-5.4)
+**Change**: Updated the repo-authoritative Claude Code permissions so routine write/edit operations used by `project-audit`, `project-fix`, and `project-analyze` no longer trigger repeated file-write approval prompts.
+
+### Changes
+- `settings.json` — added `Write` and `Edit` to the allowed tool permissions alongside `Read`, `Glob`, `Grep`, and `Bash`.
+
+### Decisions
+- The change is intentionally narrow: it enables routine file writes and edits required by the existing project-management skills without broadening unrelated permissions.
+- This addresses the operational friction where `project-audit` writes `.claude/audit-report.md`, `project-analyze` writes `analysis-report.md` plus `ai-context/` auto-updated sections, and `project-fix` applies file edits from the audit manifest.
+
+---
+
 ## [2026-03-08] — clean-skill-template-noise (apply)
 
 **Type**: SDD apply

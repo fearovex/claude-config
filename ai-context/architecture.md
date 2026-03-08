@@ -147,16 +147,16 @@ Project mode runs **8 checks** (P1–P8). Each check is listed below with its su
 
 **ADR reference:** P7 is the V2 audit integration deferred in ADR-015 (feature-domain-knowledge-layer-architecture). ADR-016 (enhance-claude-folder-audit-content-quality-convention) documents the Phase C sub-check convention.
 
-<!-- [auto-updated]: structure-mapping — last run: 2026-03-03 -->
+<!-- [auto-updated]: structure-mapping — last run: 2026-03-08 -->
 ## Observed Structure (auto-detected)
 
 Organization pattern: **feature-based** (confidence: high)
 Each `skills/` subdirectory is a distinct capability with one `SKILL.md` entry point.
 
 ```
-claude-config/ (observed 2026-03-03)
+claude-config/ (observed 2026-03-08)
 ├── CLAUDE.md, README.md, settings.json, install.sh, sync.sh, .gitattributes
-├── skills/          47 skill directories
+├── skills/          49 skill directories
 │   ├── sdd-*/       11 SDD phase/orchestrator skills (explore, propose, spec,
 │   │                  design, tasks, apply, verify, archive, ff, new, status)
 │   ├── project-*/   6 meta-tool skills (setup, onboard, audit, analyze, fix, update)
@@ -168,26 +168,26 @@ claude-config/ (observed 2026-03-03)
 │   ├── smart-commit/   1 commit automation skill
 │   └── [tech-skills]   18 technology catalog skills
 ├── hooks/           smart-commit-context.js (Node.js)
-├── openspec/        config.yaml + changes/ (3 active) + specs/ (22 domains) + archive/
+├── openspec/        config.yaml + changes/ (0 active) + specs/ (38 domains) + archive/
 ├── ai-context/      8 files: stack, architecture, conventions, known-issues,
 │                    changelog-ai, onboarding, quick-reference, scenarios
 │                    + features/ sub-directory (domain knowledge scaffold)
-├── docs/            adr/ (16 ADRs + README.md) + templates/ (prd, adr)
+├── docs/            adr/ (23 ADRs + README.md) + templates/ (prd, adr) + copilot-templates/
 └── memory/          MEMORY.md + topic files
 ```
 
-Active SDD changes: none — `config-export`, `enhance-claude-folder-audit`, and `feature-domain-knowledge-layer` all archived as of 2026-03-03.
+Active SDD changes: none — all changes archived as of 2026-03-08.
 
 <!-- [/auto-updated] -->
 
-<!-- [auto-updated]: drift-summary — last run: 2026-03-03 -->
+<!-- [auto-updated]: drift-summary — last run: 2026-03-08 -->
 ## Architecture Drift (auto-detected)
 
 Drift level: **minor** (2 informational entries)
 
-Summary of drift vs. `architecture.md` baseline (2026-03-03):
-- Skill count: stack.md manual section documents ~44 skills; 47 observed (natural catalog growth — config-export, feature-domain-expert, and one additional skill added since last count)
-- ai-context/ file count: stack.md lists 5 core files; 8 files observed (onboarding.md, quick-reference.md, scenarios.md are documented in the architecture.md artifact table but stack.md count is outdated)
+Summary of drift vs. `architecture.md` baseline (2026-03-08):
+- Skill count: stack.md manual section documents skill categories with outdated sub-counts; 49 observed (natural catalog growth — 2 additional skills since last analysis on 2026-03-03)
+- ai-context/ file count: stack.md Skill categories table references "5 core files"; 8 files observed (onboarding.md, quick-reference.md, scenarios.md are documented in the architecture.md artifact table but stack.md manual count section is stale)
 
 All drift is informational. No structural mismatches detected. All documented architectural layers (skills/, hooks/, openspec/, ai-context/, docs/adr/, docs/templates/, memory/) are present and correctly positioned.
 

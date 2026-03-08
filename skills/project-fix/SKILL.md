@@ -436,7 +436,7 @@ For missing `## Rules`:
 
 ## Rules
 
-> TODO: define constraints and invariants for this skill.
+> Scaffold note: replace this text with the concrete constraints and invariants for this skill.
 ```
 
 For missing `## Process` (format: procedural or absent):
@@ -446,7 +446,7 @@ For missing `## Process` (format: procedural or absent):
 
 ## Process
 
-> TODO: add step-by-step process instructions.
+> Scaffold note: replace this text with the real step-by-step process instructions.
 ```
 
 For missing `## Patterns` (format: reference):
@@ -456,7 +456,7 @@ For missing `## Patterns` (format: reference):
 
 ## Patterns
 
-> TODO: document core patterns and examples for this technology or library.
+> Scaffold note: replace this text with the core patterns and examples for this technology or library.
 ```
 
 For missing `## Anti-patterns` (format: anti-pattern):
@@ -466,7 +466,7 @@ For missing `## Anti-patterns` (format: anti-pattern):
 
 ## Anti-patterns
 
-> TODO: document anti-patterns to avoid and their corrections.
+> Scaffold note: replace this text with the anti-patterns to avoid and their corrections.
 ```
 
 For missing `**Triggers**`:
@@ -474,7 +474,7 @@ For missing `**Triggers**`:
 ```markdown
 <!-- AUDIT: stub added by project-fix [YYYY-MM-DD] -->
 
-**Triggers**: TODO — define when this skill is invoked.
+**Triggers**: Replace this scaffold text with the slash command and natural-language triggers for this skill.
 ```
 
 Log each modification to `ai-context/changelog-ai.md`.

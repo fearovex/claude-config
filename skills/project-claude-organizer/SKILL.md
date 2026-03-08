@@ -298,27 +298,27 @@ For each item in `UNEXPECTED`:
      ---
      name: <stem>
      description: >
-       TODO: describe what this skill does and when to trigger it.
+       Scaffold description. Replace this text with what the skill does and when to trigger it.
      format: procedural
      ---
 
      # <stem>
 
-     **Triggers**: TODO — describe triggers
+     **Triggers**: Replace this scaffold text with the slash command and natural-language triggers.
 
      ---
 
      ## Process
 
-     ### Step 1 — TODO
+     ### Step 1 — Replace with a concrete step name
 
-     TODO: describe step 1.
+     Replace this scaffold text with the first concrete action the skill should perform.
 
      ---
 
      ## Rules
 
-     - TODO: add rules
+     - Replace this scaffold rule with a real constraint or invariant.
      ```
 
      **For `reference` format:**
@@ -327,27 +327,27 @@ For each item in `UNEXPECTED`:
      ---
      name: <stem>
      description: >
-       TODO: describe what this skill does and when to trigger it.
+       Scaffold description. Replace this text with what the skill does and when to trigger it.
      format: reference
      ---
 
      # <stem>
 
-     **Triggers**: TODO — describe triggers
+     **Triggers**: Replace this scaffold text with the slash command and natural-language triggers.
 
      ---
 
      ## Patterns
 
-     ### Pattern 1 — TODO
+     ### Pattern 1 — Replace with a concrete pattern name
 
-     TODO: describe pattern.
+     Replace this scaffold text with the pattern description.
 
      ---
 
      ## Rules
 
-     - TODO: add rules
+     - Replace this scaffold rule with a real constraint or invariant.
      ```
 
      **For `anti-pattern` format:**
@@ -356,27 +356,27 @@ For each item in `UNEXPECTED`:
      ---
      name: <stem>
      description: >
-       TODO: describe what this skill does and when to trigger it.
+       Scaffold description. Replace this text with what the skill does and when to trigger it.
      format: anti-pattern
      ---
 
      # <stem>
 
-     **Triggers**: TODO — describe triggers
+     **Triggers**: Replace this scaffold text with the slash command and natural-language triggers.
 
      ---
 
      ## Anti-patterns
 
-     ### Anti-pattern 1 — TODO
+     ### Anti-pattern 1 — Replace with a concrete anti-pattern name
 
-     TODO: describe anti-pattern.
+     Replace this scaffold text with the anti-pattern description.
 
      ---
 
      ## Rules
 
-     - TODO: add rules
+     - Replace this scaffold rule with a real constraint or invariant.
      ```
 
    - **(4e) Record outcome**: `<filename>.md → .claude/skills/<stem>/SKILL.md — scaffolded (format: <format>)`.
@@ -1054,6 +1054,7 @@ This step runs only when `readme.md` is present in `LEGACY_MIGRATIONS`.
 6. **Source preservation**: The source file `.claude/readme.md` is NEVER deleted or modified as part of this step. Cleanup follows the standard cleanup prompt flow only when the migration was successful (Option A or Option B applied) AND the user explicitly confirms cleanup.
 
 7. **Cleanup prompt** (only when migration was successful — outcome recorded as "appended" or "copied"):
+
    ```
    Cleanup available for .claude/readme.md:
      Will be deleted (successfully migrated): readme.md

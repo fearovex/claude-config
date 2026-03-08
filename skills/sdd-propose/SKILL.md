@@ -11,7 +11,7 @@ model: haiku
 
 > Creates a change proposal with clear intent, defined scope, and technical approach.
 
-**Triggers**: sdd:propose, create proposal, define change, sdd proposal
+**Triggers**: `/sdd-propose <change-name>`, create proposal, define change, sdd proposal
 
 ---
 

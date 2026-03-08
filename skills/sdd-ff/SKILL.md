@@ -15,7 +15,9 @@ model: haiku
 
 ---
 
-## Step 1 — Validate argument
+## Process
+
+### Step 1 — Validate argument
 
 `$ARGUMENTS` must be a non-empty kebab-case change name (e.g. `add-payment-flow`).
 
@@ -32,7 +34,7 @@ Stop here if argument is missing.
 
 ---
 
-## Step 2 — Launch propose sub-agent
+### Step 2 — Launch propose sub-agent
 
 Use the Task tool:
 
@@ -65,7 +67,7 @@ Wait for the result. If status is `blocked` or `failed`, stop and report to user
 
 ---
 
-## Step 3 — Launch spec + design sub-agents in parallel
+### Step 3 — Launch spec + design sub-agents in parallel
 
 Use two Task tool calls simultaneously:
 
@@ -128,7 +130,7 @@ Wait for **both** to complete before proceeding. If either is `blocked` or `fail
 
 ---
 
-## Step 4 — Launch tasks sub-agent
+### Step 4 — Launch tasks sub-agent
 
 Use the Task tool:
 
@@ -161,7 +163,7 @@ Wait for the result.
 
 ---
 
-## Step 5 — Present complete summary and ask before apply
+### Step 5 — Present complete summary and ask before apply
 
 Present to the user:
 

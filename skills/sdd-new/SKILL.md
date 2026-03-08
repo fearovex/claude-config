@@ -15,7 +15,9 @@ model: haiku
 
 ---
 
-## Step 1 — Validate argument
+## Process
+
+### Step 1 — Validate argument
 
 `$ARGUMENTS` must be a non-empty kebab-case change name (e.g. `add-payment-flow`).
 
@@ -32,7 +34,7 @@ Stop here if argument is missing.
 
 ---
 
-## Step 2 — Offer optional exploration
+### Step 2 — Offer optional exploration
 
 Ask the user:
 
@@ -75,7 +77,7 @@ Wait for result. Present the exploration summary to the user. If status is `bloc
 
 ---
 
-## Step 3 — Launch propose sub-agent
+### Step 3 — Launch propose sub-agent
 
 ```
 Task tool:
@@ -119,7 +121,7 @@ If user says N, stop gracefully.
 
 ---
 
-## Step 4 — Launch spec + design sub-agents in parallel
+### Step 4 — Launch spec + design sub-agents in parallel
 
 Use two Task tool calls simultaneously:
 
@@ -198,7 +200,7 @@ If user says N, stop gracefully.
 
 ---
 
-## Step 5 — Launch tasks sub-agent
+### Step 5 — Launch tasks sub-agent
 
 ```
 Task tool:
@@ -229,7 +231,7 @@ Wait for result.
 
 ---
 
-## Step 6 — Present complete summary and remaining phases
+### Step 6 — Present complete summary and remaining phases
 
 ```
 ✅ SDD cycle ready — [change-name]

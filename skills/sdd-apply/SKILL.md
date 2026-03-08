@@ -12,7 +12,7 @@ thinking: enabled
 
 > Implements the plan tasks following specs and design, marking progress as it goes.
 
-**Triggers**: sdd:apply, implement, write code, apply changes, sdd apply
+**Triggers**: `/sdd-apply <change-name>`, implement change, write code, apply changes, sdd apply
 
 ---
 

@@ -11,7 +11,7 @@ model: haiku
 
 > Investigates and analyzes an idea or area of the codebase before committing to changes.
 
-**Triggers**: sdd:explore, explore, investigate codebase, analyze before changing, research feature
+**Triggers**: `/sdd-explore <topic>`, explore, investigate codebase, analyze before changing, research feature
 
 ---
 

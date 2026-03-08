@@ -11,7 +11,7 @@ model: sonnet
 
 > Writes delta specifications with requirements and Given/When/Then scenarios.
 
-**Triggers**: sdd:spec, write specs, specifications, functional requirements, sdd spec
+**Triggers**: `/sdd-spec <change-name>`, write specs, specifications, functional requirements, sdd spec
 
 ---
 

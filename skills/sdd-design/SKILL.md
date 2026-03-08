@@ -12,7 +12,7 @@ thinking: enabled
 
 > Produces the technical design with architecture decisions, data flow, and a file change plan.
 
-**Triggers**: sdd:design, technical design, change architecture, technical design, sdd design
+**Triggers**: `/sdd-design <change-name>`, technical design, change architecture, sdd design
 
 ---
 

@@ -78,15 +78,14 @@ Compatibility behavior is a separate policy layer of `project-audit`, not an imp
 Compatibility rules currently include:
 
 - **Repo-shape compatibility**: global-config repos may use root `CLAUDE.md`, and local skill discovery may resolve to `skills/` instead of `.claude/skills/`.
-- **Structural compatibility**: procedural skills may satisfy the process contract with `## Process` or `### Step N`.
-- **Legacy heading compatibility**: `## Rules` is the canonical target; any acceptance of legacy `## Execution rules` must be treated as transitional compatibility, not as the preferred structure.
+- **Historical terminology compatibility**: archived materials may still mention older section labels, but active skill validation uses the canonical `## Process` and `## Rules` headings.
 - **Non-scored extension compatibility**: informational dimensions may evolve without changing the base scoring model.
 
 This policy MUST be explicit whenever compatibility behavior affects how a finding is evaluated.
 
 ---
 
-## Audit Process
+## Process
 
 I run all dimensions systematically, reading real files. Never assume.
 
@@ -317,7 +316,7 @@ For each skill file (`.md` or directory with `SKILL.md`):
 
 | Resolved format                  | Required section     | Accepted headings            | Finding if absent                                                           |
 | -------------------------------- | -------------------- | ---------------------------- | --------------------------------------------------------------------------- |
-| `procedural` (or absent/unknown) | Process section      | `## Process`, `### Step N`   | MEDIUM: "procedural skill [name] missing ## Process section"                |
+| `procedural` (or absent/unknown) | Process section      | `## Process`                 | MEDIUM: "procedural skill [name] missing ## Process section"                |
 | `reference`                      | Patterns or Examples | `## Patterns`, `## Examples` | MEDIUM: "reference skill [name] missing ## Patterns or ## Examples section" |
 | `anti-pattern`                   | Anti-patterns        | `## Anti-patterns`           | MEDIUM: "anti-pattern skill [name] missing ## Anti-patterns section"        |
 
@@ -510,7 +509,7 @@ Read each local `.claude/skills/<name>/SKILL.md`. Apply the same format-aware ch
 
 | Resolved format                  | Required section     | Accepted headings            | Finding if absent |
 | -------------------------------- | -------------------- | ---------------------------- | ----------------- |
-| `procedural` (or absent/unknown) | Process section      | `## Process`, `### Step N`   | record as missing |
+| `procedural` (or absent/unknown) | Process section      | `## Process`                 | record as missing |
 | `reference`                      | Patterns or Examples | `## Patterns`, `## Examples` | record as missing |
 | `anti-pattern`                   | Anti-patterns        | `## Anti-patterns`           | record as missing |
 
@@ -619,7 +618,7 @@ if heuristic_sources is empty (after exclusions):
 
 **D10-b Structural Quality**: Verify that the found documentation has proper structure.
 
-- If doc is a `SKILL.md`: PASS (✅) if frontmatter (`---` block) present AND `**Triggers**`/`## Triggers` defined AND `## Process`/`### Step` section AND `## Rules` section; legacy `## Execution rules` MAY be accepted as transitional compatibility only; WARN (⚠️) if any of the above is missing
+- If doc is a `SKILL.md`: PASS (✅) if frontmatter (`---` block) present AND `**Triggers**`/`## Triggers` defined AND `## Process` section AND `## Rules` section; WARN (⚠️) if any of the above is missing
 - If doc is a `.md` file (not SKILL.md): PASS (✅) if has `# title` (H1) AND at least one `## section` (H2); WARN (⚠️) if missing either; N/A if doc not found
 
 **D10-c Code Freshness**: Scan the doc file for file path references and verify they still exist on disk.
@@ -772,7 +771,7 @@ For each pattern:
 
 The report is saved in `.claude/audit-report.md` with this exact structure:
 
-````markdown
+`````markdown
 # Audit Report — [Project Name]
 
 Generated: [YYYY-MM-DD HH:MM]
@@ -785,7 +784,7 @@ SDD Ready: [YES|NO|PARTIAL]
 
 <!-- This block is consumed by /project-fix — DO NOT modify manually -->
 
-````yaml
+```yaml
 score: [XX]
 sdd_ready: [true|false|partial]
 generated_at: "[timestamp]"
@@ -826,41 +825,44 @@ skill_quality_actions:
   - id: "D9-<skill-name>-<action-type>"
     skill_name: "<name>"
     local_path: ".claude/skills/<name>/SKILL.md"
-    global_counterpart: "~/.claude/skills/<name>/SKILL.md"  # only for duplicates
+    global_counterpart: "~/.claude/skills/<name>/SKILL.md" # only for duplicates
     action_type: "delete_duplicate|add_missing_section|flag_irrelevant|flag_language"
     disposition: "delete|move-to-global|update|keep"
-    missing_sections: ["## Rules", "## Process"]  # only for add_missing_section
+    missing_sections: ["## Rules", "## Process"] # only for add_missing_section
     detail: "<human-readable reason>"
     severity: "info|warning"
-```​
+```
+
 ---
 
 ## Executive Summary
+
 [3-5 lines describing the general state of the project from the Claude/SDD perspective]
 
 ---
 
 ## Score: [XX]/100
 
-| Dimension | Points | Max | Status |
-|-----------|--------|-----|--------|
-| CLAUDE.md complete and accurate | [X] | 20 | ✅/⚠️/❌ |
-| Memory initialized | [X] | 15 | ✅/⚠️/❌ |
-| Memory with substantial content | [X] | 10 | ✅/⚠️/❌ |
-| SDD Orchestrator operational | [X] | 20 | ✅/⚠️/❌ |
-| Skills registry complete and functional | [X] | 20 | ✅/⚠️/❌ |
-| Cross-references valid | [X] | 5 | ✅/⚠️/❌ |
-| Architecture compliance | [X] | 5 | ✅/⚠️/❌ |
-| Testing & Verification integrity | [X] | 5 | ✅/⚠️/❌ |
-| Project Skills Quality | N/A | N/A | ✅/ℹ️/— |
-| Feature Docs Coverage | N/A | N/A | ✅/ℹ️/— |
-| Internal Coherence | N/A | N/A | ✅/ℹ️/— |
-| ADR Coverage | N/A | N/A | ✅/ℹ️/— |
-| Spec Coverage | N/A | N/A | ✅/ℹ️/— |
-| **TOTAL** | **[X]** | **100** | |
+| Dimension                               | Points  | Max     | Status   |
+| --------------------------------------- | ------- | ------- | -------- |
+| CLAUDE.md complete and accurate         | [X]     | 20      | ✅/⚠️/❌ |
+| Memory initialized                      | [X]     | 15      | ✅/⚠️/❌ |
+| Memory with substantial content         | [X]     | 10      | ✅/⚠️/❌ |
+| SDD Orchestrator operational            | [X]     | 20      | ✅/⚠️/❌ |
+| Skills registry complete and functional | [X]     | 20      | ✅/⚠️/❌ |
+| Cross-references valid                  | [X]     | 5       | ✅/⚠️/❌ |
+| Architecture compliance                 | [X]     | 5       | ✅/⚠️/❌ |
+| Testing & Verification integrity        | [X]     | 5       | ✅/⚠️/❌ |
+| Project Skills Quality                  | N/A     | N/A     | ✅/ℹ️/—  |
+| Feature Docs Coverage                   | N/A     | N/A     | ✅/ℹ️/—  |
+| Internal Coherence                      | N/A     | N/A     | ✅/ℹ️/—  |
+| ADR Coverage                            | N/A     | N/A     | ✅/ℹ️/—  |
+| Spec Coverage                           | N/A     | N/A     | ✅/ℹ️/—  |
+| **TOTAL**                               | **[X]** | **100** |          |
 
 **SDD Readiness**: [FULL / PARTIAL / NOT CONFIGURED]
-- FULL: openspec/ exists, config.yaml valid, CLAUDE.md mentions /sdd-*, global skills present
+
+- FULL: openspec/ exists, config.yaml valid, CLAUDE.md mentions /sdd-\*, global skills present
 - PARTIAL: Some SDD elements present but incomplete
 - NOT CONFIGURED: openspec/ does not exist
 
@@ -868,15 +870,15 @@ skill_quality_actions:
 
 ## Dimension 1 — CLAUDE.md [OK|WARNING|CRITICAL]
 
-| Check | Status | Detail |
-|-------|--------|---------|
-| Exists `.claude/CLAUDE.md` (or root `CLAUDE.md` for global-config repos) | ✅/❌ | |
-| Has >50 lines | ✅/❌ | [X] lines |
-| Stack documented | ✅/⚠️/❌ | |
-| Stack vs package.json | ✅/⚠️/❌ | [specific discrepancies] |
-| Has Architecture section | ✅/⚠️/❌ | |
-| Skills registry present | ✅/⚠️/❌ | |
-| Mentions SDD (/sdd-*) | ✅/⚠️/❌ | |
+| Check                                                                    | Status   | Detail                   |
+| ------------------------------------------------------------------------ | -------- | ------------------------ |
+| Exists `.claude/CLAUDE.md` (or root `CLAUDE.md` for global-config repos) | ✅/❌    |                          |
+| Has >50 lines                                                            | ✅/❌    | [X] lines                |
+| Stack documented                                                         | ✅/⚠️/❌ |                          |
+| Stack vs package.json                                                    | ✅/⚠️/❌ | [specific discrepancies] |
+| Has Architecture section                                                 | ✅/⚠️/❌ |                          |
+| Skills registry present                                                  | ✅/⚠️/❌ |                          |
+| Mentions SDD (/sdd-\*)                                                   | ✅/⚠️/❌ |                          |
 
 **Stack Discrepancies:**
 [List each discrepancy: "Declares React 18, actual ^19.0.0"]
@@ -892,13 +894,13 @@ skill_quality_actions:
 
 ## Dimension 2 — Memory [OK|WARNING|CRITICAL]
 
-| File | Exists | Lines | Content | Coherence |
-|---------|--------|--------|-----------|------------|
-| stack.md | ✅/❌ | [N] | ✅/⚠️/❌ | ✅/⚠️/❌ |
-| architecture.md | ✅/❌ | [N] | ✅/⚠️/❌ | ✅/⚠️/❌ |
-| conventions.md | ✅/❌ | [N] | ✅/⚠️/❌ | ✅/⚠️/❌ |
-| known-issues.md | ✅/❌ | [N] | ✅/⚠️/❌ | ✅/⚠️/❌ |
-| changelog-ai.md | ✅/❌ | [N] | ✅/⚠️/❌ | N/A |
+| File            | Exists | Lines | Content  | Coherence |
+| --------------- | ------ | ----- | -------- | --------- |
+| stack.md        | ✅/❌  | [N]   | ✅/⚠️/❌ | ✅/⚠️/❌  |
+| architecture.md | ✅/❌  | [N]   | ✅/⚠️/❌ | ✅/⚠️/❌  |
+| conventions.md  | ✅/❌  | [N]   | ✅/⚠️/❌ | ✅/⚠️/❌  |
+| known-issues.md | ✅/❌  | [N]   | ✅/⚠️/❌ | ✅/⚠️/❌  |
+| changelog-ai.md | ✅/❌  | [N]   | ✅/⚠️/❌ | N/A       |
 
 **Coherence issues detected:**
 [List specific issues with file + what is outdated]
@@ -979,6 +981,7 @@ skill_quality_actions:
 ---
 
 ## Dimension 7 — Architecture Compliance [OK|WARNING|CRITICAL]
+
 Analysis report found: YES/NO
 Last analyzed: [date or N/A]
 Report age: [N days | N/A]
@@ -1010,9 +1013,9 @@ Drift entries: (when drift is present)
 
 **Local skills directory**: [value of $LOCAL_SKILLS_DIR] — [N skills found | not found — skipped]
 
-| Skill | Duplicate of global | Structural complete | Language OK | Stack relevant | Disposition |
-|-------|--------------------|--------------------|-------------|----------------|-------------|
-| [skill-name] | ⚠️ YES / ❌ NO | ✅ / ⚠️ (missing: list) | ✅ / ℹ️ violation | ✅ / ℹ️ flag / ℹ️ UNKNOWN | keep/update/delete/move-to-global |
+| Skill        | Duplicate of global | Structural complete     | Language OK       | Stack relevant            | Disposition                       |
+| ------------ | ------------------- | ----------------------- | ----------------- | ------------------------- | --------------------------------- |
+| [skill-name] | ⚠️ YES / ❌ NO      | ✅ / ⚠️ (missing: list) | ✅ / ℹ️ violation | ✅ / ℹ️ flag / ℹ️ UNKNOWN | keep/update/delete/move-to-global |
 
 **Skills with missing structural sections:**
 [list or "none"]
@@ -1023,7 +1026,7 @@ Drift entries: (when drift is present)
 **Stack relevance issues (INFO):**
 [list or "none"]
 
-*Note: Dimension 9 does not affect the score in this iteration. Findings are informational unless action_type is `delete_duplicate`.*
+_Note: Dimension 9 does not affect the score in this iteration. Findings are informational unless action_type is `delete_duplicate`._
 
 ---
 
@@ -1032,11 +1035,11 @@ Drift entries: (when drift is present)
 **Detection mode**: configured | heuristic | skipped
 **Features detected**: [N] ([list of names])
 
-| Feature | Doc found | Structure OK | Fresh | In Registry | Status |
-|---------|-----------|--------------|-------|-------------|--------|
-| [name]  | ✅/❌     | ✅/⚠️/N/A  | ✅/⚠️/N/A | ✅/ℹ️/N/A | ✅/⚠️/❌ |
+| Feature | Doc found | Structure OK | Fresh     | In Registry | Status   |
+| ------- | --------- | ------------ | --------- | ----------- | -------- |
+| [name]  | ✅/❌     | ✅/⚠️/N/A    | ✅/⚠️/N/A | ✅/ℹ️/N/A   | ✅/⚠️/❌ |
 
-*D10 findings are informational only — they do not affect the score and are not auto-fixed by /project-fix.*
+_D10 findings are informational only — they do not affect the score and are not auto-fixed by /project-fix._
 
 ---
 
@@ -1044,13 +1047,13 @@ Drift entries: (when drift is present)
 
 **Skills scanned**: [N] from $LOCAL_SKILLS_DIR
 
-| Skill | Count OK | Numbering OK | Frontmatter OK | Findings |
-|-------|----------|-------------|----------------|----------|
-| [skill-name] | ✅/⚠️ | ✅/⚠️ | ✅/⚠️/N/A | [detail or "clean"] |
+| Skill        | Count OK | Numbering OK | Frontmatter OK | Findings            |
+| ------------ | -------- | ------------ | -------------- | ------------------- |
+| [skill-name] | ✅/⚠️    | ✅/⚠️        | ✅/⚠️/N/A      | [detail or "clean"] |
 
 **Inconsistencies found**: [N] across [M] skills (or "None — all skills internally coherent")
 
-*D11 findings are informational only — they do not affect the score and are not auto-fixed by /project-fix.*
+_D11 findings are informational only — they do not affect the score and are not auto-fixed by /project-fix._
 
 ---
 
@@ -1060,13 +1063,14 @@ Drift entries: (when drift is present)
 **ADR README exists**: ✅/❌
 **ADRs scanned**: [N]
 
-| ADR | Status field found | Status value | Finding |
-|-----|-------------------|--------------|---------|
-| [001-example.md] | ✅/❌ | [accepted/deprecated/superseded/—] | clean/Missing ## Status section |
+| ADR              | Status field found | Status value                       | Finding                         |
+| ---------------- | ------------------ | ---------------------------------- | ------------------------------- |
+| [001-example.md] | ✅/❌              | [accepted/deprecated/superseded/—] | clean/Missing ## Status section |
+
 [or: "ADR Coverage check skipped — docs/adr/ not referenced in CLAUDE.md"]
 [or: "docs/adr/ contains no ADR files yet"]
 
-*D12 findings are informational only — no score impact.*
+_D12 findings are informational only — no score impact._
 
 ---
 
@@ -1075,35 +1079,43 @@ Drift entries: (when drift is present)
 **Condition**: openspec/specs/ exists and is non-empty — YES/NO
 **Domains detected**: [list of domain names]
 
-| Domain | spec.md found | Stale paths | Status |
-|--------|---------------|-------------|--------|
-| [name] | ✅/❌ | [N] | ✅/⚠️/❌ |
+| Domain | spec.md found | Stale paths | Status   |
+| ------ | ------------- | ----------- | -------- |
+| [name] | ✅/❌         | [N]         | ✅/⚠️/❌ |
+
 [or: "Spec Coverage check skipped — openspec/specs/ not found or empty"]
 
-*D13 findings are informational only — no score impact.*
+_D13 findings are informational only — no score impact._
 
 ---
 
 ## Required Actions
 
 ### Critical (block SDD):
+
 1. [concrete action] → run `/project-fix` or manually: [instruction]
 
 ### High (degrade quality):
+
 1. [concrete action]
 
 ### Medium:
+
 1. [concrete action]
 
 ### Low (optional improvements):
+
 1. [concrete action]
 
 ---
 
-*To implement these corrections: run `/project-fix`*
-*This report was generated by `/project-audit` — do not modify the FIX_MANIFEST block manually*
-````
-````
+_To implement these corrections: run `/project-fix`_
+_This report was generated by `/project-audit` — do not modify the FIX_MANIFEST block manually_
+
+```
+
+```
+`````
 
 ---
 
@@ -1264,3 +1276,7 @@ After the Phase A Bash batch completes, the following two variables are availabl
 - `project-audit` does NOT invoke `project-analyze` automatically. `analysis-report.md` is treated as external input produced by a prior `/project-analyze` run.
 - D7 in Phase B reads `ANALYSIS_REPORT_EXISTS` and `ANALYSIS_REPORT_DATE` to compute its score and staleness warning.
 - These two variables are added to the existing Phase A Bash script template — no additional Bash call is introduced. Total Bash calls per audit run remain ≤ 3.
+
+```
+
+```

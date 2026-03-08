@@ -11,7 +11,7 @@ model: sonnet
 
 > Verifies that the implementation complies with the specs, design, and task plan.
 
-**Triggers**: sdd:verify, verify implementation, quality gate, validate change, sdd verify
+**Triggers**: `/sdd-verify <change-name>`, verify implementation, quality gate, validate change, sdd verify
 
 ---
 

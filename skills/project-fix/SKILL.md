@@ -104,7 +104,7 @@ This policy MUST be explicit whenever compatibility behavior affects whether an 
 
 ---
 
-## Fix Process
+## Process
 
 ### Step 1 — Read and parse the FIX_MANIFEST
 

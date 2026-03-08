@@ -11,7 +11,7 @@ model: haiku
 
 > Syncs delta specs to the master specs and archives the completed change.
 
-**Triggers**: sdd:archive, archive change, finalize sdd cycle, close change, sdd archive
+**Triggers**: `/sdd-archive <change-name>`, archive change, finalize sdd cycle, close change, sdd archive
 
 ---
 

@@ -11,7 +11,7 @@ model: haiku
 
 > Breaks down the design into an atomic, ordered, and verifiable task plan.
 
-**Triggers**: sdd:tasks, task plan, break down implementation, task breakdown, sdd tasks
+**Triggers**: `/sdd-tasks <change-name>`, task plan, break down implementation, task breakdown, sdd tasks
 
 ---
 

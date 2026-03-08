@@ -6,7 +6,7 @@
     "CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION": "true"
   },
   "permissions": {
-    "allow": ["Read", "Glob", "Grep", "Bash"]
+    "allow": ["Read", "Glob", "Grep", "Bash", "Write", "Edit"]
   },
   "mcpServers": {
     "github": {

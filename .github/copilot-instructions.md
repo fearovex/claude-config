@@ -153,7 +153,7 @@ Structure every new SKILL.md as follows:
 2. H1 heading (`# skill-name`)
 3. Blockquote description (`> ...`)
 4. Bold triggers (`**Triggers**: ...`)
-5. Format-specific main section: `## Process` / `### Step N` (procedural), `## Patterns` or `## Examples` (reference), `## Anti-patterns` (anti-pattern)
+5. Format-specific main section: `## Process` with nested `### Step N` headings (procedural), `## Patterns` or `## Examples` (reference), `## Anti-patterns` (anti-pattern)
 6. `## Rules` section last
 
 Use guard clauses in procedural skills: explicit "Stop here if..." conditions before steps that require preconditions.

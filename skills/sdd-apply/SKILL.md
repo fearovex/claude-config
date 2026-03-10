@@ -109,6 +109,33 @@ I match detected keywords (case-insensitive substring match) against the followi
 
 > Note: The `always (non-doc changes)` row is evaluated after the scope guard. If `scope_guard_triggered` is `true` (documentation-only change), this row is also skipped — along with all other rows in the table.
 
+#### Step 0b — Initialize retry counter
+
+This step initializes the in-memory retry counter that the task execution loop uses to enforce the circuit breaker. It MUST run after the scope guard (regardless of whether the scope guard triggered) and before Step 1.
+
+**Read `apply_max_retries` from `openspec/config.yaml`:**
+
+```
+if openspec/config.yaml exists and has key apply_max_retries:
+    max_attempts = openspec/config.yaml.apply_max_retries
+    → log: "Retry limit: max_attempts = [value] (source: openspec/config.yaml)"
+else:
+    max_attempts = 3   # default
+    → log: "Retry limit: max_attempts = 3 (default — apply_max_retries not set in openspec/config.yaml)"
+```
+
+**Initialize attempt counter:**
+
+```
+attempt_counter = {}   # task_id → attempt count; starts empty; per-invocation only
+```
+
+The counter is **in-memory and per-invocation**. Each `/sdd-apply` invocation starts with a fresh counter. If a task was previously blocked and the user resumes by changing `[BLOCKED]` back to `[TODO]`, the counter resets to 0 for that task.
+
+**Circuit breaker behavior:**
+
+When `attempt_counter[task_id] >= max_attempts` before a new attempt, the task is immediately marked `[BLOCKED]` and the phase halts. The user must resolve the block and re-run `/sdd-apply <change-name>` to resume.
+
 #### Skill loading
 
 For each matched skill path:
@@ -143,7 +170,7 @@ I read in this order:
 1. `openspec/changes/<change-name>/tasks.md` — which tasks are assigned
 2. `openspec/changes/<change-name>/specs/` — the success criteria (WHAT it must do)
 3. `openspec/changes/<change-name>/design.md` — how to implement it (technical decisions, interfaces)
-4. `openspec/config.yaml` — project rules
+4. `openspec/config.yaml` — project rules, including the optional `diagnosis_commands` key (see Step 4 — Diagnosis); key is optional, absent means auto-detection only, commands are expected to be read-only
 5. `ai-context/conventions.md` — code conventions
 6. Existing code files that I will modify or that serve as pattern references
 
@@ -177,9 +204,62 @@ The detection step MUST NOT install test frameworks, create test files, or modif
 The orchestrator tells me which tasks to implement (e.g. "Phase 1, tasks 1.1-1.3").
 I implement ONLY those tasks. I do not advance to the next ones without confirmation.
 
-### Step 4 — Implement task by task
+### Step 4 — Diagnosis
 
-#### Step 4a — Check for warnings before executing each task
+Before making any file change for each assigned task, I MUST execute a Diagnosis Step. No file write or edit operation is permitted until the `DIAGNOSIS` block for that task has been written.
+
+#### 4.1 — Read files to be modified
+
+I read every file I intend to modify in its current state. For tasks that create new files, I read related files that serve as pattern references.
+
+#### 4.2 — Run diagnostic commands
+
+I check `openspec/config.yaml` for a `diagnosis_commands` key:
+
+- **Present**: I run each listed command (expected to be read-only). I capture the output (or a summary) for inclusion in the `DIAGNOSIS` block. A command that exits non-zero is recorded as a failure; it MUST NOT block the Diagnosis Step — I note the failure in the Risk field and continue.
+- **Absent**: I use only auto-detected read-only commands relevant to the task (or none). I note `"diagnosis_commands: not configured"` in the block.
+
+#### 4.3 — Write DIAGNOSIS block
+
+I write the following structured block in my task output before proceeding to implementation:
+
+```
+DIAGNOSIS — Task X.Y:
+  1. Files to be modified: [list of paths]
+  2. Diagnostic command outputs:
+     - [command]: [output summary]
+     (or "none applicable" / "diagnosis_commands: not configured")
+  3. Current behavior observation: [what the code actually does now]
+  4. Relevant data/state: [key data values, config, environment state]
+  5. Hypothesis: "The bug/issue is [X] because [Y].
+     Changing [Z] will achieve [expected behavior] because [rationale]."
+  6. Risk: [what could go wrong with this change]
+```
+
+For file-creation tasks: field 3 describes the gap (what is absent), field 5 describes what the new file is intended to do and why.
+
+#### 4.4 — Check for contradictions
+
+If the Diagnosis Step reveals that the current system state contradicts the assumptions underlying the task description, I MUST produce a `MUST_RESOLVE` warning and pause for user confirmation before proceeding:
+
+```
+⚠️ MUST_RESOLVE — Diagnosis finding:
+  Task X.Y assumes [A], but current state shows [B].
+
+  This may indicate the task description is based on incorrect assumptions.
+
+  Confirm how to proceed:
+  Option 1: [proceed with updated understanding]
+  Option 2: [revise task description]
+```
+
+If there are multiple contradictions, I MUST list each one as a separate item within the single `MUST_RESOLVE` block and wait for one combined user confirmation before proceeding.
+
+If diagnosis confirms the expected state, I proceed immediately to Step 5.
+
+### Step 5 — Implement task by task
+
+#### Step 5a — Check for warnings before executing each task
 
 Before executing any task, I inspect the task entry in `tasks.md` for a `[WARNING: MUST_RESOLVE]` or `[WARNING: ADVISORY]` marker.
 
@@ -226,38 +306,130 @@ I MUST NOT request user input. I continue execution of the task immediately afte
 
 For each assigned task:
 
-1. **I check for warnings** per Step 4a (MUST_RESOLVE blocks; ADVISORY is logged and continues)
-2. **I read the task** in tasks.md
-3. **I consult the specs** for the affected domain (success criteria)
-4. **I consult the design** (interfaces, decisions, patterns)
-5. **I read existing code** in related files (to follow the pattern)
-6. **I write the code** following all of the above
-7. **I mark the task as complete** in tasks.md: `- [x]`
+1. **I check for warnings** per Step 5a (MUST_RESOLVE blocks; ADVISORY is logged and continues)
+2. **I read the task** in tasks.md — extract `task_id` (e.g., `1.1`, `2.3`)
+3. **Check attempt counter BEFORE attempting the task:**
+   - If `attempt_counter[task_id]` is undefined → set `attempt_counter[task_id] = 0`
+   - If `attempt_counter[task_id] >= max_attempts`:
+     - → Mark task `[BLOCKED]` in tasks.md (see BLOCKED State section below)
+     - → Halt the current phase immediately
+     - → Report BLOCKED state to user (see BLOCKED Reporting section below)
+     - → **STOP — do NOT continue to the next task**
+4. **Increment attempt counter:** `attempt_counter[task_id]++` — record the current strategy snapshot: `file_snapshot = list of all files this attempt will modify`
+5. **I consult the specs** for the affected domain (success criteria)
+6. **I consult the design** (interfaces, decisions, patterns)
+7. **I read existing code** in related files (to follow the pattern)
+8. **I implement the task** following specs and design
+9. **Check success:**
+   - **Success** (all file operations complete, output as expected, no tool errors):
+     - Mark task `[x]` in tasks.md
+     - Optionally reset `attempt_counter[task_id] = 0` (clean state)
+     - Proceed to next task
+   - **Failure** (tool error, validation error, unexpected output):
+     - Capture current `file_snapshot_after` and the error output
+     - **Same-strategy detection:** compare `file_snapshot_after` with the snapshot from the previous attempt (if any):
+       - If both attempts modified the same files in the same way (see Same-Strategy Detection below):
+         - → Mark task `[BLOCKED]` with message `"Identical strategy attempted twice — manual intervention required"`
+         - → Halt the current phase
+         - → Report BLOCKED state to user
+         - → **STOP — do NOT continue to the next task**
+       - Otherwise (different strategy):
+         - Increment `attempt_counter[task_id]` again
+         - If `attempt_counter[task_id] >= max_attempts`:
+           - → Mark task `[BLOCKED]` (see BLOCKED State section below)
+           - → Halt phase, report to user
+           - → **STOP — do NOT continue to the next task**
+         - Otherwise: re-attempt the task with a different approach (loop back to step 8)
+
+#### Same-Strategy Detection
+
+Two consecutive attempts are the **same strategy** if they modified exactly the same set of files AND the content changes to each file were identical:
+
+```
+def is_same_strategy(previous_attempt, current_attempt):
+    files_prev = set(previous_attempt.files_modified.keys())
+    files_curr = set(current_attempt.files_modified.keys())
+
+    # Different files touched → different strategy
+    if files_prev != files_curr:
+        return False
+
+    # Same files → compare content changes
+    for file_path in files_prev:
+        if previous_attempt.files_modified[file_path] != current_attempt.files_modified[file_path]:
+            return False
+
+    return True  # Same files, same content changes → same strategy
+```
+
+If unsure whether strategies match, count them as **different** (conservative default).
+
+#### BLOCKED State — Marking tasks.md
+
+When a task must be marked BLOCKED, I update `tasks.md` BEFORE halting or reporting. The task line is changed from `- [ ] X.Y description` to `- [BLOCKED] X.Y description`, and a block is appended immediately below:
+
+```markdown
+- [BLOCKED] Task X.Y — description
+  - Attempts: N/max_attempts
+  - Tried:
+    1. [summary of first attempt: what files were modified, what error occurred]
+    2. [summary of second attempt]
+    3. [summary of third attempt]
+  - Last error: [the error message or output from the final attempt]
+  - Resolution required: [specific, actionable instruction for the user — not vague]
+```
+
+The attempt summary MUST include:
+- What files were modified in that attempt
+- What error or failure was observed
+- For same-strategy detection blocks: note "Identical strategy detected"
+
+#### BLOCKED Reporting — Output to user
+
+After updating `tasks.md`, I report the BLOCKED state to the user:
+
+```
+⛔ Task X.Y BLOCKED after N attempts.
+
+What was tried:
+  1. [attempt 1 summary]
+  2. [attempt 2 summary]
+  3. [attempt 3 summary]
+
+Last error: [error from final attempt]
+
+tasks.md updated. Manual intervention required.
+Resume after resolving: /sdd-apply <change-name>
+```
+
+I MUST NOT continue to the next task or the next phase after this report.
 
 #### If TDD mode is active (RED-GREEN-REFACTOR flow):
 
 For each assigned task:
 
-1. **I check for warnings** per Step 4a (MUST_RESOLVE blocks; ADVISORY is logged and continues)
-2. **I read the task** in tasks.md
-3. **I consult the specs** for the affected domain — identify the Given/When/Then scenarios this task covers
-4. **I consult the design** (interfaces, decisions, patterns)
-5. **I read existing code** in related files (to follow the pattern)
-6. **RED — Write a failing test:**
+1. **I check for warnings** per Step 5a (MUST_RESOLVE blocks; ADVISORY is logged and continues)
+2. **I read the task** in tasks.md — extract `task_id`
+3. **Check attempt counter BEFORE attempting the task** (same logic as standard flow step 3): if `attempt_counter[task_id] >= max_attempts`, mark `[BLOCKED]`, halt phase, report to user, STOP.
+4. **Increment attempt counter:** `attempt_counter[task_id]++`
+5. **I consult the specs** for the affected domain — identify the Given/When/Then scenarios this task covers
+6. **I consult the design** (interfaces, decisions, patterns)
+7. **I read existing code** in related files (to follow the pattern)
+8. **RED — Write a failing test:**
    - I write a test that captures the expected behavior from the spec scenario(s)
    - The test name or description SHOULD reference the spec scenario name
    - I run the test to confirm it fails. If it passes unexpectedly, I report a DEVIATION noting the behavior was already implemented
-7. **GREEN — Write minimum code to pass:**
+9. **GREEN — Write minimum code to pass:**
    - I write only the minimum code necessary to make the test pass
    - I do NOT add extra features, optimizations, or abstractions in this phase
    - I run the test to confirm it passes
-8. **REFACTOR — Clean up while tests stay green:**
-   - I clean up the code (remove duplication, improve naming, etc.)
-   - I run the tests after refactoring to confirm they still pass
-   - If a test breaks during refactoring, I fix the code (not the test) to restore the green state
-9. **I mark the task as complete** in tasks.md: `- [x]` — only after REFACTOR is done
+10. **REFACTOR — Clean up while tests stay green:**
+    - I clean up the code (remove duplication, improve naming, etc.)
+    - I run the tests after refactoring to confirm they still pass
+    - If a test breaks during refactoring, I fix the code (not the test) to restore the green state
+11. **I mark the task as complete** in tasks.md: `- [x]` — only after REFACTOR is done
 
-### Step 5 — Respect the design
+### Step 6 — Respect the design
 
 If during implementation I find that the design has a problem:
 
@@ -265,7 +437,7 @@ If during implementation I find that the design has a problem:
 - I note it in my report as "DEVIATION: [what and why]"
 - If it is a blocker, I stop and report `status: blocked`
 
-### Step 6 — Update progress in tasks.md
+### Step 7 — Update progress in tasks.md
 
 I update the progress counter in tasks.md:
 

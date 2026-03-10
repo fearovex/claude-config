@@ -1,40 +1,91 @@
 ---
 name: sdd-ff
 description: >
-  Fast-forward SDD cycle: runs propose → spec+design (parallel) → tasks automatically, then asks before apply.
-  Trigger: /sdd-ff <change-name>, quick SDD cycle, fast-forward, skip explore phase.
+  Fast-forward SDD cycle: includes mandatory exploration as Step 0, then runs propose → spec+design (parallel) → tasks automatically, then asks before apply.
+  Trigger: /sdd-ff <description>, quick SDD cycle, fast-forward, fast forward SDD.
 format: procedural
 model: haiku
 ---
 
 # sdd-ff
 
-> Fast-forward SDD cycle: runs propose → spec+design (parallel) → tasks automatically, then asks before apply.
+> Fast-forward SDD cycle: infers slug, runs mandatory exploration (Step 0), then propose → spec+design (parallel) → tasks automatically, then asks before apply.
 
-**Triggers**: `/sdd-ff <change-name>`, fast-forward, quick SDD cycle, skip explore
+**Triggers**: `/sdd-ff <description>`, fast-forward, quick SDD cycle, fast forward SDD
 
 ---
 
 ## Process
 
-### Step 1 — Validate argument
+### Step 0 — Infer slug and run exploration
 
-`$ARGUMENTS` must be a non-empty kebab-case change name (e.g. `add-payment-flow`).
+`$ARGUMENTS` must be a non-empty description of the change (e.g. `add payment flow`).
 
 If empty or missing:
 
 ```
-Usage: /sdd-ff <change-name>
+Usage: /sdd-ff <description>
 
-Provide a kebab-case change name. Example:
-  /sdd-ff add-payment-flow
+Provide a description of the change. Example:
+  /sdd-ff add payment flow
 ```
 
 Stop here if argument is missing.
 
+**Infer the slug** using the algorithm below:
+
+```
+STOP_WORDS = { "fix", "add", "update", "the", "a", "an", "for", "of", "in", "with",
+               "showing", "wrong", "year", "users", "user" }
+
+1. Lowercase and tokenize the description (split on spaces and punctuation)
+2. Filter out tokens that are in STOP_WORDS
+3. Take the first 5 remaining tokens as meaningful words
+4. Join with hyphens
+5. Prefix with today's date: YYYY-MM-DD
+6. Truncate to 50 characters if needed
+7. Check for collisions: if openspec/changes/[slug]/ already exists,
+   append -2, then -3, etc., until the slug is unique
+```
+
+Output to user (do NOT ask for confirmation or rename):
+
+```
+Inferred change name: [slug]
+```
+
+**Then immediately launch the explore sub-agent** (no user gate):
+
+```
+Task tool:
+  subagent_type: "general-purpose"
+  model: haiku
+  prompt: |
+    You are a specialized SDD sub-agent.
+
+    STEP 1: Read the file ~/.claude/skills/sdd-explore/SKILL.md
+    STEP 2: Follow its instructions exactly
+
+    CONTEXT:
+    - Project: [absolute path of current working directory]
+    - Change: [inferred-slug]
+    - Previous artifacts: none
+
+    TASK: Execute the explore phase for change "[inferred-slug]".
+
+    Return:
+    - status: ok|warning|blocked|failed
+    - summary: executive summary for decision-making
+    - artifacts: files created/modified
+    - next_recommended: next phases
+    - risks: identified risks (if any)
+```
+
+Wait for result. If status is `blocked` or `failed`, stop and report to user. If status is `warning`, continue but surface the warning prominently.
+
 ---
 
-### Step 2 — Launch propose sub-agent
+### Step 1 — Launch propose sub-agent
 
 Use the Task tool:
 
@@ -50,10 +101,10 @@ Task tool:
 
     CONTEXT:
     - Project: [absolute path of current working directory]
-    - Change: [change-name from $ARGUMENTS]
-    - Previous artifacts: none
+    - Change: [inferred-slug]
+    - Previous artifacts: openspec/changes/[inferred-slug]/exploration.md
 
-    TASK: Execute the propose phase for change "[change-name]".
+    TASK: Execute the propose phase for change "[inferred-slug]".
 
     Return:
     - status: ok|warning|blocked|failed
@@ -67,7 +118,7 @@ Wait for the result. If status is `blocked` or `failed`, stop and report to user
 
 ---
 
-### Step 3 — Launch spec + design sub-agents in parallel
+### Step 2 — Launch spec + design sub-agents in parallel
 
 Use two Task tool calls simultaneously:
 
@@ -85,10 +136,10 @@ Task tool:
 
     CONTEXT:
     - Project: [absolute path of current working directory]
-    - Change: [change-name]
-    - Previous artifacts: openspec/changes/[change-name]/proposal.md
+    - Change: [inferred-slug]
+    - Previous artifacts: openspec/changes/[inferred-slug]/proposal.md
 
-    TASK: Execute the spec phase for change "[change-name]".
+    TASK: Execute the spec phase for change "[inferred-slug]".
 
     Return:
     - status: ok|warning|blocked|failed
@@ -113,10 +164,10 @@ Task tool:
 
     CONTEXT:
     - Project: [absolute path of current working directory]
-    - Change: [change-name]
-    - Previous artifacts: openspec/changes/[change-name]/proposal.md
+    - Change: [inferred-slug]
+    - Previous artifacts: openspec/changes/[inferred-slug]/proposal.md
 
-    TASK: Execute the design phase for change "[change-name]".
+    TASK: Execute the design phase for change "[inferred-slug]".
 
     Return:
     - status: ok|warning|blocked|failed
@@ -130,7 +181,7 @@ Wait for **both** to complete before proceeding. If either is `blocked` or `fail
 
 ---
 
-### Step 4 — Launch tasks sub-agent
+### Step 3 — Launch tasks sub-agent
 
 Use the Task tool:
 
@@ -146,10 +197,10 @@ Task tool:
 
     CONTEXT:
     - Project: [absolute path of current working directory]
-    - Change: [change-name]
-    - Previous artifacts: openspec/changes/[change-name]/proposal.md, openspec/changes/[change-name]/specs/, openspec/changes/[change-name]/design.md
+    - Change: [inferred-slug]
+    - Previous artifacts: openspec/changes/[inferred-slug]/proposal.md, openspec/changes/[inferred-slug]/specs/, openspec/changes/[inferred-slug]/design.md
 
-    TASK: Execute the tasks phase for change "[change-name]".
+    TASK: Execute the tasks phase for change "[inferred-slug]".
 
     Return:
     - status: ok|warning|blocked|failed
@@ -163,30 +214,32 @@ Wait for the result.
 
 ---
 
-### Step 5 — Present complete summary and ask before apply
+### Step 4 — Present complete summary and ask before apply
 
 Present to the user:
 
 ```
-✅ Fast-forward complete — [change-name]
+Fast-forward complete — [inferred-slug]
 
 Phase results:
+  explore  : [status] — [one-line summary]
   propose  : [status] — [one-line summary]
   spec     : [status] — [one-line summary]
   design   : [status] — [one-line summary]
   tasks    : [status] — [one-line summary]
 
 Artifacts created:
-  openspec/changes/[change-name]/proposal.md
-  openspec/changes/[change-name]/specs/*/spec.md
-  openspec/changes/[change-name]/design.md
-  openspec/changes/[change-name]/tasks.md
+  openspec/changes/[inferred-slug]/exploration.md
+  openspec/changes/[inferred-slug]/proposal.md
+  openspec/changes/[inferred-slug]/specs/*/spec.md
+  openspec/changes/[inferred-slug]/design.md
+  openspec/changes/[inferred-slug]/tasks.md
 
-[If any warnings] ⚠️ Warnings:
+[If any warnings] Warnings:
   - [warning text]
 
 Ready to implement? Run:
-  /sdd-apply [change-name]
+  /sdd-apply [inferred-slug]
 
 Note: When the cycle completes, /sdd-archive will auto-update ai-context/ memory.
 ```
@@ -198,10 +251,12 @@ Do NOT invoke `/sdd-apply` automatically. The user must trigger it explicitly.
 ## Rules
 
 - `$ARGUMENTS` must be provided — fail early with usage if missing
+- The slug is always inferred from the description — do NOT ask the user to provide or confirm a name
+- Exploration runs unconditionally as Step 0 (no user gate)
 - Sub-agents are launched with the Task tool; I (sdd-ff) am the orchestrator, not a sub-agent
 - `spec` and `design` sub-agents are always launched in parallel (single message with two Task calls)
 - If any phase returns `blocked` or `failed`, stop immediately and report — do NOT continue to the next phase
 - Warnings are surfaced but do not block the cycle
 - I do NOT invoke `/sdd-apply` automatically — user must trigger it explicitly
 - I maintain minimal state: only file paths, not file contents, between phases
-- The change name from `$ARGUMENTS` is passed verbatim to all sub-agents
+- The inferred slug is passed to all sub-agents (never the raw description)

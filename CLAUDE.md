@@ -242,10 +242,13 @@ explore (optional)
 
 ## Fast-Forward (/sdd-ff)
 
-1. Launch `sdd-propose` → wait
+Exploration is mandatory — it runs as Step 0 with no user gate.
+
+0. Infer slug from description + Launch `sdd-explore` → wait (mandatory, no user prompt)
+1. Launch `sdd-propose` → wait (reads exploration.md)
 2. Launch `sdd-spec` + `sdd-design` in parallel → wait for both
 3. Launch `sdd-tasks` → wait
-4. Present COMPLETE summary
+4. Present COMPLETE summary (explore, propose, spec, design, tasks)
 5. Ask: "Ready to implement with `/sdd-apply`?"
 
 ---

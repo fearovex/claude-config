@@ -4,6 +4,140 @@
 
 ---
 
+## [2026-03-10] — sdd-apply-diagnose-first
+
+**Type**: SDD apply + archive
+**Agent**: Claude Sonnet 4.6 (sdd-archive)
+**Change**: `sdd-apply-diagnose-first`
+
+**What changed**:
+- `skills/sdd-apply/SKILL.md`: inserted new Step 4 (Diagnosis Step) between Step 3 (verify work scope) and the implementation step; old Steps 4–6 renumbered to 5–7; added `DIAGNOSIS` block template (6 fields: files, command outputs, current behavior, data/state, hypothesis, risk); added `MUST_RESOLVE` warning protocol for contradiction detection; documented `diagnosis_commands` config key in Step 1.
+- `openspec/config.yaml`: added `diagnosis_commands` optional key with commented example block.
+- `openspec/specs/sdd-apply/spec.md`: 3 new requirements appended (Mandatory Diagnosis Step, MUST_RESOLVE on contradictions, diagnosis_commands config key) with 8 scenarios and 5 new Rules entries.
+- Verified PASS (no critical issues, no warnings).
+
+**Files modified**:
+- `skills/sdd-apply/SKILL.md` — Step 4 Diagnosis Step added; steps renumbered
+- `openspec/config.yaml` — `diagnosis_commands` optional key documented
+- `openspec/specs/sdd-apply/spec.md` — 3 requirements + 8 scenarios + 5 rules merged from delta
+
+**Decisions made**:
+- Diagnosis Step placed after Step 0 (tech skills loaded, context available) and before implementation — front-loading prevents change-fail-change-fail loops
+- Structured prose block (not JSON) — consistent with DEVIATION and QUALITY_VIOLATION formats already in the skill
+- MUST_RESOLVE pause on contradictions — auto-proceed rejected; contradicting assumptions are high-risk
+- `diagnosis_commands` in `openspec/config.yaml` — follows established convention; no new config file needed
+- Universal applicability (all tasks including creation) — avoids sub-agent classification overhead
+- Per-task `[skip-diagnosis]` annotation explicitly deferred to a future proposal
+
+---
+
+## [2026-03-10] — sdd-apply-retry-limit
+
+**Type**: SDD apply + archive
+**Agent**: Claude Sonnet 4.6 (sdd-archive)
+**Change**: `sdd-apply-retry-limit`
+
+**What changed**:
+- `skills/sdd-apply/SKILL.md`: added Step 0b (in-memory retry counter initialization, `apply_max_retries` config read with default 3); modified task execution loop to track attempt counts, detect same-strategy loops, mark tasks `[BLOCKED]` on limit, and halt the phase.
+- `openspec/config.yaml`: added optional `apply_max_retries` key documentation.
+- `openspec/specs/sdd-apply/spec.md`: 6 new requirements appended (Retry Counter per Task, Same Strategy Detection, User Resume Path, Configuration of Max Retries, BLOCKED State Marking, Agent Stop Behavior on BLOCKED).
+- Verified PASS WITH WARNINGS (one warning: no automated test runner; verified by code inspection only).
+
+**Files modified**:
+- `skills/sdd-apply/SKILL.md` — Step 0b + retry circuit breaker in task execution loop
+- `openspec/config.yaml` — `apply_max_retries` optional key added
+- `openspec/specs/sdd-apply/spec.md` — 6 new requirements merged from delta
+
+**Decisions made**:
+- In-memory counter per invocation (not persistent) — simplicity; per-invocation reset is sufficient
+- Default max_attempts = 3 — conservative; surfaces manual intervention early
+- `apply_max_retries` key in `openspec/config.yaml` — project config stays in one place
+- Hash-based same-strategy detection — robust, conservative, avoids false positives
+- `[BLOCKED]` inline in tasks.md — discoverable, single source of truth
+- Phase halt on BLOCKED (fail-fast) — context degradation worse than stopping early
+- Manual resume via `[BLOCKED]` → `[TODO]` — explicit user control; auto-retry risks loops
+
+---
+
+## [2026-03-10] — sdd-new-improvements
+
+**Type**: SDD apply + archive
+**Agent**: Claude Sonnet 4.6 (sdd-archive)
+**Change**: `sdd-new-improvements`
+
+**What changed**:
+- `skills/sdd-new/SKILL.md`: added Step 0 (slug inference algorithm with stop-word filter, date prefix, collision detection); made `sdd-explore` unconditional as Step 1 (removed optional gate); subsequent steps renumbered.
+- `skills/sdd-ff/SKILL.md`: added Step 0 (slug inference + `sdd-explore` launch); removed name-input gate; all subsequent steps renumbered. Fast-forward now runs: explore → propose → spec+design (parallel) → tasks.
+- `CLAUDE.md` Fast-Forward section: updated to document new 6-step flow with mandatory Step 0 exploration.
+- `openspec/specs/sdd-orchestration/spec.md`: new master spec created from delta (new domain).
+
+**Files modified**:
+- `skills/sdd-new/SKILL.md` — Step 0 slug inference + unconditional explore added
+- `skills/sdd-ff/SKILL.md` — Step 0 explore added, name gate removed, steps renumbered
+- `CLAUDE.md` — Fast-Forward section updated
+
+**Decisions made**:
+- Slug inference duplicated in both SKILL.md files (not extracted to a utility) — acceptable for a simple leaf operation
+- Stop word list hardcoded (stable, avoids external config overhead)
+- Collision handling uses numeric suffix (`-2`, `-3`) — human-readable
+
+---
+
+## [2026-03-10] — sdd-blocking-warnings
+
+**Type**: SDD archive
+**Agent**: Claude Sonnet 4.6 (sdd-archive)
+**Change**: `sdd-blocking-warnings`
+
+**What changed**:
+- Added a two-tier warning classification system to `sdd-tasks` and `sdd-apply`.
+- `sdd-tasks` Step 4a: classifies each warning as `MUST_RESOLVE` or `ADVISORY` with a reason; records both in `tasks.md` using `[WARNING: TYPE]` inline markers.
+- `sdd-tasks` Step 4b: documents the exact tasks.md format for MUST_RESOLVE (Warning, Reason, Question, Answer, Answered fields) and ADVISORY (Warning, Reason fields) entries.
+- `sdd-apply` Step 5a: before executing any MUST_RESOLVE-flagged task, presents a blocking gate (`⛔ BLOCKED`) with no skip option; records the user's answer + ISO 8601 timestamp in tasks.md; then resumes execution.
+- ADVISORY warnings are logged inline with task progress output; execution continues without user input.
+- Created master spec: `openspec/specs/sdd-warning-classification/spec.md`.
+- Verified PASS WITH WARNINGS (one warning: no E2E run on Audiio V3 test project).
+
+**Files modified**:
+- `skills/sdd-tasks/SKILL.md` — Steps 4a and 4b added (warning classification and tasks.md format)
+- `skills/sdd-apply/SKILL.md` — Step 5a added (MUST_RESOLVE blocking gate + ADVISORY log-and-continue)
+- `openspec/specs/sdd-warning-classification/spec.md` — created (new master spec from delta)
+- `openspec/changes/archive/2026-03-10-sdd-blocking-warnings/` — archived
+- `ai-context/architecture.md` — decision #13 added
+- `ai-context/changelog-ai.md` — this entry
+
+**Decisions made**:
+- Warnings are stored inline in `tasks.md` (not a separate manifest); all context co-located with tasks
+- Classification happens at sdd-tasks phase, not sdd-apply — risks are visible before execution begins
+- Blocking gate has no skip option — answer is required; bypassing is structurally prevented
+- Answers are preserved permanently in `tasks.md` with exact user text + timestamp — serves as a decision log
+
+---
+
+## [2026-03-10] — sdd-apply-diagnose-first
+
+**Type**: SDD apply
+**Agent**: Claude Sonnet 4.6 (sdd-apply)
+**Change**: `sdd-apply-diagnose-first`
+
+**What changed**:
+- Added mandatory Step 4 — Diagnosis to `skills/sdd-apply/SKILL.md`. The Diagnosis Step runs before any file modification for each task: reads files to be modified, runs `diagnosis_commands` from config (if configured), and writes a structured `DIAGNOSIS` block (6 fields: files, command outputs, current behavior, data/state, hypothesis, risk).
+- When Diagnosis reveals contradictions with task assumptions, a `MUST_RESOLVE` warning is raised and execution pauses until the user confirms.
+- Added `diagnosis_commands` documentation to Step 1 (Read full context) in `skills/sdd-apply/SKILL.md`.
+- Renumbered old Steps 4→5, 5→6, 6→7 to maintain sequential numbering after the insertion.
+- Added commented `diagnosis_commands` optional key documentation block to `openspec/config.yaml`, consistent with existing optional key conventions.
+
+**Files modified**:
+- `skills/sdd-apply/SKILL.md` — Diagnosis Step added (new Step 4), subsequent steps renumbered, `diagnosis_commands` doc added to Step 1
+- `openspec/config.yaml` — `diagnosis_commands` optional key documented (commented example block)
+
+**Decisions made**:
+- Diagnosis Step is mandatory for every task, including file-creation tasks (pattern reference reads still required)
+- `DIAGNOSIS` block must be written before any file write — hard gate enforced by instruction ordering
+- Multiple contradictions in one task are listed together in a single `MUST_RESOLVE` block with one combined confirmation wait
+
+---
+
 ## [2026-03-10] — sdd-project-context-awareness
 
 **Type**: SDD apply + archive

@@ -29,17 +29,28 @@ Specs are deltas (changes) on top of what already exists, not full replacements.
 
 ## Process
 
-### Step 1 — Read prior artifacts
+### Step 0a — Load project context
 
-I must read:
+This step is **non-blocking**: any failure (missing file, unreadable file) MUST produce
+at most an INFO-level note. This step MUST NOT produce `status: blocked` or `status: failed`.
 
-- `openspec/changes/<change-name>/proposal.md` (the WHAT and WHY)
-- `openspec/specs/<domain>/spec.md` if it exists (current domain spec)
-- `ai-context/architecture.md` if it exists (to understand the current system)
+1. Read `ai-context/stack.md` — tech stack, versions, key tools.
+2. Read `ai-context/architecture.md` — architectural decisions and their rationale.
+3. Read `ai-context/conventions.md` — naming patterns, code conventions.
+4. Read the project's `CLAUDE.md` (at project root) and extract the `## Skills Registry` section.
 
-#### Step 0 — Domain context preload
+For each file:
+- If absent: log `INFO: [filename] not found — proceeding without it.`
+- If present: extract `Last updated:` or `Last analyzed:` date. If date is older than 7 days:
+  log `NOTE: [filename] last updated [date] — context may be stale. Consider running /memory-update or /project-analyze.`
 
-After reading the artifacts above and before identifying affected domains, I perform an optional, non-blocking domain context preload:
+Loaded context is used as enrichment throughout all subsequent steps. It informs architectural
+coherence, naming consistency, and skill alignment checks—but does NOT override explicit
+content in the proposal or design.
+
+### Step 0b — Domain context preload
+
+After loading project context and before identifying affected domains, I perform an optional, non-blocking domain context preload:
 
 1. **List candidates**: List all `.md` files in `ai-context/features/`, excluding `_template.md` and any file whose name begins with an underscore. If the directory is absent, skip this step silently.
 2. **Apply the filename-stem matching heuristic**:
@@ -51,6 +62,14 @@ After reading the artifacts above and before identifying affected domains, I per
 5. **Non-blocking contract**: This step MUST NEVER produce `status: blocked` or `status: failed`. Any file read error is treated as a miss (skip silently).
 6. **Enrichment note**: Feature file content is treated as enrichment context — it surfaces business rules, invariants, and known gotchas that should inform the spec's requirements and THEN clauses. It is NOT a replacement for reading the existing `openspec/specs/<domain>/spec.md` when one exists. Both files MUST be read when both are present.
 7. **Orchestrator reporting**: When one or more feature files are loaded, the `summary` field MUST note that domain context was preloaded (e.g., "domain context loaded from ai-context/features/auth.md"). Each loaded file path MUST appear in the `artifacts` list (read, not written).
+
+### Step 1 — Read prior artifacts
+
+I must read:
+
+- `openspec/changes/<change-name>/proposal.md` (the WHAT and WHY)
+- `openspec/specs/<domain>/spec.md` if it exists (current domain spec)
+- `ai-context/architecture.md` if it exists (to understand the current system)
 
 ### Step 2 — Identify affected domains
 

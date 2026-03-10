@@ -25,6 +25,25 @@ It is the input for `sdd-apply`. Without an approved tasks file, nothing gets im
 
 ## Process
 
+### Step 0 — Load project context
+
+This step is **non-blocking**: any failure (missing file, unreadable file) MUST produce
+at most an INFO-level note. This step MUST NOT produce `status: blocked` or `status: failed`.
+
+1. Read `ai-context/stack.md` — tech stack, versions, key tools.
+2. Read `ai-context/architecture.md` — architectural decisions and their rationale.
+3. Read `ai-context/conventions.md` — naming patterns, code conventions.
+4. Read the project's `CLAUDE.md` (at project root) and extract the `## Skills Registry` section.
+
+For each file:
+- If absent: log `INFO: [filename] not found — proceeding without it.`
+- If present: extract `Last updated:` or `Last analyzed:` date. If date is older than 7 days:
+  log `NOTE: [filename] last updated [date] — context may be stale. Consider running /memory-update or /project-analyze.`
+
+Loaded context is used as enrichment throughout all subsequent steps. It informs architectural
+coherence, naming consistency, and skill alignment checks—but does NOT override explicit
+content in the proposal or design.
+
 ### Step 1 — Read prior artifacts
 
 I must read:

@@ -24,6 +24,25 @@ The design defines **HOW to implement** what the specs say the system MUST do. I
 
 ## Process
 
+### Step 0 — Load project context
+
+This step is **non-blocking**: any failure (missing file, unreadable file) MUST produce
+at most an INFO-level note. This step MUST NOT produce `status: blocked` or `status: failed`.
+
+1. Read `ai-context/stack.md` — tech stack, versions, key tools.
+2. Read `ai-context/architecture.md` — architectural decisions and their rationale.
+3. Read `ai-context/conventions.md` — naming patterns, code conventions.
+4. Read the project's `CLAUDE.md` (at project root) and extract the `## Skills Registry` section.
+
+For each file:
+- If absent: log `INFO: [filename] not found — proceeding without it.`
+- If present: extract `Last updated:` or `Last analyzed:` date. If date is older than 7 days:
+  log `NOTE: [filename] last updated [date] — context may be stale. Consider running /memory-update or /project-analyze.`
+
+Loaded context is used as enrichment throughout all subsequent steps. It informs architectural
+coherence, naming consistency, and skill alignment checks—but does NOT override explicit
+content in the proposal or design.
+
 ### Step 1 — Read prior artifacts
 
 I must read:
@@ -48,6 +67,16 @@ I evaluate the solution considering:
 - Minimal impact on existing code
 - Testability
 - Reversibility (rollback plan from the proposal)
+
+#### Skills Registry cross-reference
+
+When recommending a skill, library, or technology pattern in the design, I MUST check the project Skills Registry extracted in Step 0 and follow these rules:
+
+- **Registered skill**: reference it by its exact registered name (e.g., `typescript`, `react-19`).
+- **Global catalog skill, not registered in project**: mark it as optional with a note, e.g. `[optional — not registered in project; add via /skill-add <name>]`.
+- **Skill not in the global catalog**: state it as a new dependency and flag it for review.
+
+This check applies to the Technical Decisions table, the Testing Strategy table, and any inline recommendations in the design narrative. It ensures design output stays aligned with the project's declared toolset.
 
 ### Step 3 — Create design.md
 

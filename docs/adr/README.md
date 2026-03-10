@@ -77,3 +77,6 @@ ADR files are append-only by convention: once accepted, the original Context, De
 | [023](023-project-claude-organizer-commands-scaffold.md) | Project Claude Organizer Commands Scaffold Pattern — active SKILL.md generation for commands/ and skills audit sub-step | Proposed | 2026-03-04 |
 | [024](024-sdd-project-context-awareness-convention.md) | SDD Phase Skills Load Project Context Before Producing Output | Proposed | 2026-03-10 |
 | [025](025-sdd-apply-diagnose-first-convention.md) | sdd-apply Diagnosis-Before-Change Convention — mandatory Diagnosis Step with written hypothesis before any file modification | Proposed | 2026-03-10 |
+| [026](026-sdd-verify-enforcement-convention.md) | sdd-verify Enforcement Convention — Tool Execution Gate and Evidence-Based Criteria in verify-report.md | Proposed | 2026-03-10 |
+| [027](027-codebase-teach-skill-convention.md) | Codebase Teach Skill Convention — Manual Domain Knowledge Extraction into ai-context/features/ | Proposed | 2026-03-10 |
+| [028](028-sdd-parallelism-model.md) | SDD Parallelism Model — maximum 2 parallel Tasks, file conflict boundary rule, and bounded-context apply evaluation | Accepted | 2026-03-10 |

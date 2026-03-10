@@ -133,6 +133,14 @@ testing:
 #   #   - src/core/domain.ts
 
 # ---------------------------------------------------------------------------
+# apply_max_retries (optional) — Circuit breaker for /sdd-apply task execution
+# ---------------------------------------------------------------------------
+# Maximum number of retry attempts per task before sdd-apply marks the task
+# as [BLOCKED] and halts the phase. If absent, the default is 3.
+#
+# apply_max_retries: 3
+
+# ---------------------------------------------------------------------------
 # tdd (optional) — TDD mode configuration for /sdd-apply
 # ---------------------------------------------------------------------------
 # Uncomment and configure to control TDD behavior during /sdd-apply.
@@ -151,6 +159,22 @@ testing:
 # tdd:
 #   enabled: true
 #   explicit_only: false
+
+# ---------------------------------------------------------------------------
+# diagnosis_commands (optional) — Read-only commands for /sdd-apply Diagnosis Step
+# ---------------------------------------------------------------------------
+# Uncomment and configure to supply project-specific read-only shell commands
+# that sdd-apply runs during the Diagnosis Step (Step 4) for every task.
+# Without this key, sdd-apply uses only auto-detected read-only commands (or none).
+#
+# Commands are expected to be NON-DESTRUCTIVE (read-only). The user is responsible
+# for ensuring configured commands do not modify project state.
+# A command that exits non-zero is recorded in the DIAGNOSIS block and does NOT
+# block the Diagnosis Step — the step continues and the failure is noted in Risk.
+#
+# diagnosis_commands:
+#   - "npm test -- --dry-run"
+#   - "cat ai-context/known-issues.md"
 
 # ---------------------------------------------------------------------------
 # coverage (optional) — Coverage threshold for /sdd-verify

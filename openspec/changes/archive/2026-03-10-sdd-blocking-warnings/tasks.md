@@ -3,7 +3,7 @@
 Date: 2026-03-10
 Design: openspec/changes/2026-03-10-sdd-blocking-warnings/design.md
 
-## Progress: 7/8 tasks
+## Progress: 8/8 tasks
 
 ## Phase 1: sdd-tasks — Add warning classification rules and documentation
 
@@ -24,8 +24,8 @@ Design: openspec/changes/2026-03-10-sdd-blocking-warnings/design.md
 
 ## Phase 4: Finalization and documentation
 
-- [ ] 4.1 Run `bash install.sh` to deploy updated SKILL.md files to `~/.claude/`
-- [ ] 4.2 Verify `~/.claude/skills/sdd-tasks/SKILL.md` contains the warning classification rules
-- [ ] 4.3 Verify `~/.claude/skills/sdd-apply/SKILL.md` contains the blocking gate and answer recording logic
-- [ ] 4.4 Commit changes to git: `git add -A && git commit -m "feat(sdd): add blocking warnings system to sdd-tasks and sdd-apply"`
+- [x] 4.1 Run `bash install.sh` to deploy updated SKILL.md files to `~/.claude/` ✓
+- [x] 4.2 Verify `~/.claude/skills/sdd-tasks/SKILL.md` contains the warning classification rules ✓
+- [x] 4.3 Verify `~/.claude/skills/sdd-apply/SKILL.md` contains the blocking gate and answer recording logic ✓
+- [x] 4.4 Commit changes to git: `git add -A && git commit -m "feat(sdd): add blocking warnings system to sdd-tasks and sdd-apply"` ✓
 

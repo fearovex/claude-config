@@ -4,6 +4,22 @@
 
 ---
 
+## [2026-03-10] — sdd-feedback-persistence
+
+**Type**: Config + Documentation
+**Agent**: Claude Haiku 4.5 (sdd-apply)
+**Change**: `sdd-feedback-persistence`
+
+**What changed**:
+- Added Rule 5 — Feedback persistence to the Unbreakable Rules section of `CLAUDE.md` (both repo and runtime via install.sh). Rule enforces that feedback sessions produce only `proposal.md` files and must not trigger any SDD implementation commands in the same session.
+- Created `docs/workflows/feedback-to-proposal.md` — end-to-end protocol for the feedback → proposal → separate-implementation session pattern, including proposal quality requirements and a worked example with two proposals.
+
+**Files modified**:
+- `CLAUDE.md` — Rule 5 added after Rule 4
+- `docs/workflows/feedback-to-proposal.md` — created
+
+---
+
 ## [2026-03-08] — settings-write-permissions-for-project-tools
 
 **Type**: Config update

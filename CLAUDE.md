@@ -67,6 +67,13 @@ SDD meta-cycle for this repo:
 - Config changes (skills, CLAUDE.md, hooks) use `install.sh` (repo → `~/.claude/`), never `sync.sh`.
 - Never edit `~/.claude/` directly — always edit in the repo and deploy via `install.sh`.
 
+### 5. Feedback persistence
+- A **feedback session** is any session where the user provides observations, complaints, or improvement ideas about the system.
+- In a feedback session, I MUST produce only `proposal.md` files — one per feedback item — in `openspec/changes/YYYY-MM-DD-<slug>/`.
+- I MUST NOT start `/sdd-ff`, `/sdd-new`, `/sdd-apply`, `/sdd-spec`, `/sdd-design`, `/sdd-tasks`, or any other implementation command in the same session.
+- At the end of the feedback session, I list all proposals created with their full paths.
+- Implementation happens in a **separate session**: the user opens a new session, references a proposal, and triggers `/sdd-ff` or `/sdd-new`.
+
 ---
 
 ## Plan Mode Rules

@@ -75,3 +75,4 @@ ADR files are append-only by convention: once accepted, the original Context, De
 | [021](021-project-claude-organizer-cleanup-after-migrate-conv.md) | Project Claude Organizer Cleanup Convention — Confirmed-Deletion Post-Migration Pattern | Proposed | 2026-03-04 |
 | [022](022-solid-ddd-quality-enforcement-pattern.md) | Solid Ddd Quality Enforcement Pattern — unconditional solid-ddd preload and Quality Gate checklist in sdd-apply | Proposed | 2026-03-04 |
 | [023](023-project-claude-organizer-commands-scaffold.md) | Project Claude Organizer Commands Scaffold Pattern — active SKILL.md generation for commands/ and skills audit sub-step | Proposed | 2026-03-04 |
+| [024](024-sdd-project-context-awareness-convention.md) | SDD Phase Skills Load Project Context Before Producing Output | Proposed | 2026-03-10 |

@@ -4,6 +4,32 @@
 
 ---
 
+## [2026-03-10] — sdd-project-context-awareness
+
+**Type**: SDD full cycle (spec + design + tasks + apply + verify + archive)
+**Agent**: Claude Sonnet 4.6 (sdd-archive inline)
+**Change**: `sdd-project-context-awareness`
+
+**What changed**:
+- `skills/sdd-explore/SKILL.md`: Added `### Step 0 — Load project context` block as the first step in `## Process`. This was the only remaining SDD phase skill without Step 0 — all others already had it.
+- `docs/sdd-context-injection.md`: Canonical reference for skill authors (Step 0 template, dual-block variant, graceful degradation rules, staleness threshold).
+- `docs/adr/024-sdd-project-context-awareness-convention.md`: ADR documenting the convention.
+- `docs/adr/README.md`: Row added for ADR 024.
+- `ai-context/architecture.md`: Decision 11 added.
+- `openspec/specs/sdd-context-loading/spec.md`: New master spec (5 requirements, 10 scenarios).
+
+**Files modified**:
+- `skills/sdd-explore/SKILL.md`
+- `openspec/specs/sdd-context-loading/spec.md` (promoted master spec)
+- SDD cycle artifacts archived at `openspec/changes/archive/2026-03-10-sdd-project-context-awareness/`
+
+**Decisions made**:
+- Per-skill Step 0 file reads chosen over Context Capsule (YAML object) — simpler, self-contained, no orchestrator changes required.
+- Context Capsule deferred to a future change as an optional enhancement.
+- Dual-block structure (0a/0b) preserved for sdd-propose and sdd-spec.
+
+---
+
 ## [2026-03-10] — sdd-verify-enforcement
 
 **Type**: SDD apply + archive

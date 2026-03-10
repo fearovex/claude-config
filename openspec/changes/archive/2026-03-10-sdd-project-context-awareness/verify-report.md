@@ -1,61 +1,156 @@
-# Verify Report: sdd-project-context-awareness
+# Verification Report: sdd-project-context-awareness
 
 Date: 2026-03-10
-Spec files:
-- openspec/changes/2026-03-10-sdd-project-context-awareness/specs/sdd-phase-context-loading/spec.md
-- openspec/changes/2026-03-10-sdd-project-context-awareness/specs/skill-authoring-conventions/spec.md
+Verifier: sdd-verify
+
+## Summary
+
+| Dimension            | Status |
+|----------------------|--------|
+| Completeness (Tasks) | ✅ OK |
+| Correctness (Specs)  | ✅ OK |
+| Coherence (Design)   | ✅ OK |
+| Testing              | ⏭️ SKIPPED |
+| Test Execution       | ⏭️ SKIPPED |
+| Build / Type Check   | ⏭️ SKIPPED |
+| Coverage             | ⏭️ SKIPPED |
+| Spec Compliance      | ✅ OK |
+
+## Verdict: PASS
 
 ---
 
-## Verification Criteria
+## Detail: Completeness
 
-### From spec: sdd-phase-context-loading
+### Completeness
 
-- [x] **SC-1**: All six SDD phase skills (`sdd-explore`, `sdd-propose`, `sdd-spec`, `sdd-design`, `sdd-tasks`, `sdd-apply`) contain a Step 0 (or Step 0a) block that reads `ai-context/stack.md`, `ai-context/architecture.md`, and `ai-context/conventions.md`.
-  - Verified: each skill file was modified in Phase 3 / Phase 4 tasks (3.1–4.2). All six SKILL.md files contain the Step 0 Load project context block.
+| Metric               | Value |
+|----------------------|-------|
+| Total tasks          | 4     |
+| Completed tasks [x]  | 4     |
+| Incomplete tasks [ ] | 0     |
 
-- [x] **SC-2**: The Step 0 block is non-blocking in all six skills — absent files produce only an INFO-level note and execution continues.
-  - Verified: each inserted block contains the text "MUST produce at most an INFO-level note" and "MUST NOT produce `status: blocked` or `status: failed`".
-
-- [x] **SC-3**: All six skills include a staleness check — if the loaded file has a `Last updated:` date older than 7 days, a NOTE is emitted.
-  - Verified: each Step 0 block includes "If date is older than 7 days: log NOTE:" language.
-
-- [x] **SC-4**: `sdd-propose` and `sdd-spec` use a dual-step structure (Step 0a — global context, Step 0b — domain context preload) that preserves the existing feature-file matching logic unchanged.
-  - Verified: Tasks 4.1 and 4.2 renamed existing logic to Step 0b and inserted Step 0a before it.
-
-- [x] **SC-5**: `sdd-apply` inserts the global context load as a named sub-step (Step 0a) inside the existing Step 0 (Technology Skill Preload), before the scope guard.
-  - Verified: Task 3.4 added the Step 0a sub-section to sdd-apply/SKILL.md before the scope guard.
-
-### From spec: skill-authoring-conventions
-
-- [x] **SC-6**: `docs/sdd-context-injection.md` exists after apply.
-  - Verified: Task 1.1 created this file as the first task in Phase 1.
-
-- [x] **SC-7**: `docs/sdd-context-injection.md` contains a purpose section, a Step 0 template code block (fenced), and a graceful degradation section.
-  - Verified: the file was created with all three sections in Task 1.1.
-
-- [x] **SC-8**: `sdd-design` SKILL.md includes a Skills Registry cross-reference requirement in its design step — registered skills are referenced by name and unregistered global-catalog skills are marked `[optional — not registered in project]`.
-  - Verified: Task 5.1 added the "Skills Registry cross-reference" sub-section to Step 2 of sdd-design/SKILL.md.
+All tasks complete. No incomplete tasks.
 
 ---
 
-## Audit Score
+## Detail: Correctness
 
-Project-audit baseline before this change: **98/100**.
+### Correctness (Specs)
 
-Run `/project-audit` after deploying via `install.sh` to confirm score >= 98.
+| Requirement | Status | Notes |
+|-------------|--------|-------|
+| Step 0 present in all SDD phase skills | ✅ Implemented | All 6 skills verified by grep: sdd-explore (1 match), sdd-propose (2), sdd-spec (2), sdd-design (2), sdd-tasks (1), sdd-apply (7) |
+| Dual-block structure for sdd-propose and sdd-spec | ✅ Implemented | Both skills contain Step 0a + Step 0b confirmed by grep output |
+| Context enriches but does not override explicit content | ✅ Implemented | All Step 0 blocks include the override exclusion clause |
+| Reference documentation exists for skill authors | ✅ Implemented | `docs/sdd-context-injection.md` confirmed to exist with all required sections |
+| sdd-design cross-references Skills Registry | ✅ Implemented | sdd-design Step 2 contains Skills Registry cross-reference requirement |
+
+### Scenario Coverage
+
+| Scenario | Status |
+|----------|--------|
+| Happy path — all four context files present | ✅ Covered |
+| Partial context — some files missing | ✅ Covered |
+| All context files absent | ✅ Covered |
+| Stale context file detected | ✅ Covered |
+| Dual-block executes in order | ✅ Covered |
+| Step 0a failure does not affect Step 0b | ✅ Covered |
+| Context suggests different naming convention | ✅ Covered |
+| New skill author adds Step 0 | ✅ Covered |
+| Design recommends a registered skill | ✅ Covered |
+| Design recommends an unregistered global skill | ✅ Covered |
 
 ---
 
-## Artifacts Verified
+## Detail: Coherence
 
-| File | Status |
-|------|--------|
-| `~/.claude/skills/sdd-explore/SKILL.md` | Modified — Step 0 added |
-| `~/.claude/skills/sdd-design/SKILL.md` | Modified — Step 0 + registry cross-ref added |
-| `~/.claude/skills/sdd-tasks/SKILL.md` | Modified — Step 0 added |
-| `~/.claude/skills/sdd-apply/SKILL.md` | Modified — Step 0a added inside Step 0 |
-| `~/.claude/skills/sdd-propose/SKILL.md` | Modified — Step 0a + 0b structure added |
-| `~/.claude/skills/sdd-spec/SKILL.md` | Modified — Step 0a + 0b structure added |
-| `docs/sdd-context-injection.md` | Created — reference doc for skill authors |
-| `openspec/changes/2026-03-10-sdd-project-context-awareness/verify-report.md` | Created — this file |
+### Coherence (Design)
+
+| Decision | Followed? | Notes |
+|----------|-----------|-------|
+| Per-skill Step 0 block (not Context Capsule) | ✅ Yes | Each skill has its own Step 0; no orchestrator-level capsule generation added |
+| Non-blocking contract | ✅ Yes | All Step 0 blocks explicitly state non-blocking requirement |
+| 7-day staleness threshold | ✅ Yes | All blocks include `>7 days` staleness check language |
+| Dual-block for sdd-propose and sdd-spec | ✅ Yes | Both use Step 0a + Step 0b structure |
+| Reference document at docs/sdd-context-injection.md | ✅ Yes | File exists with all required sections |
+| sdd-explore as the only remaining skill needing update | ✅ Yes | Task 1.1 added Step 0 to sdd-explore; all other skills were already updated |
+
+---
+
+## Detail: Testing
+
+Testing: SKIPPED — this is a documentation-only change (all modified files are `.md`). No executable code was added or changed.
+
+---
+
+## Tool Execution
+
+| Command | Exit Code | Result |
+|---------|-----------|--------|
+| grep Step 0 skills/sdd-explore/SKILL.md | 0 | PASS — Step 0 found at line 33 |
+| grep Step 0 for all 6 SDD phase skills | 0 | PASS — all 6 skills have Step 0 presence confirmed |
+| grep Step 0a,0b sdd-propose SKILL.md | 0 | PASS — dual-block confirmed |
+| grep Step 0a,0b sdd-spec SKILL.md | 0 | PASS — dual-block confirmed |
+| grep "sdd-context-injection" architecture.md | 0 | PASS — decision 11 references docs/sdd-context-injection.md |
+| grep "024" docs/adr/README.md | 0 | PASS — ADR 024 row present in index |
+
+---
+
+## Detail: Test Execution
+
+| Metric | Value |
+|--------|-------|
+| Runner | none detected |
+| Command | N/A |
+| Exit code | N/A |
+| Tests passed | N/A |
+| Tests failed | N/A |
+| Tests skipped | N/A |
+
+Test Execution: SKIPPED — no test runner detected. Project uses manual `/project-audit` as integration test.
+
+---
+
+## Detail: Build / Type Check
+
+No build command detected. Project is Markdown + YAML + Bash; no compilation step exists.
+
+---
+
+## Spec Compliance Matrix
+
+| Spec Domain | Requirement | Scenario | Status | Evidence |
+|-------------|-------------|----------|--------|----------|
+| sdd-context-loading | Step 0 in all SDD phase skills | Happy path — all files present | COMPLIANT | grep confirms Step 0 blocks in all 6 skills |
+| sdd-context-loading | Step 0 in all SDD phase skills | Partial context — some files missing | COMPLIANT | Each Step 0 block contains INFO: not found instruction |
+| sdd-context-loading | Step 0 in all SDD phase skills | All context files absent | COMPLIANT | Graceful degradation rules in docs/sdd-context-injection.md and enforced in each block |
+| sdd-context-loading | Step 0 in all SDD phase skills | Stale context file detected | COMPLIANT | All blocks include staleness check >7 days → NOTE |
+| sdd-context-loading | Dual-block for sdd-propose and sdd-spec | Dual-block executes in order | COMPLIANT | grep confirms Step 0a + Step 0b in both skills |
+| sdd-context-loading | Dual-block for sdd-propose and sdd-spec | Step 0a failure does not affect Step 0b | COMPLIANT | Both sub-steps independently non-blocking |
+| sdd-context-loading | Context enriches but does not override | Context suggests different naming | COMPLIANT | All blocks state override exclusion clause |
+| sdd-context-loading | Reference documentation exists | New skill author adds Step 0 | COMPLIANT | docs/sdd-context-injection.md exists with complete template |
+| sdd-context-loading | sdd-design cross-references Skills Registry | Design recommends registered skill | COMPLIANT | sdd-design Step 2 contains cross-reference logic |
+| sdd-context-loading | sdd-design cross-references Skills Registry | Design recommends unregistered global skill | COMPLIANT | sdd-design Step 2 mandates [optional — not registered] annotation |
+
+---
+
+## Issues Found
+
+### CRITICAL (must be resolved before archiving):
+
+None.
+
+### WARNINGS (should be resolved):
+
+None.
+
+### SUGGESTIONS (optional improvements):
+
+- The Context Capsule approach (structured YAML object passed from orchestrator) from the original proposal was deferred. This is a valid future enhancement that would reduce per-sub-agent file reads in large projects.
+
+---
+
+## User Documentation
+
+- [x] Review user docs — this change adds a new convention for SDD phase skills. `docs/sdd-context-injection.md` serves as the primary user/author reference. No changes to `ai-context/scenarios.md`, `ai-context/quick-reference.md`, or `ai-context/onboarding.md` are needed for this internal convention change.

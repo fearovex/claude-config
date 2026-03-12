@@ -4,6 +4,29 @@
 
 ---
 
+## [2026-03-12] — project-user-docs (SDD archive)
+
+**Type**: SDD full cycle (explore + propose + spec + design + tasks + apply + verify + archive)
+**Agent**: Claude Sonnet 4.6 (sdd-archive inline)
+**Change**: `project-user-docs`
+
+**What changed**:
+- `docs/user-guide.md`: New file (302 lines) — comprehensive human-readable guide covering what agent-config is, deployment model (install.sh / sync.sh), global/local configuration precedence, conflict resolution workflow, command reference (22 commands), and quick-start checklists
+- `README.md`: Added link to `docs/user-guide.md` in overview section (line 16)
+- `openspec/specs/user-documentation/spec.md`: New master spec created (7 requirements, 20 scenarios)
+
+**Decisions made**:
+- Single comprehensive guide (not modular) to maximize discoverability and minimize maintenance overhead
+- ASCII diagrams embedded in Markdown — no external image dependencies
+- Narrative-driven structure (not reference-driven) to ease learning for first-time users
+- Document length capped at 250–400 lines (actual: 302)
+- README link placed within first 40 lines for discoverability
+- Worked example uses `sdd-apply` skill override scenario to illustrate global/local precedence
+
+**Notes**: Verification passed with 0 critical issues and 0 warnings on first attempt.
+
+---
+
 ## [2026-03-12] — orchestrator-always-on (SDD archive)
 
 **Type**: SDD full cycle (explore + propose + spec + design + tasks + apply + verify + archive)

@@ -160,7 +160,7 @@ files).
 ### Pattern 6: Worked example — the sdd-meta-system domain
 
 The canonical worked example for this skill is `ai-context/features/sdd-meta-system.md` in the
-`claude-config` repository. It demonstrates all six sections with realistic content for the SDD
+`agent-config` repository. It demonstrates all six sections with realistic content for the SDD
 meta-system bounded context.
 
 Below is an abbreviated illustration of the pattern each section should follow:

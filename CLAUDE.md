@@ -20,12 +20,12 @@ I am an expert development assistant. At the user level I have **two roles**:
 | Testing | /project-audit (integration test) |
 | Version control | Git |
 | Sync | sync.sh (~/.claude/memory/ → repo/memory/ only) |
-| Install | install.sh (~/.claude/ ← ~/claude-config) |
+| Install | install.sh (~/.claude/ ← ~/agent-config) |
 
 ## Architecture
 
 ```
-claude-config (repo)  ──install.sh──►  ~/.claude/ (runtime)
+agent-config (repo)  ──install.sh──►  ~/.claude/ (runtime)
                        ◄──sync.sh────  (memory/ only)
 ```
 

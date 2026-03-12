@@ -1,6 +1,6 @@
 <!-- Note: "ADR" in this filename stands for "Architecture Definition Report", not "Architecture Decision Record". For architectural decision records, see docs/adr/. -->
 # Architecture Definition Report (ADR)
-# claude-config — SDD Meta-System
+# agent-config — SDD Meta-System
 
 > **Version**: 1.0
 > **Date**: 2026-02-28
@@ -30,7 +30,7 @@
 
 ## 1. Executive Summary
 
-`claude-config` is a **zero-dependency, Markdown-based meta-system** that implements Specification-Driven Development (SDD) for AI-assisted coding. It extends the original `agent-teams-lite` framework with:
+`agent-config` is a **zero-dependency, Markdown-based meta-system** that implements Specification-Driven Development (SDD) for AI-assisted coding. It extends the original `agent-teams-lite` framework with:
 
 - **Meta-tools** for project lifecycle management (audit, analyze, fix, setup, onboard, update)
 - **Persistent memory layer** (`ai-context/`) replacing the engram dependency
@@ -95,7 +95,7 @@ A **configuration repository** that deploys to `~/.claude/` and provides:
 ### 3.2 Deployment Model
 
 ```
-claude-config (repo)  ──install.sh──►  ~/.claude/ (runtime)
+agent-config (repo)  ──install.sh──►  ~/.claude/ (runtime)
                        ◄──sync.sh────  (memory/ only)
 ```
 
@@ -617,10 +617,10 @@ memory/            ──►     memory/
 ### 10.3 Deployment Workflow
 
 ```
-1. Edit files in claude-config repo
+1. Edit files in agent-config repo
 2. Run install.sh (deploy to ~/.claude/)
 3. Test in a target project
-4. Git commit in claude-config
+4. Git commit in agent-config
 5. Periodically run sync.sh to capture memory changes
 ```
 
@@ -772,7 +772,7 @@ Phase 3: Feature parity
 Since SKILL.md files are tool-agnostic (they describe behavior, not tool-specific APIs), the strategy is:
 
 ```
-claude-config/skills/           ← source of truth
+agent-config/skills/           ← source of truth
     │
     ├── install.sh ──► ~/.claude/skills/         (Claude Code)
     └── install-opencode.sh ──► ~/.config/opencode/skill/  (OpenCode)

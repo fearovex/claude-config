@@ -1,4 +1,4 @@
-# claude-config
+# agent-config
 
 Global configuration repository for Claude Code. This repo is the source of truth for the
 SDD (Specification-Driven Development) meta-system that runs inside Claude Code.
@@ -19,7 +19,7 @@ For the canonical reference on all commands, flow, and rules, read [CLAUDE.md](.
 ## Repository Structure
 
 ```
-claude-config/
+agent-config/
 ├── CLAUDE.md              # Global orchestrator instructions (read by Claude at session start)
 ├── settings.json          # Claude Code user-level settings (MCP servers, permissions)
 ├── settings.local.json    # Machine-local overrides — NOT committed
@@ -141,8 +141,8 @@ SKILL.md on demand and executes its instructions.
 ### Initial Setup (new machine)
 
 ```bash
-git clone <this-repo> ~/claude-config
-cd ~/claude-config
+git clone <this-repo> ~/agent-config
+cd ~/agent-config
 bash install.sh
 ```
 

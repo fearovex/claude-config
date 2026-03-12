@@ -1,4 +1,4 @@
-# Conventions — claude-config
+# Conventions — agent-config
 
 > Last updated: 2026-02-23
 

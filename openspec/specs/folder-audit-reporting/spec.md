@@ -135,7 +135,7 @@ immediately following the finding description. INFO observations MAY include a
 - **GIVEN** a HIGH finding is recorded (e.g., a missing required directory)
 - **WHEN** the report is written
 - **THEN** the finding block contains a `Remediation:` line with a specific, actionable
-  command or instruction (e.g., "Run install.sh from the claude-config repo")
+  command or instruction (e.g., "Run install.sh from the agent-config repo")
 
 #### Scenario: INFO observation appears without a remediation line
 
@@ -176,7 +176,7 @@ findings exist, the section MUST state that the runtime appears healthy.
 
 - **GIVEN** the report contains one or more HIGH findings
 - **WHEN** the report's "## Recommended Next Steps" section is read
-- **THEN** the first item is: "1. Run install.sh from the claude-config repo to re-sync
+- **THEN** the first item is: "1. Run install.sh from the agent-config repo to re-sync
   the runtime with the source"
 - **AND** additional items MAY follow for MEDIUM or LOW findings
 
@@ -357,7 +357,7 @@ project-specific remediation actions rather than global `install.sh` instruction
 - **AND** one or more HIGH or MEDIUM findings are present
 - **WHEN** the report's "## Findings Summary" table is read
 - **THEN** remediation hints in the table reference project-local actions for P3 and P4 findings
-- **AND** for P2 findings (global skill not deployed), the hint "Run install.sh from the claude-config repo" IS appropriate and MUST appear
+- **AND** for P2 findings (global skill not deployed), the hint "Run install.sh from the agent-config repo" IS appropriate and MUST appear
 
 ---
 
@@ -446,7 +446,7 @@ The skill MUST note in the report footer that this file should be excluded from 
 - The report MUST NOT contain any content suggesting destructive operations
   (file deletion, directory removal) without explicit human review as a prerequisite
 - The CLAUDE.md registry entry MUST use the global path `~/.claude/skills/claude-folder-audit/SKILL.md`
-  because `claude-folder-audit` is a meta-system skill (deployed from `claude-config` itself, not a project)
+  because `claude-folder-audit` is a meta-system skill (deployed from `agent-config` itself, not a project)
 - The "System Audits" section header MUST be added to CLAUDE.md only if it does not already exist;
   if it exists, the new entry MUST be appended under it
 - In `project` mode, the report MUST be written to `<cwd>/.claude/claude-folder-audit-report.md` — never to `~/.claude/`

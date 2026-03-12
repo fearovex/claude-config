@@ -53,11 +53,11 @@ The file MUST be parseable as valid JSON after the edit.
 
 ### Requirement: settings.json in repo is the source of truth
 
-The edit MUST be made to `settings.json` in the `claude-config` repo, not directly in `~/.claude/settings.json`.
+The edit MUST be made to `settings.json` in the `agent-config` repo, not directly in `~/.claude/settings.json`.
 
 #### Scenario: Repo file is edited, then deployed via install.sh
 
-- **GIVEN** the change is applied to `C:/Users/juanp/claude-config/settings.json`
+- **GIVEN** the change is applied to `C:/Users/juanp/agent-config/settings.json`
 - **WHEN** `install.sh` is run
 - **THEN** `~/.claude/settings.json` reflects the updated `permissions.allow` array
 - **AND** no direct edits were made to `~/.claude/settings.json`

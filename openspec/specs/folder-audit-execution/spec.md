@@ -112,14 +112,14 @@ Required directories: `skills/`, `openspec/`, `ai-context/`, `memory/`, `hooks/`
 - **WHEN** Check 1 runs
 - **THEN** a HIGH finding is recorded for each missing directory:
   "Required directory missing: ~/.claude/<dir>/"
-- **AND** the remediation hint reads: "Run install.sh from the claude-config repo"
+- **AND** the remediation hint reads: "Run install.sh from the agent-config repo"
 
 #### Scenario: CLAUDE.md file absent from runtime root — HIGH finding
 
 - **GIVEN** `~/.claude/CLAUDE.md` does not exist
 - **WHEN** Check 1 runs
 - **THEN** a HIGH finding is recorded: "CLAUDE.md missing from ~/.claude/"
-- **AND** the remediation hint reads: "Run install.sh from the claude-config repo"
+- **AND** the remediation hint reads: "Run install.sh from the agent-config repo"
 
 ---
 
@@ -143,7 +143,7 @@ deployed if its directory exists; the presence of `SKILL.md` inside it is MUST b
 - **AND** `~/.claude/skills/<name>/` does NOT exist
 - **WHEN** Check 2 runs
 - **THEN** a HIGH finding is recorded: "Skill '<name>' present in source but not deployed to ~/.claude/skills/"
-- **AND** the remediation hint reads: "Run install.sh from the claude-config repo"
+- **AND** the remediation hint reads: "Run install.sh from the agent-config repo"
 
 #### Scenario: a deployed skill directory is missing SKILL.md — MEDIUM finding
 
@@ -348,7 +348,7 @@ each referenced `SKILL.md` is actually present at the expanded runtime path.
 - **AND** the file does NOT exist at the expanded path
 - **WHEN** Check P2 runs
 - **THEN** a HIGH finding is recorded: "Global skill '<name>' registered in .claude/CLAUDE.md is not deployed at ~/.claude/skills/<name>/SKILL.md"
-- **AND** the remediation hint reads: "Run install.sh from the claude-config repo to deploy missing global skills"
+- **AND** the remediation hint reads: "Run install.sh from the agent-config repo to deploy missing global skills"
 
 #### Scenario: .claude/CLAUDE.md has no global-path registrations — P2 skipped with INFO note
 
@@ -550,7 +550,7 @@ content-quality checks in P1, P2, P3, P6, P7, and P8. Lines inside fenced code b
 - **AND** one or more of the following section headings are absent: `## Tech Stack` (or `## Stack`), `## Architecture`, `## Unbreakable Rules`, `## Plan Mode Rules`
 - **WHEN** Check P1 runs
 - **THEN** a MEDIUM finding is recorded for each missing section: "CLAUDE.md is missing mandatory section: <section-name>"
-- **AND** the remediation hint reads: "Add the missing section to .claude/CLAUDE.md — refer to the global CLAUDE.md in the claude-config repo as a template"
+- **AND** the remediation hint reads: "Add the missing section to .claude/CLAUDE.md — refer to the global CLAUDE.md in the agent-config repo as a template"
 
 #### Scenario: CLAUDE.md has fewer than 30 lines — MEDIUM finding
 

@@ -21,7 +21,7 @@ format: procedural
 
 This skill diagnoses the health of Claude configuration by adapting its checks to where it is invoked:
 
-- **From the `claude-config` source repo** (`global-config` mode): audits the `~/.claude/` runtime for installation drift, missing skill deployments, and orphaned artifacts
+- **From the `agent-config` source repo** (`global-config` mode): audits the `~/.claude/` runtime for installation drift, missing skill deployments, and orphaned artifacts
 - **From a project with a `.claude/` folder** (`project` mode): audits the project's `.claude/CLAUDE.md`, registered skills vs. actual files on disk, and orphaned local skills
 - **From any other location** (`global` mode): audits the `~/.claude/` runtime structure
 
@@ -147,7 +147,7 @@ severity: MEDIUM
 check: P1
 title: CLAUDE.md is missing mandatory section: <section-name>
 detail: No line starting with "## <section-name>" was found in PROJECT_CLAUDE_DIR/CLAUDE.md.
-remediation: Add the missing section to .claude/CLAUDE.md — refer to the global CLAUDE.md in the claude-config repo as a template
+remediation: Add the missing section to .claude/CLAUDE.md — refer to the global CLAUDE.md in the agent-config repo as a template
 ```
 
 **Line count check** — count the total number of lines in the file:
@@ -216,7 +216,7 @@ Skip the rest of P2.
   check: P2
   title: Global skill '<n>' registered in CLAUDE.md but not deployed to ~/.claude/skills/
   detail: Expected at RUNTIME_ROOT/skills/<n>/ — directory not found.
-  remediation: Run install.sh from the claude-config repo, or install the skill manually.
+  remediation: Run install.sh from the agent-config repo, or install the skill manually.
   ```
 
 - If `RUNTIME_ROOT/skills/<n>/` exists but `RUNTIME_ROOT/skills/<n>/SKILL.md` is **absent**:
@@ -665,7 +665,7 @@ severity: HIGH
 check: 1
 title: Required directory missing: ~/.claude/<dir>/
 detail: The directory does not exist in the runtime root.
-remediation: Run install.sh from the claude-config repo
+remediation: Run install.sh from the agent-config repo
 ```
 
 If `CLAUDE.md` is **absent** from `RUNTIME_ROOT`, record:
@@ -674,7 +674,7 @@ severity: HIGH
 check: 1
 title: CLAUDE.md missing from ~/.claude/
 detail: The CLAUDE.md file is not present at the runtime root.
-remediation: Run install.sh from the claude-config repo
+remediation: Run install.sh from the agent-config repo
 ```
 
 If all required directories and CLAUDE.md are present → no finding for this check.
@@ -705,7 +705,7 @@ Skip the rest of Check 2.
      check: 2
      title: Skill '<name>' present in source but not deployed to ~/.claude/skills/
      detail: Source path: SOURCE_ROOT/skills/<name>/ — Runtime path: RUNTIME_ROOT/skills/<name>/ does not exist.
-     remediation: Run install.sh from the claude-config repo
+     remediation: Run install.sh from the agent-config repo
      ```
    - If `RUNTIME_ROOT/skills/<name>/` exists but `RUNTIME_ROOT/skills/<name>/SKILL.md` does **not** → record:
      ```
@@ -752,7 +752,7 @@ check: 3
 title: Possible installation drift — source repo appears newer than ~/.claude/ (mtime proxy)
 detail: Source mtime: <ISO 8601 timestamp> / Runtime mtime: <ISO 8601 timestamp>
         Note: mtime comparison is an approximate proxy. Re-running install.sh is always safe.
-remediation: Run install.sh from the claude-config repo to re-sync runtime with source repo
+remediation: Run install.sh from the agent-config repo to re-sync runtime with source repo
 ```
 
 If **runtime mtime is equal to or more recent than source mtime** → no finding for this check.
@@ -922,7 +922,7 @@ Summary: <N> HIGH, <N> MEDIUM, <N> LOW, <N> INFO
 
 <!-- If HIGH findings exist: -->
 1. Fix .claude/CLAUDE.md (P1 findings) or run /project-setup to initialize project config
-2. Run install.sh from claude-config repo to deploy missing global skills (P2 findings)
+2. Run install.sh from agent-config repo to deploy missing global skills (P2 findings)
 3. Add missing SKILL.md files or remove stale registry entries (P3/P4 findings)
 4. Review LOW findings at your discretion
 
@@ -998,7 +998,7 @@ Summary: <N> HIGH, <N> MEDIUM, <N> LOW, <N> INFO
 ## Recommended Next Steps
 
 <!-- If HIGH findings exist: -->
-1. Run install.sh from the claude-config repo to re-sync the runtime with the source
+1. Run install.sh from the agent-config repo to re-sync the runtime with the source
 2. [additional steps for MEDIUM findings]
 3. Review LOW findings at your discretion
 

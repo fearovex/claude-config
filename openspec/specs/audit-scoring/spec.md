@@ -64,14 +64,14 @@ After this change, a project that has no `.claude/commands/` directory MUST NOT 
 
 ---
 
-### Requirement: Audit score on claude-config itself does not decrease after the change
+### Requirement: Audit score on agent-config itself does not decrease after the change
 
-Running `/project-audit` on the claude-config repo after applying this change MUST yield a score greater than or equal to the score recorded in the current `audit-report.md`.
+Running `/project-audit` on the agent-config repo after applying this change MUST yield a score greater than or equal to the score recorded in the current `audit-report.md`.
 
 #### Scenario: Score regression check
 
-- **GIVEN** the current `audit-report.md` in the claude-config repo records a baseline score
-- **WHEN** `/project-audit` is run on claude-config after this change is applied and `install.sh` has been run
+- **GIVEN** the current `audit-report.md` in the agent-config repo records a baseline score
+- **WHEN** `/project-audit` is run on agent-config after this change is applied and `install.sh` has been run
 - **THEN** the new score is >= the baseline score
 - **AND** any score increase is attributable to the removal of the false penalty from D5
 
@@ -112,10 +112,10 @@ The score table in `project-audit/SKILL.md` and in every generated `audit-report
 
 Adding Dimension 10 to `project-audit/SKILL.md` MUST NOT change the maximum attainable score or the per-dimension point allocation for Dimensions 1–9.
 
-#### Scenario: Score on claude-config does not decrease after this change
+#### Scenario: Score on agent-config does not decrease after this change
 
-- **GIVEN** the current `audit-report.md` in the claude-config repo records a baseline score
-- **WHEN** `/project-audit` is run on claude-config after this change is applied and `install.sh` has been run
+- **GIVEN** the current `audit-report.md` in the agent-config repo records a baseline score
+- **WHEN** `/project-audit` is run on agent-config after this change is applied and `install.sh` has been run
 - **THEN** the new score is >= the baseline score
 - **AND** any score difference is attributable only to legitimate D1–D9 changes, not to D10
 
@@ -216,16 +216,16 @@ only in `violations[]`. D13 MUST NOT be assigned a numeric max-points value.
 
 ---
 
-### Requirement: Adding D12 and D13 does not regress the audit score on the claude-config repo
+### Requirement: Adding D12 and D13 does not regress the audit score on the agent-config repo
 
-Running `/project-audit` on the claude-config repo after this change MUST yield a score
+Running `/project-audit` on the agent-config repo after this change MUST yield a score
 greater than or equal to the pre-change baseline.
 
-#### Scenario: Score on claude-config does not decrease after audit-improvements
+#### Scenario: Score on agent-config does not decrease after audit-improvements
 
-- **GIVEN** the current `audit-report.md` in the claude-config repo records a baseline
+- **GIVEN** the current `audit-report.md` in the agent-config repo records a baseline
   score before this change is applied
-- **WHEN** `/project-audit` is run on claude-config after this change is applied and
+- **WHEN** `/project-audit` is run on agent-config after this change is applied and
   `install.sh` has been run
 - **THEN** the new score is >= the baseline score
 - **AND** any difference is attributable only to legitimate D1–D9 improvements or
@@ -262,5 +262,5 @@ the actual points awarded (which may be less than the maximum due to staleness).
   additions
 - The D7 staleness penalty operates within D7's existing 5-point ceiling — it does not
   add new max points or change the total ceiling of 100
-- Score regression on the claude-config repo is a hard acceptance criterion; any change
+- Score regression on the agent-config repo is a hard acceptance criterion; any change
   that reduces the score below the pre-change baseline MUST be reverted or explained

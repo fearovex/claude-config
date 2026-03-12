@@ -9,7 +9,7 @@ Date: 2026-03-03
 
 ### Requirement: CLAUDE.md memory layer table updated
 
-`CLAUDE.md` (both the repo copy at `claude-config/CLAUDE.md` and the runtime copy deployed via `install.sh`) MUST be updated to document `ai-context/features/*.md` as a first-class memory artifact in the Project Memory section.
+`CLAUDE.md` (both the repo copy at `agent-config/CLAUDE.md` and the runtime copy deployed via `install.sh`) MUST be updated to document `ai-context/features/*.md` as a first-class memory artifact in the Project Memory section.
 
 The update MUST add a row to the memory layer table:
 

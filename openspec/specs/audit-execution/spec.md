@@ -110,10 +110,10 @@ The batching change MUST NOT alter the report produced by `project-audit`.
 - **THEN** the dimensions, scoring table, FIX_MANIFEST structure, and required actions sections are identical in format
 - **AND** the score differs by no more than 0 points if the project state has not changed between runs
 
-#### Scenario: Audit on claude-config itself scores at least as high after the change
+#### Scenario: Audit on agent-config itself scores at least as high after the change
 
-- **GIVEN** the current `audit-report.md` in the claude-config project records a baseline score
-- **WHEN** `/project-audit` is run on claude-config after this change is applied and `install.sh` has been run
+- **GIVEN** the current `audit-report.md` in the agent-config project records a baseline score
+- **WHEN** `/project-audit` is run on agent-config after this change is applied and `install.sh` has been run
 - **THEN** the score is greater than or equal to the baseline score
 
 ---

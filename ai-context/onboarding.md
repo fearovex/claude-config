@@ -22,7 +22,7 @@ Before starting, verify all four of the following:
    ~/.claude/skills/sdd-archive/SKILL.md
    ```
 3. **Target project accessible** — you can `cd` into the project root and it has a recognizable structure (any language/framework)
-4. **install.sh run at least once** — `~/.claude/` contains the latest skills from `claude-config`. If in doubt, run `bash ~/claude-config/install.sh` before proceeding.
+4. **install.sh run at least once** — `~/.claude/` contains the latest skills from `agent-config`. If in doubt, run `bash ~/agent-config/install.sh` before proceeding.
 
 If any prerequisite fails, resolve it before running the onboarding sequence.
 

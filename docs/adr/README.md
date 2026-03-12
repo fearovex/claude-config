@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-This directory contains Architecture Decision Records (ADRs) for the claude-config system. An ADR captures a significant architectural decision: the context that motivated it, the decision itself, and its consequences.
+This directory contains Architecture Decision Records (ADRs) for the agent-config system. An ADR captures a significant architectural decision: the context that motivated it, the decision itself, and its consequences.
 
 ---
 

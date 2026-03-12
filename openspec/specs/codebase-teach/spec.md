@@ -26,7 +26,7 @@ MUST include a `## Rules` section.
 #### Scenario: project-audit D4b finds no structural violation
 
 - **GIVEN** the skill is installed via `install.sh`
-- **WHEN** `/project-audit` is run on the `claude-config` repo
+- **WHEN** `/project-audit` is run on the `agent-config` repo
 - **THEN** the audit score MUST NOT decrease relative to the pre-change score
 - **AND** no `MEDIUM` or `HIGH` finding for `codebase-teach` MUST appear in `audit-report.md`
 

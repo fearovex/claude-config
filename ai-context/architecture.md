@@ -1,10 +1,10 @@
-# Architecture — claude-config
+# Architecture — agent-config
 
 > Last updated: 2026-03-03
 
 ## System role
 
-`claude-config` is the global brain of Claude Code. It defines:
+`agent-config` is the global brain of Claude Code. It defines:
 1. **How Claude orchestrates** — the SDD workflow, delegation patterns, phase DAG
 2. **What Claude knows** — skill catalog covering SDD phases, meta-tools, tech stacks
 3. **How projects are managed** — setup, audit, fix, update lifecycle
@@ -12,7 +12,7 @@
 ## Two-layer architecture
 
 ```
-claude-config (repo)          ~/.claude/ (runtime)
+agent-config (repo)          ~/.claude/ (runtime)
       │                              │
       ├── CLAUDE.md    ──install──►  ├── CLAUDE.md       ← Claude reads at session start
       ├── skills/      ──install──►  ├── skills/          ← Claude reads on demand
@@ -137,7 +137,7 @@ Skills that need to pass state to each other use **file artifacts**:
 
 10. **Feedback sessions produce only proposals — never SDD cycles** (added 2026-03-10, change: sdd-feedback-persistence) — Rule 5 in CLAUDE.md Unbreakable Rules enforces a two-session model: when a user provides feedback (observations, complaints, improvement ideas), the orchestrator MUST only create `proposal.md` files and MUST NOT start any SDD command (`/sdd-ff`, `/sdd-new`, `/sdd-apply`, etc.) in the same session. Implementation happens in a separate session. The rule is placed in Unbreakable Rules (not a skill) to ensure it is loaded at session start without additional file reads. Workflow documented at `docs/workflows/feedback-to-proposal.md`.
 
-6. **Two-tier skill placement model** (added 2026-03-02, change: skill-scope-global-vs-project) — Skills have two placement tiers: global (`~/.claude/skills/`) and project-local (`.claude/skills/`). When `/skill-add` or `/skill-creator` is used inside a project (not `claude-config`), the default placement is project-local — the skill file is copied into the repo and versioned alongside project source code. Global placement remains available as an explicit override. `project-fix` treats `move-to-global` as informational only (no automated file moves). Project-local skills MUST be committed to the repo; no `.gitignore` rule should exclude `.claude/skills/`. The CLAUDE.md Skills Registry uses `.claude/skills/<name>/SKILL.md` for local copies and `~/.claude/skills/<name>/SKILL.md` for global references — both formats can coexist.
+6. **Two-tier skill placement model** (added 2026-03-02, change: skill-scope-global-vs-project) — Skills have two placement tiers: global (`~/.claude/skills/`) and project-local (`.claude/skills/`). When `/skill-add` or `/skill-creator` is used inside a project (not `agent-config`), the default placement is project-local — the skill file is copied into the repo and versioned alongside project source code. Global placement remains available as an explicit override. `project-fix` treats `move-to-global` as informational only (no automated file moves). Project-local skills MUST be committed to the repo; no `.gitignore` rule should exclude `.claude/skills/`. The CLAUDE.md Skills Registry uses `.claude/skills/<name>/SKILL.md` for local copies and `~/.claude/skills/<name>/SKILL.md` for global references — both formats can coexist.
 
 ## claude-folder-audit: Check Inventory (project mode)
 
@@ -170,7 +170,7 @@ Organization pattern: **feature-based** (confidence: high)
 Each `skills/` subdirectory is a distinct capability with one `SKILL.md` entry point.
 
 ```
-claude-config/ (observed 2026-03-08)
+agent-config/ (observed 2026-03-08)
 ├── CLAUDE.md, README.md, settings.json, install.sh, sync.sh, .gitattributes
 ├── skills/          49 skill directories
 │   ├── sdd-*/       11 SDD phase/orchestrator skills (explore, propose, spec,

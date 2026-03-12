@@ -11,7 +11,7 @@ Related specs: openspec/specs/feature-domain-knowledge/spec.md
 ## Domain Overview
 
 The SDD meta-system is the Claude Code configuration and skill orchestration framework that lives in
-`claude-config` (repo) and is deployed to `~/.claude/` (runtime). It provides two primary
+`agent-config` (repo) and is deployed to `~/.claude/` (runtime). It provides two primary
 capabilities: (1) a library of reusable skills — each a directory with a `SKILL.md` entry point —
 that Claude loads on demand; and (2) an SDD (Specification-Driven Development) phase pipeline
 (`sdd-propose` → `sdd-spec` + `sdd-design` → `sdd-tasks` → `sdd-apply` → `sdd-verify` →
@@ -68,7 +68,7 @@ of individual changes — they represent the durable system state.
 | `install.sh` | outbound | Copies repo root (`skills/`, `CLAUDE.md`, `ai-context/`, `hooks/`, `settings.json`) to `~/.claude/`. Must be run after any config change before the next Claude session picks up the updates. |
 | `sync.sh` | inbound | Copies `~/.claude/memory/` back into `repo/memory/`. Used for persisting Claude's automatic memory notes. Does NOT touch skills, hooks, or ai-context. |
 | `~/.claude/` (runtime) | outbound | The live Claude Code runtime directory. Claude reads SKILL.md files from here. This is the deployment target — never the source of truth. |
-| `git` (version control) | outbound | All config changes committed to the `claude-config` repo after `install.sh` runs. Conventional commit prefix: `feat:`, `fix:`, `docs:`, `chore:`. |
+| `git` (version control) | outbound | All config changes committed to the `agent-config` repo after `install.sh` runs. Conventional commit prefix: `feat:`, `fix:`, `docs:`, `chore:`. |
 | Sub-agents (Task tool) | outbound | The SDD orchestrator launches one sub-agent per SDD phase. Each sub-agent reads its phase SKILL.md from `~/.claude/skills/sdd-<phase>/SKILL.md` and returns a structured JSON result. |
 | `openspec/config.yaml` | inbound | Controls which SDD features are active (mode, optional blocks). SDD phase skills read this file at runtime to determine behavior. |
 

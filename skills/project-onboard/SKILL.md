@@ -215,7 +215,7 @@ the proposal before proceeding. See ai-context/quick-reference.md for the /sdd-f
 
 ### Check 7 — Runtime sync hint (non-blocking, global-config mode only)
 
-If `install.sh` AND `skills/` exist at the project root (i.e., the cwd is the `claude-config` meta-repo), append the following line to the `Warnings:` section of the case diagnosis output — regardless of which case was assigned:
+If `install.sh` AND `skills/` exist at the project root (i.e., the cwd is the `agent-config` meta-repo), append the following line to the `Warnings:` section of the case diagnosis output — regardless of which case was assigned:
 
 ```
 - Run /claude-folder-audit to verify ~/.claude/ is in sync with this repo (installation drift check).

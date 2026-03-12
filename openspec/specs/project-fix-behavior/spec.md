@@ -26,7 +26,7 @@ human-readable recommendation comment in the fix output, with no file system sid
 - **WHEN** the user runs `/project-fix`
 - **THEN** `project-fix` writes a recommendation in its output such as:
   "Skill '<name>' is project-local. To promote it to the global catalog, manually copy
-  `.claude/skills/<name>/SKILL.md` to `~/.claude/skills/<name>/SKILL.md` in `claude-config`
+  `.claude/skills/<name>/SKILL.md` to `~/.claude/skills/<name>/SKILL.md` in `agent-config`
   and run `install.sh`."
 - **AND** no file is copied or moved by `project-fix`
 - **AND** the skill file at `.claude/skills/<name>/SKILL.md` remains untouched

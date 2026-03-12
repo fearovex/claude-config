@@ -8,7 +8,7 @@
 
 - VS Code with the GitHub Copilot extension installed and authenticated
 - Git repository initialized in the target project
-- This `claude-config` repo cloned locally (you need one file from it)
+- This `agent-config` repo cloned locally (you need one file from it)
 
 ---
 
@@ -19,7 +19,7 @@
 Copy `.github/copilot-instructions.md` from this repo to the target project:
 
 ```
-# From the claude-config repo root:
+# From the agent-config repo root:
 cp .github/copilot-instructions.md <path-to-your-project>/.github/copilot-instructions.md
 ```
 

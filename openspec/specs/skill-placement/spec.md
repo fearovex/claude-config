@@ -22,13 +22,13 @@ The two tiers are:
 ### Requirement: /skill-add defaults to project-local copy when invoked inside a project
 
 When `/skill-add <name>` is invoked inside a project (any directory that is not
-`claude-config`), `skill-add` MUST copy the skill file from the global catalog into
+`agent-config`), `skill-add` MUST copy the skill file from the global catalog into
 `.claude/skills/<name>/SKILL.md` within the current project directory by default.
 The CLAUDE.md registry entry MUST use the local relative path `.claude/skills/<name>/SKILL.md`.
 
 #### Scenario: /skill-add inside a project produces a local copy
 
-- **GIVEN** the current working directory is a project (not `claude-config`)
+- **GIVEN** the current working directory is a project (not `agent-config`)
 - **AND** the skill `<name>` exists in the global catalog at `~/.claude/skills/<name>/SKILL.md`
 - **WHEN** the user runs `/skill-add <name>` with no explicit strategy selection
 - **THEN** the skill file is copied to `.claude/skills/<name>/SKILL.md` inside the project
@@ -43,16 +43,16 @@ The CLAUDE.md registry entry MUST use the local relative path `.claude/skills/<n
 - **AND** a collaborator who clones the repository finds the skill at `.claude/skills/<name>/SKILL.md`
   without any additional setup step
 
-#### Scenario: /skill-add in claude-config does not produce a local copy
+#### Scenario: /skill-add in agent-config does not produce a local copy
 
-- **GIVEN** the current working directory is the `claude-config` meta-repo
+- **GIVEN** the current working directory is the `agent-config` meta-repo
 - **WHEN** the user runs `/skill-add <name>`
 - **THEN** `skill-add` follows its standard behavior for the meta-repo context
-- **AND** no `.claude/skills/` directory is created inside `claude-config`
+- **AND** no `.claude/skills/` directory is created inside `agent-config`
 
 #### Scenario: /skill-add with explicit Option A still produces a global-path reference
 
-- **GIVEN** the current working directory is a project (not `claude-config`)
+- **GIVEN** the current working directory is a project (not `agent-config`)
 - **AND** the user explicitly selects Option A (symbolic reference) during the `skill-add` interaction
 - **WHEN** `skill-add` processes the explicit Option A selection
 - **THEN** the CLAUDE.md registry entry uses `~/.claude/skills/<name>/SKILL.md`
@@ -100,7 +100,7 @@ local and global-reference entries.
 
 For any skill added via `/skill-add` using the default (local copy) strategy after this
 change, a collaborator who clones the repository MUST be able to use the skill immediately
-without installing the `claude-config` meta-repo or running `install.sh`.
+without installing the `agent-config` meta-repo or running `install.sh`.
 
 #### Scenario: collaborator clone — skill available without install step
 
@@ -122,7 +122,7 @@ without installing the `claude-config` meta-repo or running `install.sh`.
 
 ## Rules
 
-- The default strategy for `/skill-add` inside any project (not `claude-config`) MUST produce
+- The default strategy for `/skill-add` inside any project (not `agent-config`) MUST produce
   a local copy — the user is never silently defaulted to Option A (global reference)
 - The local copy operation MUST be idempotent: running `/skill-add <name>` a second time on a
   skill already present at `.claude/skills/<name>/SKILL.md` MUST NOT overwrite the existing file

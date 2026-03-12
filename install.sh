@@ -79,7 +79,7 @@ detect_claude_dir() {
 
 CLAUDE_DIR="$(detect_claude_dir)"
 
-echo "Installing claude-config → $CLAUDE_DIR ..."
+echo "Installing agent-config → $CLAUDE_DIR ..."
 
 mkdir -p "$CLAUDE_DIR"
 mkdir -p "$CLAUDE_DIR/memory"

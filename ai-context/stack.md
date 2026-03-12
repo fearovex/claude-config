@@ -1,10 +1,10 @@
-# Stack — claude-config
+# Stack — agent-config
 
 > Last updated: 2026-03-06
 
 ## What this project is
 
-`claude-config` is the source-of-truth repository for the global Claude Code configuration. It is deployed to `~/.claude/` via `install.sh`, while `sync.sh` captures `memory/` only.
+`agent-config` is the source-of-truth repository for the global Claude Code configuration. It is deployed to `~/.claude/` via `install.sh`, while `sync.sh` captures `memory/` only.
 
 ## File types
 
@@ -20,7 +20,7 @@
 ## Directory structure
 
 ```
-claude-config/
+agent-config/
 ├── CLAUDE.md              # Global orchestrator instructions
 ├── settings.json          # Claude Code user settings
 ├── settings.local.json    # Local overrides (not committed)

@@ -115,7 +115,7 @@ Not sure which case applies? Run `/project-onboard` — it reads your project au
 | A local skill is flagged as duplicate but has custom modifications | Answer `N` when project-fix asks to delete — keep the local version |
 | `add_missing_section` adds a stub but the skill still doesn't work | Fill in the stub with real content — the stub is a placeholder, not a complete implementation |
 | D9 shows `Stack relevance check skipped` | No `ai-context/stack.md` or `package.json` found — run `/memory-init` first |
-| Global catalog unreadable warning | `~/.claude/skills/` may not be fully set up — run `bash ~/claude-config/install.sh` |
+| Global catalog unreadable warning | `~/.claude/skills/` may not be fully set up — run `bash ~/agent-config/install.sh` |
 
 ---
 
@@ -170,7 +170,7 @@ Not sure which case applies? Run `/project-onboard` — it reads your project au
 **Common failure modes**:
 | Failure | Recovery |
 |---------|----------|
-| `/sdd-ff` returns "Unknown skill: sdd-ff" | Run `bash ~/claude-config/install.sh` — the skill files need to be deployed to `~/.claude/` |
+| `/sdd-ff` returns "Unknown skill: sdd-ff" | Run `bash ~/agent-config/install.sh` — the skill files need to be deployed to `~/.claude/` |
 | `/sdd-apply` is blocked on a task | Check the task description and the relevant spec — the issue is usually an ambiguity in the design |
 | Score drops after a change | Run `/project-audit` to see which dimension regressed, then `/project-fix` or manual fix |
 | `openspec/changes/` accumulates stale entries | Run `/sdd-status` to see what is open, then resolve or archive each one |

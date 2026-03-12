@@ -1,7 +1,7 @@
 project:
-  name: "claude-config"
+  name: "agent-config"
   description: "Global Claude Code configuration: SDD orchestrator, meta-tools, and skill catalog"
-  root: "~/claude-config"
+  root: "~/agent-config"
   stack:
     language: "markdown + yaml + bash"
     framework: "Claude Code SDD meta-system"
@@ -51,7 +51,7 @@ rules:
     - "Each task must be independently verifiable"
   apply:
     - "Follow tasks.md exactly — no improvising"
-    - "Run /project:audit on claude-config after each apply"
+    - "Run /project:audit on agent-config after each apply"
     - "Update global CLAUDE.md if the change adds/removes commands"
   verify:
     - "Run /project:audit — score must be >= previous score"

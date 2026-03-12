@@ -105,7 +105,7 @@ The schema documentation for `openspec/config.yaml` (in `ai-context/` or inline 
 
 #### Scenario: Schema documentation is discoverable in the project
 
-- **GIVEN** a developer reads the `ai-context/` directory or `openspec/config.yaml` of the claude-config project
+- **GIVEN** a developer reads the `ai-context/` directory or `openspec/config.yaml` of the agent-config project
 - **WHEN** they look for documentation of the `feature_docs` section
 - **THEN** they find a description of the key, its sub-keys (`convention`, `paths`, `feature_detection`), accepted values, and at least one example block
 - **AND** the documentation indicates that `feature_docs` is optional

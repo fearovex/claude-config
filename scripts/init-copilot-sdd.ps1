@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Copies the generic SDD Copilot templates (prompts + agent) from this
-    claude-config repository into the .github/ structure of any target project.
+    agent-config repository into the .github/ structure of any target project.
 
     The three .instructions.md files are NOT copied — those are project-specific
     and should be generated with /config-export in the target project.

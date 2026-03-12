@@ -8,7 +8,7 @@
 
 ### Requirement: solid-ddd skill exists as a reference-format skill with correct structure
 
-A new skill directory `skills/solid-ddd/` MUST exist in the `claude-config` repo containing exactly one `SKILL.md` entry point. The file MUST declare `format: reference` in its YAML frontmatter and satisfy the reference format section contract: `**Triggers**` (or `## Triggers`), `## Patterns` or `## Examples`, and `## Rules`.
+A new skill directory `skills/solid-ddd/` MUST exist in the `agent-config` repo containing exactly one `SKILL.md` entry point. The file MUST declare `format: reference` in its YAML frontmatter and satisfy the reference format section contract: `**Triggers**` (or `## Triggers`), `## Patterns` or `## Examples`, and `## Rules`.
 
 #### Scenario: skill file is created with correct frontmatter
 
@@ -134,7 +134,7 @@ After the change is applied and `install.sh` is run, `skills/solid-ddd/SKILL.md`
 #### Scenario: install.sh deploys the skill to the runtime
 
 - **GIVEN** `skills/solid-ddd/SKILL.md` exists in the repo
-- **WHEN** `bash install.sh` is executed from the `claude-config` root
+- **WHEN** `bash install.sh` is executed from the `agent-config` root
 - **THEN** `~/.claude/skills/solid-ddd/SKILL.md` exists on disk after the command completes
 - **AND** the file contents are identical to the repo source
 

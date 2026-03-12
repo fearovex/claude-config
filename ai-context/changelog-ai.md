@@ -1,4 +1,4 @@
-# AI Changelog — claude-config
+# AI Changelog — agent-config
 
 > Log of significant changes made with AI assistance. Newest first.
 
@@ -1040,7 +1040,7 @@ Tech skills (react-19, typescript, etc.) covered framework patterns but no SOLID
 **Decisions made**:
 - Approach D (hybrid) selected: local copy by default + explicit global override, no new commands
 - skill-add Option B (local copy) promoted to default; Option A (global reference) requires explicit "A" at confirm prompt
-- skill-creator context-detection uses install.sh presence + basename/config.yaml to identify claude-config repo
+- skill-creator context-detection uses install.sh presence + basename/config.yaml to identify agent-config repo
 - project-fix move-to-global: already informational; two-tier explanation note added for clarity
 - CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION enabled explicitly in settings.json
 
@@ -1268,7 +1268,7 @@ Tech skills (react-19, typescript, etc.) covered framework patterns but no SOLID
 - D10 findings are explicitly excluded from `required_actions` and `skill_quality_actions` in FIX_MANIFEST
 - Heuristic detection sources: `src/` subdirs, `docs/features/` dirs, local `.claude/skills/` dirs
 - Config-driven detection takes precedence over heuristic when `feature_docs:` key is present in `openspec/config.yaml`
-- `feature_docs:` section in `openspec/config.yaml` is commented out for claude-config itself (this repo has no feature subdirectories to audit in that sense)
+- `feature_docs:` section in `openspec/config.yaml` is commented out for agent-config itself (this repo has no feature subdirectories to audit in that sense)
 
 **Motivation**: Users with feature-rich projects need visibility into which features have supporting documentation. D10 provides a non-blocking coverage audit that surfaced documentation gaps without disrupting the existing score contract.
 
@@ -1417,7 +1417,7 @@ Tech skills (react-19, typescript, etc.) covered framework patterns but no SOLID
 
 ---
 
-## 2026-02-23 — Bootstrap SDD infrastructure on claude-config
+## 2026-02-23 — Bootstrap SDD infrastructure on agent-config
 
 **Type:** Configuration / Meta
 **Agent:** Claude Sonnet 4.6
@@ -1454,7 +1454,7 @@ Tech skills (react-19, typescript, etc.) covered framework patterns but no SOLID
 Audit of the Audiio V3 project revealed that project-audit only checked file existence, not content quality or SDD readiness. The new audit generates a machine-readable report consumed by project-fix, implementing the audit→fix flow as a self-contained SDD meta-cycle.
 
 **Technical debt created:**
-- project-audit does not handle projects without package.json (affects claude-config itself)
+- project-audit does not handle projects without package.json (affects agent-config itself)
 - Both skills were written without prior SDD artifacts — violates the standard this repo enforces
 
 ---

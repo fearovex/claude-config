@@ -531,7 +531,7 @@ This skill may be a candidate for promotion to the global catalog.
 
 To promote manually:
   1. Copy: cp [local_path] ~/.claude/skills/[skill_name]/SKILL.md
-  2. Register in claude-config repo: skills/[skill_name]/SKILL.md
+  2. Register in agent-config repo: skills/[skill_name]/SKILL.md
   3. Run install.sh to deploy
   4. Run /skill-add [skill_name] in the original project to add a registry reference
   5. Delete the local copy after verifying the global version works

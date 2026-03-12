@@ -1,4 +1,4 @@
-# Known Issues & Gotchas — claude-config
+# Known Issues & Gotchas — agent-config
 
 > Last updated: 2026-03-06
 
@@ -71,7 +71,7 @@ Never run `sync.sh` expecting it to deploy or recover skill/config changes.
 
 ## Skills modified via Claude Code don't auto-sync
 
-When a Claude Code session modifies `~/.claude/skills/` directly (not via the repo), those changes do NOT appear in `~/claude-config/` via `sync.sh`, because `sync.sh` is memory-only. This happened in the 2026-02-23 session before the workflow was tightened.
+When a Claude Code session modifies `~/.claude/skills/` directly (not via the repo), those changes do NOT appear in `~/agent-config/` via `sync.sh`, because `sync.sh` is memory-only. This happened in the 2026-02-23 session before the workflow was tightened.
 
 **Correct approach**: edit repo files directly, or manually copy runtime changes back before running `install.sh`.
 
@@ -79,7 +79,7 @@ When a Claude Code session modifies `~/.claude/skills/` directly (not via the re
 
 ## project-audit skill does not yet handle no-package.json projects
 
-The current `project-audit` SKILL.md assumes a package.json exists for stack detection. For projects without one (like `claude-config` itself), the stack detection dimension will report a warning. The skill needs a fallback for non-Node projects.
+The current `project-audit` SKILL.md assumes a package.json exists for stack detection. For projects without one (like `agent-config` itself), the stack detection dimension will report a warning. The skill needs a fallback for non-Node projects.
 
 ---
 
@@ -93,7 +93,7 @@ Skills have no automated tests. The only validation is running `/project-audit` 
 
 `claude-folder-audit` Check 4 (orphaned artifact detection) flags Claude Code internal runtime files (cache/, telemetry/, projects/, history.jsonl, statsig/, ide/, plans/, plugins/, tasks/, todos/, backups/, debug/, etc.) as MEDIUM findings — "Unexpected item in ~/.claude/".
 
-**Root cause**: The expected-item allowlist in `skills/claude-folder-audit/SKILL.md` does not include Claude Code's own operational directories that accumulate in `~/.claude/` over time. The allowlist was designed for the claude-config source content, not for Claude Code's runtime footprint.
+**Root cause**: The expected-item allowlist in `skills/claude-folder-audit/SKILL.md` does not include Claude Code's own operational directories that accumulate in `~/.claude/` over time. The allowlist was designed for the agent-config source content, not for Claude Code's runtime footprint.
 
 **Impact**: Up to 17 MEDIUM findings may appear on any normal Claude Code installation. All are false positives. The report itself notes this and marks remediation as "Review manually."
 

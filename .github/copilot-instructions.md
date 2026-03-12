@@ -44,7 +44,7 @@
 
 ## Architecture
 
-`claude-config` is the source-of-truth repository for the global Claude Code configuration. It defines the SDD workflow, the skill catalog, and the project memory layer.
+`agent-config` is the source-of-truth repository for the global Claude Code configuration. It defines the SDD workflow, the skill catalog, and the project memory layer.
 
 ### Three-layer structure
 
@@ -55,7 +55,7 @@
 ### Directory layout
 
 ```
-claude-config/
+agent-config/
 ├── CLAUDE.md              # Global orchestrator instructions
 ├── settings.json          # Claude Code user settings
 ├── skills/                # Skill catalog (49 skills)

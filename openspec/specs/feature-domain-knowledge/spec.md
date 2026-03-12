@@ -22,7 +22,7 @@ The template MUST contain the following six named sections, in order:
 
 #### Scenario: Template file exists with all six sections
 
-- **GIVEN** the `claude-config` repository after this change is applied
+- **GIVEN** the `agent-config` repository after this change is applied
 - **WHEN** a developer opens `ai-context/features/_template.md`
 - **THEN** the file exists and contains all six section headers: Domain Overview, Business Rules and Invariants, Data Model Summary, Integration Points, Decision Log, Known Gotchas
 - **AND** each section contains placeholder text explaining what to write there

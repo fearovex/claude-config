@@ -52,7 +52,7 @@ Skills have two placement tiers:
 - **Global** (`~/.claude/skills/`) — available across all projects
 - **Project-local** (`.claude/skills/`) — versioned alongside project source code; must be committed to the repo
 
-When a skill is added inside a project (not `claude-config`), the default placement is project-local. Project-local skills MUST be committed to the repo; no `.gitignore` rule should exclude `.claude/skills/`.
+When a skill is added inside a project (not `agent-config`), the default placement is project-local. Project-local skills MUST be committed to the repo; no `.gitignore` rule should exclude `.claude/skills/`.
 
 ### Skill architecture
 
@@ -105,7 +105,7 @@ Skills communicate via **file artifacts** — never via in-memory or conversatio
 ### Observed project structure (auto-detected 2026-03-03)
 
 ```
-claude-config/
+agent-config/
 ├── CLAUDE.md, README.md, settings.json, install.sh, sync.sh, .gitattributes
 ├── skills/          47 skill directories
 │   ├── sdd-*/       11 SDD phase/orchestrator skills

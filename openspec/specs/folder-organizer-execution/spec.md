@@ -36,7 +36,7 @@ The skill MUST NOT operate on `~/.claude/` (the user-level runtime) under any ci
 
 #### Scenario: skill MUST NOT target ~/.claude/
 
-- **GIVEN** the user invokes `/project-claude-organizer` from the `claude-config` source repo (which has `install.sh` and `skills/` at root but no `.claude/`)
+- **GIVEN** the user invokes `/project-claude-organizer` from the `agent-config` source repo (which has `install.sh` and `skills/` at root but no `.claude/`)
 - **WHEN** the skill resolves its target
 - **THEN** it outputs: "No .claude/ folder found at <CWD>. This skill targets project .claude/ folders only — not the ~/.claude/ runtime."
 - **AND** it exits without writing any files
@@ -227,7 +227,7 @@ After the skill is created and deployed, CLAUDE.md MUST contain:
 - **GIVEN** `skills/project-claude-organizer/SKILL.md` has been written
 - **AND** the CLAUDE.md registry entry has been added
 - **AND** `install.sh` has been run
-- **WHEN** `/project-audit` is run on `claude-config`
+- **WHEN** `/project-audit` is run on `agent-config`
 - **THEN** D1 passes without a finding for `project-claude-organizer`
 
 ---

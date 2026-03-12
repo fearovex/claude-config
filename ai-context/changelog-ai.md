@@ -4,6 +4,50 @@
 
 ---
 
+## [2026-03-12] — orchestrator-always-on (SDD archive)
+
+**Type**: SDD full cycle (explore + propose + spec + design + tasks + apply + verify + archive)
+**Agent**: Claude Sonnet 4.6 (sdd-archive inline)
+**Change**: `orchestrator-always-on`
+
+**What changed**:
+- `CLAUDE.md`: Added `## Always-On Orchestrator — Intent Classification` section (lines 12–88) with routing table, decision tree, four intent classes, unbreakable rules, and project-level override mechanism
+- `docs/adr/029-orchestrator-always-on-intent-classification.md`: New ADR documenting the architectural decision (Status: Accepted)
+- `docs/adr/README.md`: ADR-029 entry added to index table
+- `openspec/specs/orchestrator-behavior/spec.md`: New master spec created (5 requirements, 14 scenarios)
+
+**Decisions made**:
+- Intent classification runs as inline rules in CLAUDE.md (no new skill) because it is a global cross-cutting concern that must execute before skill resolution
+- Placement immediately after `## Identity and Purpose` ensures the always-on gate is the first behavioral instruction
+- Change Requests recommend SDD (non-blocking); Explorations auto-launch sdd-explore; Questions answered directly; Meta-Commands execute immediately
+- Project CLAUDE.md can override or disable intent classification via `intent_classification` and `enabled_classes` keys
+- Keyword-based heuristics handle all four intent classes; ambiguous requests default to Question + SDD hint
+
+**Warnings from verify report** (non-blocking):
+- Task 5.1 not executed (project-audit verification)
+- install.sh deployment not confirmed via tool execution
+- No automated behavioral tests (by design — CLAUDE.md behavioral rules are validated manually)
+
+---
+
+## [2026-03-12] — project-fix (audit score 94→100)
+
+**Type**: /project-fix corrections
+**Agent**: Claude Sonnet 4.6 (/project-fix sub-agent)
+
+**What changed**:
+- `openspec/changes/archive/2026-03-04-solid-ddd-quality-enforcement/verify-report.md`: Created retroactively — archived change was missing the required verify-report.md (SDD Rule 3)
+- `skills/playwright/SKILL.md`: Changed `format:` from `procedural` to `reference` — actual content structure (Critical Patterns + Code Examples + Rules) matches the reference format contract
+- `skills/pytest/SKILL.md`: Same fix — `format: procedural` → `format: reference`
+- `docs/adr/README.md`: ADR 029 entry was already present — no change needed
+- `ai-context/stack.md`: Updated skill category sub-counts (stale since 2026-03-06); added missing categories (Design Principles, System Audits, expanded Misc); updated observed skill count to 51
+
+**Decisions made**:
+- playwright and pytest correctly use reference format — frontmatter was updated to match actual structure rather than adding stub sections
+- verify-report.md for solid-ddd-quality-enforcement is retroactive but satisfies the compliance rule
+
+---
+
 ## [2026-03-10] — sdd-project-context-awareness
 
 **Type**: SDD full cycle (spec + design + tasks + apply + verify + archive)

@@ -51,12 +51,14 @@ agent-config/
 | Category | Count | Examples |
 |----------|-------|---------|
 | SDD phases | 8 | sdd-propose, sdd-spec, sdd-design, sdd-tasks, sdd-apply, sdd-verify, sdd-archive, sdd-explore |
-| Meta-tools | 10 | project-setup, project-onboard, project-audit, project-analyze, project-fix, project-update, memory-init, memory-update, skill-creator, skill-add |
+| Meta-tools | 11 | project-setup, project-onboard, project-audit, project-analyze, project-fix, project-update, memory-init, memory-update, skill-creator, skill-add, codebase-teach |
 | Tech — Frontend | 8 | react-19, nextjs-15, typescript, zustand-5, zod-4, tailwind-4, ai-sdk-5, react-native |
 | Tech — Backend | 4 | django-drf, spring-boot-3, hexagonal-architecture-java, java-21 |
 | Tech — Testing | 2 | playwright, pytest |
-| Tech — Tooling | 5 | github-pr, jira-task, jira-epic, elixir-antipatterns, electron |
-| Misc | 3 | claude-code-expert, excel-expert, image-ocr |
+| Tech — Tooling | 6 | github-pr, jira-task, jira-epic, elixir-antipatterns, electron, smart-commit |
+| Misc | 5 | claude-code-expert, excel-expert, image-ocr, config-export, feature-domain-expert |
+| Design Principles | 1 | solid-ddd |
+| System Audits | 2 | claude-folder-audit, project-claude-organizer |
 
 ## Workflows
 
@@ -91,7 +93,7 @@ Source: openspec/config.yaml + file-extension sampling
 | Hooks runtime | Node.js | file: hooks/smart-commit-context.js (.js extension) |
 | Version control | Git | .git directory |
 
-Observed skill count: **49 directories** under `skills/`.
+Observed skill count: **51 directories** under `skills/`.
 File extension distribution: `.md` (100), `.json` (3), `.sh` (2), `.yaml` (1), `.js` (1), `.ps1` (1).
 No standard package manifests (package.json, pyproject.toml, etc.) — expected for a Markdown/YAML/Bash meta-system.
 

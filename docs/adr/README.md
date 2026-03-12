@@ -80,3 +80,4 @@ ADR files are append-only by convention: once accepted, the original Context, De
 | [026](026-sdd-verify-enforcement-convention.md) | sdd-verify Enforcement Convention — Tool Execution Gate and Evidence-Based Criteria in verify-report.md | Proposed | 2026-03-10 |
 | [027](027-codebase-teach-skill-convention.md) | Codebase Teach Skill Convention — Manual Domain Knowledge Extraction into ai-context/features/ | Proposed | 2026-03-10 |
 | [028](028-sdd-parallelism-model.md) | SDD Parallelism Model — maximum 2 parallel Tasks, file conflict boundary rule, and bounded-context apply evaluation | Accepted | 2026-03-10 |
+| [029](029-orchestrator-always-on-intent-classification.md) | Always-On Intent Classification — cross-cutting orchestration layer for routing every user message through SDD discipline | Accepted | 2026-03-12 |

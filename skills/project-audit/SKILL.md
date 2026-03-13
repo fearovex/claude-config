@@ -314,11 +314,14 @@ For each skill file (`.md` or directory with `SKILL.md`):
   2. If `format:` value is not one of `procedural`, `reference`, `anti-pattern` → emit INFO finding: `"Unknown format value '[value]' in [skill-name] — defaulting to procedural check"` and treat as `procedural`.
   3. Apply the check for the resolved format:
 
-| Resolved format                  | Required section     | Accepted headings            | Finding if absent                                                           |
-| -------------------------------- | -------------------- | ---------------------------- | --------------------------------------------------------------------------- |
-| `procedural` (or absent/unknown) | Process section      | `## Process`                 | MEDIUM: "procedural skill [name] missing ## Process section"                |
-| `reference`                      | Patterns or Examples | `## Patterns`, `## Examples` | MEDIUM: "reference skill [name] missing ## Patterns or ## Examples section" |
-| `anti-pattern`                   | Anti-patterns        | `## Anti-patterns`           | MEDIUM: "anti-pattern skill [name] missing ## Anti-patterns section"        |
+| Resolved format                  | Required section               | Accepted headings (any one satisfies)         | Finding if absent                                                                                                          |
+| -------------------------------- | ------------------------------ | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `procedural` (or absent/unknown) | Process section                | `## Process`                                  | MEDIUM: "procedural skill [name] missing ## Process section"                                                               |
+| `reference`                      | Patterns section (one of)      | `## Patterns` OR `## Critical Patterns`       | MEDIUM: "reference skill [name] missing (## Patterns or ## Critical Patterns) or (## Examples or ## Code Examples) section" |
+| `reference`                      | Examples section (one of)      | `## Examples` OR `## Code Examples`           | (same finding — emitted when skill lacks both a pattern section AND an examples section, or has one but not the other)    |
+| `anti-pattern`                   | Anti-patterns section (one of) | `## Anti-patterns` OR `## Critical Patterns`  | MEDIUM: "anti-pattern skill [name] missing ## Anti-patterns or ## Critical Patterns section"                               |
+
+> **Validation logic for `reference` format**: A reference skill passes D4b if it has **at least one** of `## Patterns`/`## Critical Patterns` AND **at least one** of `## Examples`/`## Code Examples`. Use regex alternation: `^## (Patterns|Critical Patterns)` and `^## (Examples|Code Examples)` (case-sensitive). Emit the MEDIUM finding only when either condition is unsatisfied.
 
 4. Missing `**Triggers**` and missing `## Rules` remain MEDIUM findings for **all** format types (unchanged).
 5. For a `reference` or `anti-pattern` skill: missing `## Process` is **not a finding**.
@@ -507,11 +510,12 @@ Read each local `.claude/skills/<name>/SKILL.md`. Apply the same format-aware ch
 2. If `format:` value is unrecognized → emit INFO finding and treat as `procedural`.
 3. Apply the format-to-required-section check:
 
-| Resolved format                  | Required section     | Accepted headings            | Finding if absent |
-| -------------------------------- | -------------------- | ---------------------------- | ----------------- |
-| `procedural` (or absent/unknown) | Process section      | `## Process`                 | record as missing |
-| `reference`                      | Patterns or Examples | `## Patterns`, `## Examples` | record as missing |
-| `anti-pattern`                   | Anti-patterns        | `## Anti-patterns`           | record as missing |
+| Resolved format                  | Required section               | Accepted headings (any one satisfies)        | Finding if absent |
+| -------------------------------- | ------------------------------ | -------------------------------------------- | ----------------- |
+| `procedural` (or absent/unknown) | Process section                | `## Process`                                 | record as missing |
+| `reference`                      | Patterns section (one of)      | `## Patterns` OR `## Critical Patterns`      | record as missing |
+| `reference`                      | Examples section (one of)      | `## Examples` OR `## Code Examples`          | record as missing |
+| `anti-pattern`                   | Anti-patterns section (one of) | `## Anti-patterns` OR `## Critical Patterns` | record as missing |
 
 4. Missing `**Triggers**` and `## Rules` are checked for **all** format types (unchanged).
 5. For `reference` or `anti-pattern` skills: missing `## Process` is **not a finding**.

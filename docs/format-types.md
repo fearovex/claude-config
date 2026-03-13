@@ -112,12 +112,15 @@ documents "how to use X correctly" with concrete code patterns.
 | Section | Accepted headings | Required? |
 |---------|------------------|-----------|
 | Trigger definition | `**Triggers**` or `## Triggers` | ✅ Required |
-| Patterns or Examples | `## Patterns` **or** `## Examples` (at least one) | ✅ Required |
+| Patterns | `## Patterns` **or** `## Critical Patterns` (at least one) | ✅ Required |
+| Examples | `## Examples` **or** `## Code Examples` (at least one) | ✅ Required |
 | Rules | `## Rules` | ✅ Required |
 | Process | `## Process` | ❌ Not required — its absence is not a finding |
 
+> **Variant headings**: `## Critical Patterns` is semantically equivalent to `## Patterns`; `## Code Examples` is equivalent to `## Examples`. Both standard and variant names are equally valid — variants appear in externally-sourced skills from the Gentleman-Skills corpus. A reference skill must have at least one pattern section (standard **or** variant) **and** at least one examples section (standard **or** variant) to pass the format check.
+
 **Structural check** (D4b / D9-3):
-- Missing both `## Patterns` and `## Examples` → MEDIUM finding: `"reference skill missing ## Patterns or ## Examples section"`
+- Missing both `## Patterns`/`## Critical Patterns` AND `## Examples`/`## Code Examples` → MEDIUM finding: `"reference skill [name] missing (## Patterns or ## Critical Patterns) or (## Examples or ## Code Examples) section"`
 - Missing `**Triggers**` → MEDIUM finding (unchanged)
 - Missing `## Rules` → MEDIUM finding (unchanged)
 - Missing `## Process` → **no finding**
@@ -192,15 +195,17 @@ skills are better served by Format B (which may include an anti-patterns section
 | Section | Accepted headings | Required? |
 |---------|------------------|-----------|
 | Trigger definition | `**Triggers**` or `## Triggers` | ✅ Required |
-| Anti-patterns | `## Anti-patterns` | ✅ Required |
+| Anti-patterns | `## Anti-patterns` **or** `## Critical Patterns` | ✅ Required |
 | Rules | `## Rules` | ✅ Required |
 | Process | `## Process` | ❌ Not required — its absence is not a finding |
+
+> **Variant heading**: `## Critical Patterns` is an accepted variant for `## Anti-patterns` when used in an `anti-pattern` format skill. Both are equally valid — the variant appears in externally-sourced skills from the Gentleman-Skills corpus.
 
 > **Note**: If Format C does not suit your skill (e.g., it mixes patterns and anti-patterns),
 > use `format: reference` instead, which accepts both `## Patterns` and `## Anti-patterns` sections.
 
 **Structural check** (D4b / D9-3):
-- Missing `## Anti-patterns` → MEDIUM finding: `"anti-pattern skill missing ## Anti-patterns section"`
+- Missing both `## Anti-patterns` and `## Critical Patterns` → MEDIUM finding: `"anti-pattern skill [name] missing ## Anti-patterns or ## Critical Patterns section"`
 - Missing `**Triggers**` → MEDIUM finding (unchanged)
 - Missing `## Rules` → MEDIUM finding (unchanged)
 - Missing `## Process` → **no finding**
@@ -257,7 +262,13 @@ format: anti-pattern
 | `format:` value | Required section | Accepted headings |
 |-----------------|-----------------|------------------|
 | `procedural` (or absent) | Process | `## Process`, `### Step N` |
-| `reference` | Patterns or Examples | `## Patterns`, `## Examples` |
-| `anti-pattern` | Anti-patterns | `## Anti-patterns` |
+| `reference` | Patterns (one of) | `## Patterns`, `## Critical Patterns` |
+| `reference` | Examples (one of) | `## Examples`, `## Code Examples` |
+| `anti-pattern` | Anti-patterns (one of) | `## Anti-patterns`, `## Critical Patterns` |
 
 All three formats always require `**Triggers**` and `## Rules`.
+
+> **Variant heading note**: `## Critical Patterns` and `## Code Examples` are approved variant names
+> for externally-sourced skills from the Gentleman-Skills corpus. Both the standard name and the variant
+> are equally valid for format compliance. Custom project skills created via `skill-creator` continue to
+> use the standard names (`## Patterns`, `## Examples`, `## Anti-patterns`).

@@ -4,6 +4,28 @@
 
 ---
 
+## [2026-03-13] — fix-format-contract (SDD archive)
+
+**Type**: SDD full cycle (explore + propose + spec + design + tasks + apply + verify + archive)
+**Agent**: Claude Sonnet 4.6 (sdd-archive inline)
+**Change**: `fix-format-contract`
+
+**What changed**:
+- `docs/format-types.md`: Expanded reference and anti-pattern format sections to document variant heading names (`## Critical Patterns`, `## Code Examples`); updated quick-reference table; added variant heading note
+- `skills/project-audit/SKILL.md`: Updated D4b and D9-3 validation tables to accept standard and variant headings via regex alternation (`^## (Patterns|Critical Patterns)`, `^## (Examples|Code Examples)`)
+- `openspec/specs/format-contract/spec.md`: New master spec created from delta (2 requirements, 13 scenarios)
+
+**Decisions made**:
+- Variant section headings (`## Critical Patterns`, `## Code Examples`) are accepted ONLY for externally-sourced Gentleman-Skills corpus skills; new skills created via `skill-creator` continue to generate standard names
+- Anti-pattern format also accepts `## Critical Patterns` as a valid variant (not only reference format)
+- D4b uses regex alternation for validation, not separate checks for each variant
+- `django-drf` non-compliance (custom domain-specific headings) is a pre-existing known issue, out of scope; tracked as a future follow-up
+
+**Warnings from verify report** (non-blocking):
+- One acceptance criterion (running `/project-audit` for 0 D4b findings on all 21 skills) was deferred to manual confirmation — no automated runner available
+
+---
+
 ## [2026-03-13] — fix-skills-structural (SDD archive)
 
 **Type**: SDD full cycle (explore + propose + spec + design + tasks + apply + verify + archive)

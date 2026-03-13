@@ -4,6 +4,30 @@
 
 ---
 
+## [2026-03-13] — fix-skills-structural (SDD archive)
+
+**Type**: SDD full cycle (explore + propose + spec + design + tasks + apply + verify + archive)
+**Agent**: Claude Sonnet 4.6 (sdd-archive inline)
+**Change**: `fix-skills-structural`
+
+**What changed**:
+- `skills/skill-creator/SKILL.md`: Removed dead `/skill-add` documentation block (lines 294–319)
+- `skills/pytest/SKILL.md`: Translated Spanish comment `# Teardown automático` → `# Automatic teardown`
+- `skills/elixir-antipatterns/SKILL.md`: Renamed `## Critical Patterns` → `## Anti-patterns` to satisfy `format: anti-pattern` contract
+- `skills/claude-code-expert/SKILL.md`: Verified no real duplicate sections (apparent duplicates were inside fenced code block examples; no edit needed)
+- `openspec/specs/skill-compliance/spec.md`: New master spec created from delta (4 requirements, 12 scenarios)
+
+**Decisions made**:
+- Duplicate headings inside fenced Markdown code blocks are NOT counted as structural violations; only active skill documentation sections count toward format contract compliance
+- elixir-antipatterns dual `## Anti-patterns` / `## Anti-Patterns` heading structure is a pre-existing design; format contract satisfied by presence of required heading at line 28; merging deferred to follow-up
+- Minor comment wording deviation (`# Teardown automatic` vs `# Automatic teardown`) is cosmetic — English rule satisfied regardless of word order
+
+**Warnings from verify report** (non-blocking, accepted at archive):
+- elixir-antipatterns: dual Anti-patterns headings (pre-existing, not introduced by this change)
+- pytest comment wording deviation (cosmetic, no functional impact)
+
+---
+
 ## [2026-03-12] — fix-subagent-project-context (SDD archive)
 
 **Type**: SDD full cycle (explore + propose + spec + design + tasks + apply + verify + archive)

@@ -134,6 +134,55 @@ Skills Registry (loaded in Step 0 from project CLAUDE.md) and annotate recommend
 
 ---
 
+---
+
+### Requirement: Spec context preload sub-step is present in all five applicable SDD phase skills
+
+The skills `sdd-explore`, `sdd-propose`, `sdd-spec`, `sdd-design`, and `sdd-tasks` MUST include a spec context preload sub-step within Step 0. The sub-step MUST:
+
+1. List subdirectory names in `openspec/specs/`.
+2. Apply the stem-based matching algorithm: split the change slug on hyphens, discard single-character stems, match when the domain slug appears in the change name OR any stem appears in the domain slug.
+3. Load at most 3 matching spec files (hard cap).
+4. Treat loaded spec files as authoritative behavioral contracts (taking precedence over `ai-context/` for behavioral questions).
+5. Emit the log line `Spec context loaded from: [domain1/spec.md, ...]` when one or more files are loaded.
+6. Skip silently when no domains match — no error or warning.
+
+The sub-step is **non-blocking**: any failure (missing directory, unreadable file, no match) MUST produce at most an INFO-level note and MUST NOT produce `status: blocked` or `status: failed`.
+
+**Placement:**
+- `sdd-explore`, `sdd-design`, `sdd-tasks`: new sub-step appended to existing Step 0 block
+- `sdd-propose`, `sdd-spec`: Step 0c (after existing Step 0b — domain features preload)
+
+**Excluded:** `sdd-apply` — operates against `openspec/changes/<change>/specs/` delta files; adding master spec loading would introduce a conflicting spec source.
+
+#### Scenario: Match found — spec files loaded
+
+- **GIVEN** a SDD phase skill is invoked for change `fix-auth-token-refresh`
+- **AND** `openspec/specs/` contains a domain directory named `auth`
+- **WHEN** the spec context preload sub-step runs
+- **THEN** `openspec/specs/auth/spec.md` is read and its content is available as enrichment context
+- **AND** the log line `Spec context loaded from: [auth/spec.md]` is emitted
+- **AND** the spec file content is treated as an authoritative behavioral contract (precedence over `ai-context/` for behavioral questions)
+
+#### Scenario: No match — silent skip
+
+- **GIVEN** a SDD phase skill is invoked for change `add-resilience-layer`
+- **AND** no domain in `openspec/specs/` shares lexical stems with the change slug
+- **WHEN** the spec context preload sub-step runs
+- **THEN** no spec files are loaded
+- **AND** no error or warning is emitted
+- **AND** the phase continues with `ai-context/` as the sole supplementary context source
+
+#### Scenario: openspec/specs/ directory absent
+
+- **GIVEN** the project has no `openspec/specs/` directory
+- **WHEN** the spec context preload sub-step runs
+- **THEN** an INFO-level note is logged: `INFO: openspec/specs/ not found — skipping spec context preload`
+- **AND** the sub-step completes without error and execution proceeds to the next step
+- **AND** `status: blocked` and `status: failed` are NOT set
+
+---
+
 ## Scenarios Not Covered (out of scope)
 
 - Context Capsule (YAML/JSON structured object) generation and passing between orchestrator and sub-agents — deferred; see proposal Excluded section

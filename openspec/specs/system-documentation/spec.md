@@ -98,3 +98,40 @@ The new row MUST specify:
 - **THEN** `install.sh` deploys it without any change to the script
 - **AND** the `--no change needed` assertion holds: this requirement is verifiable by running `install.sh` after apply and checking for `~/.claude/ai-context/features/`
 
+---
+
+### Requirement: docs/SPEC-CONTEXT.md documents the spec-loading convention
+
+_(Added in: 2026-03-14 by change "specs-as-subagent-background")_
+
+A reference document MUST exist at `docs/SPEC-CONTEXT.md` that describes the spec context
+loading convention for skill authors. The document MUST include:
+
+1. **Purpose** — why spec files are loaded as background context (authoritative behavioral
+   contracts vs. ai-context/ summaries)
+2. **Selection Algorithm** — the stem-based matching heuristic for domain selection (applied by sub-agents when SPEC CONTEXT is absent)
+3. **Load Cap** — maximum number of spec files loaded (hard cap at 3 per sub-agent)
+4. **Non-Blocking Contract** — all spec-loading steps are INFO-only on failure; `status: blocked` and `status: failed` are never triggered by Step 0c alone
+5. **Precedence Rule** — spec files (authoritative) > ai-context/ (supplementary)
+6. **Fallback Behavior** — what sub-agents do when SPEC CONTEXT is absent or openspec/specs/ is empty
+7. **Skills This Applies To** — enumeration of the five phase skills that implement Step 0c (sdd-explore, sdd-propose, sdd-spec, sdd-design, sdd-tasks)
+8. **Relationship to Companion Proposal** — clarification that SPEC CONTEXT differs from the sdd-context-injection pattern (feature domain preload)
+9. **When to Override** — exceptional cases where a skill might diverge from the convention (rarely needed; documented for future flexibility)
+
+#### Scenario: New skill author adds Step 0c to a phase skill
+
+- **GIVEN** a skill author is creating a new SDD phase skill that should load spec context
+- **WHEN** they read `docs/SPEC-CONTEXT.md`
+- **THEN** it MUST provide a copy-paste ready `### Step 0c — Spec context preload` block
+- **AND** the block MUST include the SPEC CONTEXT absent fallback instruction
+- **AND** the block MUST include the non-blocking error handling instruction
+
+#### Scenario: docs/SPEC-CONTEXT.md is discoverable from sdd-context-injection.md
+
+- **GIVEN** a skill author reads `docs/sdd-context-injection.md`
+- **WHEN** they look for information about spec-loading context
+- **THEN** `docs/sdd-context-injection.md` MUST contain a reference or link to
+  `docs/SPEC-CONTEXT.md`
+- **AND** the reference MUST describe it as the companion document for spec-file loading
+  (as opposed to ai-context/ loading)
+

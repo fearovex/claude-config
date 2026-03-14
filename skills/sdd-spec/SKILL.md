@@ -83,6 +83,32 @@ After loading project context and before identifying affected domains, I perform
 6. **Enrichment note**: Feature file content is treated as enrichment context — it surfaces business rules, invariants, and known gotchas that should inform the spec's requirements and THEN clauses. It is NOT a replacement for reading the existing `openspec/specs/<domain>/spec.md` when one exists. Both files MUST be read when both are present.
 7. **Orchestrator reporting**: When one or more feature files are loaded, the `summary` field MUST note that domain context was preloaded (e.g., "domain context loaded from ai-context/features/auth.md"). Each loaded file path MUST appear in the `artifacts` list (read, not written).
 
+### Step 0c — Spec context preload
+
+This step is **non-blocking**: any failure (missing directory, unreadable file, no match) MUST produce at most an INFO-level note. This step MUST NOT produce `status: blocked` or `status: failed`.
+
+1. **List candidates**: list subdirectory names in `openspec/specs/`. If the directory does not exist, log `INFO: openspec/specs/ not found — skipping spec context preload` and skip this step.
+
+2. **Apply stem matching**:
+   ```
+   stems = change_name.split("-").filter(s => s.length > 1)
+   matches = []
+   for domain in candidates:
+     if domain in change_name OR any stem in domain:
+       matches.append(domain)
+   matches = matches[:3]   ← hard cap at 3
+   ```
+
+3. **Load matches**: for each matched domain, read `openspec/specs/<domain>/spec.md` and treat its content as an **authoritative behavioral contract** (precedence over `ai-context/` for behavioral questions; `ai-context/` remains supplementary for architecture and naming context). If a file cannot be read, log an INFO note and skip that file.
+
+4. **If no match**: skip silently — proceed to Step 1 without error or warning.
+
+5. **When files are loaded**: emit the log line `Spec context loaded from: [domain/spec.md, ...]` and include the loaded paths in the artifacts list (read, not written).
+
+See `docs/SPEC-CONTEXT.md` for the full convention reference, load cap rationale, and fallback behavior.
+
+---
+
 ### Step 1 — Read prior artifacts
 
 I must read:

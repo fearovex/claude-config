@@ -69,6 +69,32 @@ Loaded context is used as enrichment throughout all subsequent steps. It informs
 coherence, naming consistency, and skill alignment checks — but does NOT override explicit
 content in the proposal or design.
 
+### Step 0 sub-step — Spec context preload
+
+This sub-step is **non-blocking**: any failure (missing directory, unreadable file, no match) MUST produce at most an INFO-level note. This sub-step MUST NOT produce `status: blocked` or `status: failed`.
+
+1. **List candidates**: list subdirectory names in `openspec/specs/`. If the directory does not exist, log `INFO: openspec/specs/ not found — skipping spec context preload` and skip this sub-step.
+
+2. **Apply stem matching**:
+   ```
+   stems = change_name.split("-").filter(s => s.length > 1)
+   matches = []
+   for domain in candidates:
+     if domain in change_name OR any stem in domain:
+       matches.append(domain)
+   matches = matches[:3]   ← hard cap at 3
+   ```
+
+3. **Load matches**: for each matched domain, read `openspec/specs/<domain>/spec.md` and treat its content as an **authoritative behavioral contract** (precedence over `ai-context/` for behavioral questions; `ai-context/` remains supplementary for architecture and naming context). If a file cannot be read, log an INFO note and skip that file.
+
+4. **If no match**: skip silently — proceed to Step 1 without error or warning.
+
+5. **When files are loaded**: emit the log line `Spec context loaded from: [domain/spec.md, ...]` and include the loaded paths in the artifacts list (read, not written).
+
+See `docs/SPEC-CONTEXT.md` for the full convention reference, load cap rationale, and fallback behavior.
+
+---
+
 ### Step 1 — Understand the request
 
 I classify what type of exploration is needed:

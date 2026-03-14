@@ -4,6 +4,27 @@
 
 ---
 
+## [2026-03-14] — specs-as-subagent-background (SDD apply)
+
+**Type**: SDD apply phase
+**Agent**: Claude Sonnet 4.6 (sdd-apply)
+
+**Summary**: Added spec context preload sub-step to 5 SDD phase skills. Each skill now loads up to 3 relevant master spec files from `openspec/specs/` at Step 0 using stem-based matching, giving sub-agents direct access to existing behavioral contracts before authoring new artifacts.
+
+**Files modified**:
+- `skills/sdd-explore/SKILL.md` — added spec context preload sub-step to Step 0
+- `skills/sdd-propose/SKILL.md` — added Step 0c (spec context preload)
+- `skills/sdd-spec/SKILL.md` — added Step 0c (spec context preload)
+- `skills/sdd-design/SKILL.md` — added spec context preload sub-step to Step 0
+- `skills/sdd-tasks/SKILL.md` — added spec context preload sub-step to Step 0
+- `docs/SPEC-CONTEXT.md` — created convention reference document
+- `openspec/specs/sdd-context-loading/spec.md` — added spec context preload requirement + 3 scenarios
+- `docs/sdd-context-injection.md` — added cross-reference to SPEC-CONTEXT.md and updated skills table
+
+**Next step**: `/sdd-verify 2026-03-14-specs-as-subagent-background`
+
+---
+
 ## [2026-03-14] — add-clarification-gate-for-ambiguous-inputs (SDD archive)
 
 **Type**: SDD archive phase

@@ -169,9 +169,23 @@ It MUST NOT substitute `~/.claude/ai-context/` files if the project's own files 
 
 | Skill | Step 0 variant |
 |---|---|
-| `sdd-explore` | Standard Step 0 block |
-| `sdd-propose` | Dual-block: Step 0a (global) + Step 0b (domain features) |
-| `sdd-spec` | Dual-block: Step 0a (global) + Step 0b (domain features) |
-| `sdd-design` | Standard Step 0 block |
-| `sdd-tasks` | Standard Step 0 block |
-| `sdd-apply` | Sub-section inside existing Step 0 (before scope guard) |
+| `sdd-explore` | Standard Step 0 block + spec context preload sub-step |
+| `sdd-propose` | Dual-block: Step 0a (global) + Step 0b (domain features) + Step 0c (spec context preload) |
+| `sdd-spec` | Dual-block: Step 0a (global) + Step 0b (domain features) + Step 0c (spec context preload) |
+| `sdd-design` | Standard Step 0 block + spec context preload sub-step |
+| `sdd-tasks` | Standard Step 0 block + spec context preload sub-step |
+| `sdd-apply` | Sub-section inside existing Step 0 (before scope guard) — spec context preload excluded (see below) |
+
+---
+
+## Spec Context Preload (Step 0c / sub-step)
+
+In addition to loading `ai-context/` files, the five applicable phase skills include a spec context preload sub-step that loads relevant master spec files from `openspec/specs/`. This gives sub-agents direct access to the project's existing behavioral contracts before they author new artifacts.
+
+**See `docs/SPEC-CONTEXT.md`** for the full convention reference:
+- Selection algorithm (stem-based matching)
+- Load cap (3 files maximum)
+- Non-blocking contract
+- Precedence rule (spec files > ai-context/ for behavioral contracts)
+- Fallback behavior
+- Skills this applies to (and `sdd-apply` exclusion rationale)

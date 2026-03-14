@@ -10,21 +10,11 @@ format: reference
 
 > Expert in Claude Code configuration, architecture, and best practices for development projects.
 
-## Description
-
-This skill provides specialized knowledge about:
-- CLAUDE.md file configuration
-- Creating custom skills
-- Slash commands and hooks
-- AI file architecture for projects
-- MCP server integration
-- Optimized workflows
-
 **Triggers**: claude code, CLAUDE.md, configure claude, skills, hooks, mcp, claude commands, AI architecture, setup project claude, claude config, claude setup
 
 ---
 
-## File Structure for Claude Code
+## Patterns
 
 ```
 project/

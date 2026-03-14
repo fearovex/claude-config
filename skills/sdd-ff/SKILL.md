@@ -46,7 +46,7 @@ Provide a description of the change. Example:
 
 Stop here if argument is missing.
 
-**Infer the slug** using the algorithm below:
+**Infer the slug** using the algorithm below (canonical definition: `docs/sdd-slug-algorithm.md`):
 
 ```
 STOP_WORDS = { "fix", "add", "update", "the", "a", "an", "for", "of", "in", "with",

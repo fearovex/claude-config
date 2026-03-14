@@ -4,6 +4,38 @@
 
 ---
 
+## [2026-03-14] — skills-catalog-analysis (SDD archive)
+
+**Type**: SDD full cycle (explore + propose + spec + design + tasks + apply + verify + archive)
+**Agent**: Claude Haiku 4.5 (sdd-archive inline)
+**Change**: `skills-catalog-analysis`
+
+**What changed**:
+- `docs/format-types.md`: Extended format contract to accept variant section names (`## Critical Patterns`, `## Code Examples`) as valid alternatives in reference and anti-pattern formats; added variant note blocks
+- `skills/project-audit/SKILL.md`: Updated section detection rule in lines 320–324 with regex alternation `^## (Patterns|Critical Patterns)` and `^## (Examples|Code Examples)` to match variants across all formats
+- `skills/elixir-antipatterns/SKILL.md`: Renamed `## Critical Patterns` → `## Anti-patterns` (hard anti-pattern format violation fix)
+- `skills/claude-code-expert/SKILL.md`: Removed duplicate `## Description` section (real content section replaced with `## Patterns`); single `**Triggers**` retained, redundant occurrence removed
+- `skills/sdd-verify/SKILL.md`: Added Step 0 governance loading block (lines 19–41) matching pattern from other SDD phase skills; non-blocking file reads with INFO/NOTE fallback behavior
+- `docs/sdd-slug-algorithm.md`: New canonical reference documenting STOP_WORDS algorithm (set of stop words, max 5 tokens, normalization rules, collision handling, 3 examples)
+- `skills/sdd-ff/SKILL.md`: Added reference to `docs/sdd-slug-algorithm.md` in slug inference section
+- `skills/sdd-new/SKILL.md`: Added reference to `docs/sdd-slug-algorithm.md` in slug inference section
+- `openspec/specs/skills-catalog-format/spec.md`: New master spec created from delta (4 requirements, 10+ scenarios covering variant acceptance, audit compliance, structural corrections)
+- `openspec/specs/skills-catalog-consistency/spec.md`: New master spec created from delta (2 requirements, 7 scenarios covering governance loading and slug algorithm documentation)
+
+**Decisions made**:
+- Format contract extension via Option A (extend contract to accept variants) rather than refactoring 19 externally-sourced skills — low risk, high compliance impact
+- Step 0 governance block added to sdd-verify for consistency across all SDD phase skills — ensures uniform context loading and audit compliance
+- Slug algorithm documented canonically in `docs/sdd-slug-algorithm.md` as non-behavioral reference — future algorithm changes will be tracked in separate SDD cycles
+- Changes delivered in two SDD phases (Phase 1: format alignment, Phase 2: consistency) for independent rollback and audit trail clarity
+
+**Risks mitigated**:
+- Contract extension maintains backward compatibility — all currently compliant skills remain compliant
+- Step 0 pattern copied exactly from reference skills (sdd-propose) to avoid inconsistency
+- Slug algorithm documentation is read-only with explicit constraint: no algorithm behavior changes permitted
+- Two-phase structure allows Phase 1 and Phase 2 to be reverted independently if needed
+
+---
+
 ## [2026-03-13] — fix-format-contract (SDD archive)
 
 **Type**: SDD full cycle (explore + propose + spec + design + tasks + apply + verify + archive)

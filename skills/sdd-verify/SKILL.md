@@ -152,27 +152,49 @@ I verify that the design decisions were followed:
 
 ### Step 6 — Run Tests
 
-I first check `openspec/config.yaml` for a `verify_commands` key:
+I resolve test commands using a three-level priority model. I check `openspec/config.yaml` in order:
 
-**`verify_commands` config key (checked before auto-detection):**
+**Level 1 — `verify_commands` config key (highest priority — checked first):**
 
 ```
 if openspec/config.yaml exists and has key verify_commands:
     → use the listed commands in order
-    → do NOT run auto-detection
+    → do NOT check level 2 or run auto-detection
     → for each command:
          run the command via Bash tool
          capture exit code + stdout/stderr
-         record in ## Tool Execution section
-    → skip the auto-detection table below entirely
+         record in ## Tool Execution section with source label "verify_commands (config level 1)"
+    → skip levels 2 and 3 entirely
 else:
-    → proceed to auto-detection
+    → proceed to level 2 check
 ```
 
-When `verify_commands` is present, it overrides auto-detection entirely — it is NOT additive.
+When `verify_commands` is present, it overrides all lower levels — it is NOT additive.
 Commands are assumed non-destructive; the user is responsible for this.
 
-**Auto-detection (only when `verify_commands` is absent — prioritized — use the first match):**
+**Level 2 — `verify.test_commands` config key (checked when verify_commands is absent):**
+
+```
+if openspec/config.yaml exists and has key verify.test_commands:
+    if verify.test_commands is not a list:
+        → emit WARNING: "verify.test_commands is not a list — treating as absent"
+        → proceed to level 3 (auto-detection)
+    else if verify.test_commands is an empty list []:
+        → treat as absent (empty list falls through — prevents silent zero-command success)
+        → proceed to level 3 (auto-detection)
+    else:
+        → use the listed commands in order
+        → do NOT run auto-detection
+        → for each command:
+             run the command via Bash tool
+             capture exit code + stdout/stderr
+             record in ## Tool Execution section with source label "verify.test_commands (config level 2)"
+        → skip level 3 entirely
+else:
+    → proceed to level 3 (auto-detection)
+```
+
+**Level 3 — Auto-detection (only when both `verify_commands` and `verify.test_commands` are absent or invalid — prioritized — use the first match):**
 
 | Priority | File to check                                 | Condition                 | Command                                                                                   |
 | -------- | --------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------- |
@@ -200,9 +222,32 @@ I save the full test output for use in Step 8 (Coverage Validation) and Step 9 (
 
 ### Step 7 — Build & Type Check
 
-I detect the project's build/type-check command and execute it:
+I detect the project's build/type-check command and execute it.
 
-**Build command detection (prioritized — use the first match):**
+**Config override check — `verify.build_command` and `verify.type_check_command` (checked before auto-detection):**
+
+```
+if openspec/config.yaml exists and has key verify.build_command:
+    if verify.build_command is not a string:
+        → emit WARNING: "verify.build_command is not a string — treating as absent"
+        → proceed to auto-detection for build command
+    else:
+        → use verify.build_command as the build/type-check command
+        → skip the auto-detection table below for the build/type-check command
+
+if openspec/config.yaml exists and has key verify.type_check_command:
+    if verify.type_check_command is not a string:
+        → emit WARNING: "verify.type_check_command is not a string — treating as absent"
+        → proceed to auto-detection for type check command
+    else:
+        → use verify.type_check_command as the type-check command
+        → skip auto-detection for type check command
+```
+
+When either config override is present and valid, it replaces the corresponding auto-detected command.
+Both overrides are independent — one can be set without the other.
+
+**Build command auto-detection (only when `verify.build_command` is absent or invalid — prioritized — use the first match):**
 
 | Priority | File to check              | Condition                                   | Command                            |
 | -------- | -------------------------- | ------------------------------------------- | ---------------------------------- |
@@ -470,3 +515,6 @@ Verifier: sdd-verify
 - I run tests if possible (via Bash tool): I report the actual results
 - The `## Tool Execution` section is mandatory in every `verify-report.md` — even when skipped; when skipped it MUST state "Test Execution: SKIPPED — no test runner detected"
 - A criterion marked `[x]` MUST have verifiable evidence: tool output or an explicit user evidence statement; abstract reasoning or code inspection alone MUST NOT suffice
+- Test command resolution uses a three-level priority model: level 1 (`verify_commands`) > level 2 (`verify.test_commands`) > level 3 (auto-detection); each level is only consulted when all higher levels are absent or invalid
+- Empty `verify.test_commands: []` falls through to auto-detection — it is NOT treated as zero-command success
+- `verify.build_command` and `verify.type_check_command` override their respective auto-detected commands when present and are strings; non-string values emit a WARNING and fall back to auto-detection

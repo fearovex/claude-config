@@ -284,6 +284,65 @@ rules:
   verify:
     - "Verify compliance with specs first"
     - "Then verify adherence to design"
+
+# ---------------------------------------------------------------------------
+# verify (optional) — Auto-detected verification commands for /sdd-verify
+# ---------------------------------------------------------------------------
+# Populated automatically by project-setup on initialization and optionally
+# by memory-init when the section is absent.
+# Priority in sdd-verify Step 6:
+#   Level 1: verify_commands (manual override — highest, unchanged)
+#   Level 2: verify.test_commands (this section)
+#   Level 3: auto-detection table (package.json, pytest, Makefile, etc.)
+#
+# test_commands (list of strings, optional):
+#   Commands to run the project test suite. Empty list is treated as absent.
+#
+# build_command (string, optional):
+#   Single command to build the project. Overrides auto-detected build.
+#
+# type_check_command (string, optional):
+#   Single command to run type checking. Overrides auto-detected type check.
+#
+# [CONDITIONAL BLOCK — emit only when a test runner is detected]:
+# verify:
+#   test_commands:
+#     - "[detected test command: npm test / pytest / make test / ./gradlew test / mix test]"
+#   [build_command: "[detected build command]"  # emit only when detected]
+#   [type_check_command: "[detected type check command]"  # emit only when detected]
+```
+
+**Conditional verify: section generation logic:**
+
+```
+detect_test_runner():
+  if package.json with scripts.test → "npm test"
+    (or "yarn test" if yarn.lock, "pnpm test" if pnpm-lock.yaml)
+  elif pyproject.toml / pytest.ini / setup.cfg → "pytest"
+  elif Makefile with test target → "make test"
+  elif build.gradle or gradlew → "./gradlew test"
+  elif mix.exs → "mix test"
+  else → None
+
+detect_build_command():
+  if package.json with scripts.build → "npm run build" (or yarn/pnpm variant)
+  elif package.json with scripts.typecheck → "npm run typecheck"
+  elif tsconfig.json + TypeScript in devDependencies → "npx tsc --noEmit"
+  else → None
+
+detect_type_check_command():
+  if tsconfig.json + TypeScript in devDependencies and scripts.typecheck absent → "npx tsc --noEmit"
+  else → None (build_command covers this case)
+
+if detect_test_runner() is not None:
+    emit verify: section with test_commands: [detected runner]
+    if detect_build_command() is not None:
+        emit build_command: [detected command]
+    if detect_type_check_command() is not None (and different from build_command):
+        emit type_check_command: [detected command]
+else:
+    omit verify: section entirely (absence is valid — sdd-verify falls back to auto-detection)
+    failure during detection MUST NOT abort config.yaml generation
 ```
 
 ### Step 5 — Final report

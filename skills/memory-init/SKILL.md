@@ -325,6 +325,84 @@ Include in the `memory-init` final summary:
 
 ---
 
+### Step 8 — verify: back-fill (non-blocking)
+
+This step appends a `verify:` section to `openspec/config.yaml` when the file exists but the `verify:` key is absent. It is **non-blocking**: any failure (config.yaml absent, detection error, write error) MUST produce at most an INFO-level note. This step MUST NOT produce `status: blocked` or `status: failed`.
+
+#### 8.1 — Existence check
+
+```
+if openspec/config.yaml does not exist:
+    → log: "INFO: openspec/config.yaml not found — verify: back-fill skipped"
+    → return (skip this step entirely)
+```
+
+#### 8.2 — Idempotency check
+
+```
+if openspec/config.yaml already contains a verify: key:
+    → skip silently (idempotent — never overwrite user-set values)
+    → return
+```
+
+#### 8.3 — Command detection
+
+Use the same detection logic as `project-setup` Step 4:
+
+```
+detect_test_runner():
+  if package.json with scripts.test → "npm test" (or yarn/pnpm variant)
+  elif pyproject.toml / pytest.ini / setup.cfg → "pytest"
+  elif Makefile with test target → "make test"
+  elif build.gradle or gradlew → "./gradlew test"
+  elif mix.exs → "mix test"
+  else → None
+
+detect_build_command():
+  if package.json with scripts.build → "npm run build" (or yarn/pnpm variant)
+  elif package.json with scripts.typecheck → "npm run typecheck"
+  elif tsconfig.json + TypeScript in devDependencies → "npx tsc --noEmit"
+  else → None
+```
+
+If detection fails for any reason, log `"INFO: verify: back-fill — command detection failed"` and return.
+
+#### 8.4 — Append verify: section
+
+If a test runner was detected, append the following block to `openspec/config.yaml`:
+
+```yaml
+
+# ---------------------------------------------------------------------------
+# verify (optional) — Auto-detected verification commands for /sdd-verify
+# ---------------------------------------------------------------------------
+# Added by memory-init back-fill. Edit as needed.
+# Priority: verify_commands (level 1) > verify.test_commands (level 2) > auto-detection (level 3)
+verify:
+  test_commands:
+    - "[detected test command]"
+  # build_command: "[detected build command]"     # uncomment if needed
+  # type_check_command: "[detected type check]"   # uncomment if needed
+```
+
+If no test runner was detected, omit the `verify:` section (absence is valid).
+
+If the write fails for any reason, log `"INFO: verify: back-fill — could not write to openspec/config.yaml"` and return.
+
+#### 8.5 — Emit INFO on success
+
+```
+→ log: "INFO: verify: section added to openspec/config.yaml"
+```
+
+Include in the `memory-init` final summary:
+- `"verify: back-fill: section added to openspec/config.yaml"` (if written)
+- `"verify: back-fill: skipped (config.yaml absent)"` (if no config.yaml)
+- `"verify: back-fill: skipped (verify: already present)"` (if idempotent)
+- `"verify: back-fill: skipped (no test runner detected)"` (if no runner found)
+
+---
+
 ## Rules
 
 - I read real code to infer, I never invent
@@ -332,3 +410,4 @@ Include in the `memory-init` final summary:
 - I never overwrite existing ai-context/ files without asking — offer intelligent merge
 - If `ai-context/` already exists, I warn the user and suggest `/memory-update` instead
 - All generated content MUST be based on real detected evidence, not templates with placeholders
+- The verify: back-fill step (Step 8) is non-blocking — any failure produces at most an INFO note and MUST NOT produce `status: blocked` or `status: failed`

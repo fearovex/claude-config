@@ -87,3 +87,4 @@ ADR files are append-only by convention: once accepted, the original Context, De
 | [033](033-specs-as-subagent-background-convention.md) | Spec Context Loading as Phase-Skill-Owned Cross-Cutting Convention — phase skills self-select relevant master specs via stem matching; orchestrators unchanged | Proposed | 2026-03-14 |
 | [034](034-specs-search-optimization-architecture.md) | Spec Index — Flat YAML as Primary Storage with SQLite/FTS5 as Migration Path | Proposed | 2026-03-14 |
 | [035](035-specs-verify-config-pattern.md) | Verify Section Pattern — Grouped verify: Top-Level Key in openspec/config.yaml | Proposed | 2026-03-17 |
+| [036](036-opus-routing-convention.md) | Model Routing Convention — Three-Level Priority Chain for Orchestrator Task Calls | Proposed | 2026-03-18 |

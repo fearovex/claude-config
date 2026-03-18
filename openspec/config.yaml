@@ -253,3 +253,19 @@ testing:
 # coverage:
 #   threshold: 80
 #   tool: "auto"
+
+# ---------------------------------------------------------------------------
+# model_routing (optional) — Per-phase model selection for SDD orchestrators
+# ---------------------------------------------------------------------------
+# Supports two activation modes:
+#   1. CLI flag: /sdd-ff --opus <description>  (overrides all phases)
+#   2. Per-phase: model_routing.phases map     (overrides named phases only)
+# Resolution order: CLI flag > per-phase config > claude-sonnet-4-5 default
+#
+# model_routing:
+#   phases:
+#     explore: claude-opus-4-5    # sdd-explore phase
+#     propose: claude-sonnet-4-5  # sdd-propose phase
+#     spec:    claude-sonnet-4-5  # sdd-spec phase
+#     design:  claude-opus-4-5    # sdd-design phase (recommended: Opus for architectural reasoning)
+#     tasks:   claude-sonnet-4-5  # sdd-tasks phase

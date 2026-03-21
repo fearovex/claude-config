@@ -52,6 +52,57 @@ Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md`
 
 ### Step 1 — Verify it is archivable
 
+#### Completeness Check
+
+Before reading `verify-report.md`, I check the change directory for required SDD artifacts using a two-tier severity model.
+
+**CRITICAL artifacts** (block with no proceed option): `proposal.md`, `tasks.md`
+
+**WARNING artifacts** (present two-option prompt): `design.md`, non-empty `specs/` directory (contains at least one `.md` file)
+
+**Check order:**
+
+1. Check CRITICAL artifacts first. If any are absent:
+
+```
+CRITICAL — Cannot archive "[change-name]"
+
+The following artifacts are required for a valid SDD cycle but are missing:
+  - proposal.md   (required — CRITICAL)
+  - tasks.md      (required — CRITICAL)
+
+Return and complete the missing phases before archiving.
+No proceed option is available.
+```
+
+List only the artifacts that are actually absent. Halt immediately. Do NOT evaluate WARNING artifacts. Do NOT continue to the verify-report.md check.
+
+2. If CRITICAL passes, check WARNING artifacts. If any are absent:
+
+```
+WARNING — Incomplete cycle detected for "[change-name]"
+
+The following artifacts are missing:
+  - design.md     (recommended — WARNING)
+  - specs/        (recommended — WARNING)
+
+Choose:
+  1. Return and complete the missing phases (/sdd-spec, /sdd-design)
+  2. Archive anyway — I acknowledge these phases were intentionally skipped
+
+Reply 1 or 2:
+```
+
+List only the artifacts that are actually absent. Wait for the user to reply:
+- **Option 1 selected**: halt. The user returns to complete the missing phases.
+- **Option 2 selected**: record the skipped phases (for use in Step 5 CLOSURE.md) and continue to the verify-report.md check.
+
+3. If all CRITICAL and WARNING artifacts are present: produce no output and continue immediately to the verify-report.md check.
+
+**Note**: `exploration.md` and `prd.md` are explicitly excluded from this check. Their absence MUST NOT trigger any CRITICAL or WARNING output.
+
+---
+
 I read `openspec/changes/<change-name>/verify-report.md` if it exists.
 
 If there are unresolved CRITICAL issues:
@@ -170,18 +221,39 @@ If the condition is met:
 
 ### Step 4 — Move to archive
 
-I move the change folder:
+**Pre-flight: strip embedded date from slug**
+
+Before constructing the archive folder name, check whether `<change-name>` already starts with a date prefix:
+
+```
+if <change-name> matches /^\d{4}-\d{2}-\d{2}-(.+)$/
+  archive_slug = captured group 1  (everything after the embedded date)
+else
+  archive_slug = <change-name>
+```
+
+Then construct the archive destination using today's archive date:
 
 ```
 openspec/changes/<change-name>/
-→ openspec/changes/archive/YYYY-MM-DD-<change-name>/
+→ openspec/changes/archive/YYYY-MM-DD-<archive_slug>/
 ```
+
+Example:
+- Input slug `2026-03-14-spec-headers` → archive folder `2026-03-19-spec-headers` (not `2026-03-19-2026-03-14-spec-headers`)
+- Input slug `add-payment-flow` → archive folder `2026-03-19-add-payment-flow` (no change)
 
 I create `openspec/changes/archive/` if it does not exist.
 
+I move the change folder:
+
+After ALL files are confirmed present at `openspec/changes/archive/<date>-<archive_slug>/`, I MUST delete `openspec/changes/<change-name>/` and all its contents. Source deletion MUST NOT execute before destination files are confirmed — if confirmation fails, I halt and report an error without deleting the source.
+
+I confirm the source directory `openspec/changes/<change-name>/` no longer exists before continuing to Step 5. I output "Source directory deleted: openspec/changes/<change-name>/" to confirm completion. If deletion fails after a successful copy, I output a WARNING with the exact path to delete manually and continue to Step 5 with `status: warning`.
+
 ### Step 5 — Create closure note
 
-I create `openspec/changes/archive/YYYY-MM-DD-<name>/CLOSURE.md`:
+I create `openspec/changes/archive/YYYY-MM-DD-<archive_slug>/CLOSURE.md` (using the same `archive_slug` computed in Step 4):
 
 ```markdown
 # Closure: [change-name]
@@ -214,7 +286,11 @@ Close date: [YYYY-MM-DD]
 ## User Docs Reviewed
 
 [YES — updated scenarios.md / quick-reference.md / onboarding.md as needed | NO — change does not affect user-facing workflows | N/A — pre-dates this requirement]
+
+Skipped phases: [phase1, phase2]
 ```
+
+**Conditional field — `Skipped phases:`**: Include this field ONLY when the user selected option 2 during a WARNING-level completeness check in Step 1. Derive phase names from the absent artifacts: `design.md` → `design`, absent or empty `specs/` → `spec`. If no phases were skipped (happy-path archive), omit this field entirely — do NOT write `Skipped phases: none` or leave the line blank.
 
 ### Step 5b — Verify-report template (for reference when creating verify-report.md)
 
@@ -239,7 +315,7 @@ After the archive is complete, I automatically update `ai-context/` with the dec
 1. Read `~/.claude/skills/memory-update/SKILL.md`
 2. Execute the `/memory-update` process inline, using the archived change as session context:
    - Change name: `<change-name>`
-   - Archive path: `openspec/changes/archive/YYYY-MM-DD-<change-name>/`
+   - Archive path: `openspec/changes/archive/YYYY-MM-DD-<archive_slug>/`
    - Artifacts: proposal, specs, design, tasks, closure note
 3. Report the result
 
@@ -281,7 +357,7 @@ Memory: [updated | failed — reason]
   "summary": "Change [name] archived. [N] master specs updated. Memory: [updated|failed|skipped].",
   "artifacts": [
     "openspec/specs/<domain>/spec.md — updated",
-    "openspec/changes/archive/YYYY-MM-DD-<name>/ — created"
+    "openspec/changes/archive/YYYY-MM-DD-<archive_slug>/ — created"
   ],
   "next_recommended": [],
   "risks": []
@@ -298,3 +374,5 @@ Memory: [updated | failed — reason]
 - The archive history is IMMUTABLE — I never delete files from archive/
 - If the merge is destructive (e.g. the delta removes a lot), I show this explicitly to the user
 - If the master spec has conflicts with the delta, I show them and ask how to resolve
+- CRITICAL artifacts (`proposal.md`, `tasks.md`) MUST block with no proceed option — the completeness check MUST run before `verify-report.md` is read
+- WARNING artifacts (`design.md`, non-empty `specs/`) MUST always offer option 2 (acknowledge and proceed) — they MUST NOT silently block

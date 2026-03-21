@@ -97,6 +97,7 @@ I must read:
 - `openspec/changes/<change-name>/design.md` (the file matrix and approach)
 - `openspec/changes/<change-name>/specs/` (the success criteria)
 - `openspec/config.yaml` if it exists (project rules)
+- `openspec/changes/<change-name>/proposal.md` — specifically the `## Supersedes` section
 
 ### Step 2 — Analyze dependencies between tasks
 
@@ -106,22 +107,76 @@ I identify the natural implementation order:
 - Providers/services before their consumers
 - Schema/migration before the code that uses them
 - Unit tests alongside the code (not at the end)
+- **Removals and replacements BEFORE additions** (see Step 3 below)
 
-### Step 3 — Organize into phases
+### Step 3 — Generate removal tasks from Supersedes section
 
-I group tasks into logical phases:
+#### Step 3a — Check Supersedes
+
+1. Read `## Supersedes` from proposal.md.
+2. **If section is absent** (older archived change): log `INFO: no Supersedes section in proposal.md — skipping removal task generation` and proceed to Step 4 with standard phase organization.
+3. **If section states "None — purely additive change"**: skip removal task generation; proceed to Step 4.
+4. **If section has REMOVED or REPLACED items**: proceed to Step 3b.
+
+#### Step 3b — Generate removal/replacement tasks
+
+For each **REMOVED** item in Supersedes:
+- Generate one task titled `Remove: [feature name]` with:
+  - File paths to delete or modify
+  - Acceptance criterion: "File deleted AND no runtime errors in related flows"
+  - Spec reference: linked spec requirement name (if spec exists for this removal)
+
+For each **REPLACED** item in Supersedes:
+- Generate two tasks in dependency order:
+  1. `Remove old: [old feature name]` — delete/unregister the old implementation
+  2. `Implement new: [new feature name]` — add the replacement (link to spec requirement)
+- Note explicit dependency: task 2 cannot start until task 1 is complete.
+
+#### Step 3c — Phase 1 organization
+
+All removal and replacement tasks (from Step 3b) MUST be grouped into **Phase 1: Removals and Replacements**. Standard addition/implementation tasks start from Phase 2 or later. Phase 2 MUST NOT begin until Phase 1 is complete — enforce this with an explicit sequencing note in tasks.md.
+
+**Removal task format:**
+```markdown
+### Phase 1: Removals and Replacements
+
+- [ ] 1.1 Remove: [feature name] from `path/to/file`
+  Linked spec: [Requirement name from spec, or "N/A — no spec for this removal"]
+  Files: `path/to/file` (DELETE), `path/to/other.ts` (remove registration/import)
+  Acceptance: File deleted AND related flows continue without runtime errors
+
+- [ ] 1.2 Remove old: [old feature name] from `path/to/old-file`
+  Linked spec: [Requirement: Replacement requirement name]
+  Files: `path/to/old-file` (DELETE or MODIFY)
+  Acceptance: Old implementation fully removed; no lingering imports or references
+
+- [ ] 1.3 Implement new: [new feature name] in `path/to/new-file`
+  Linked spec: [Requirement: new feature requirement]
+  Depends on: 1.2
+  Files: `path/to/new-file` (CREATE or MODIFY)
+  Acceptance: New implementation active; spec scenarios pass
+
+---
+⚠️ Phase 2 MUST NOT begin until all Phase 1 tasks are complete.
+---
+```
+
+### Step 4 — Organize addition tasks into phases
+
+I group addition/implementation tasks into logical phases after Phase 1 (or Phase 1 if no removals):
 
 ```
-Phase 1 — Foundation: types, interfaces, schemas, configuration
-Phase 2 — Core: main business logic
-Phase 3 — Integration: connect with the rest of the system
-Phase 4 — Testing: tests for previous phases
-Phase 5 — Cleanup: remove temporary code, update docs
+Phase 1 — Removals and Replacements [if Supersedes has items] OR Foundation [if purely additive]
+Phase 2 — Foundation: types, interfaces, schemas, configuration [if Phase 1 is Removals]
+Phase N — Core: main business logic
+Phase N+1 — Integration: connect with the rest of the system
+Phase N+2 — Testing: tests for previous phases
+Phase N+3 — Cleanup: remove temporary code, update docs
 ```
 
 (I adapt phase names to the context of the change)
 
-### Step 4 — Create tasks.md
+### Step 5 — Create tasks.md
 
 #### Step 4a — Warning Classification Rules
 

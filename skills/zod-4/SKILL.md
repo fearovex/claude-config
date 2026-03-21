@@ -5,7 +5,6 @@ description: >
   Trigger: When validating data, defining schemas, working with forms, or using Zod for type safety.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

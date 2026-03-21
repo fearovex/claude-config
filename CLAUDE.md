@@ -54,7 +54,7 @@ Signals appear as a single bold line before main response content.
 | **Meta-Command** | Message starts with `/` | Execute slash command immediately — skip classification |
 | **Change Request** | Action verbs directed at codebase: *fix, add, implement, create, build, update, refactor, remove, delete, migrate, deploy* — **also**: state descriptions of breakage directed at a named component (*is broken, doesn't work, is missing, is wrong*) | Recommend `/sdd-ff <inferred-slug>` (or `/sdd-new` for complex changes); state the inferred slug; do NOT write code |
 | **Exploration** | Investigative intent: *review, analyze, explore, examine, audit, investigate, "show me", "walk me through", "explain how it works"* | Auto-launch `sdd-explore` via Task tool, or recommend `/sdd-explore <topic>` |
-| **Question** | Information requests: *"what is", "how does", "why does", "explain", "describe"*, or message ends with `?` | Answer directly — no SDD routing |
+| **Question** | Information requests: *"what is", "how does", "why does", "explain", "describe"*, or message ends with `?` | Answer directly — no SDD routing. If project has `openspec/specs/index.yaml`, first read matching specs (spec-first Q&A, Step 8) and use them as authoritative source; surface contradiction warnings if code diverges from spec. |
 
 **Default (ambiguous):** Classify as Question and append: *"If you'd like me to implement this, I can start with `/sdd-ff <slug>`."*
 
@@ -96,10 +96,13 @@ ELSE IF message contains change intent
        (fix, add, implement, create, build, update, refactor,
         remove, delete, migrate, deploy — directed at files or codebase)
   → Change Request: recommend /sdd-ff <inferred-slug>
+    → If message contains removal/replacement language ("remove X", "no longer X",
+      "delete X", "replace X with Y", "change X to Y"):
+        Apply Rule 7: acknowledge removal/replacement intent before recommending /sdd-ff
     Examples:
-      ✓ "fix the login bug"           → /sdd-ff fix-login-bug
-      ✓ "add a payment feature"       → /sdd-ff add-payment-feature
-      ✓ "implement the retry logic"   → /sdd-ff implement-retry-logic
+      ✓ "fix the login bug"           → /sdd-ff fix-login-bug (no removal — recommend directly)
+      ✓ "add a payment feature"       → /sdd-ff add-payment-feature (purely additive)
+      ✓ "implement the retry logic"   → /sdd-ff implement-retry-logic (purely additive)
       ✗ "how does the login work?"    → Question (not a change)
       ✗ "explain the payment module"  → Question (not a change)
       ✓ "the login is broken"             → Change Request (implicit fix intent — broken state description)
@@ -107,6 +110,11 @@ ELSE IF message contains change intent
       ✓ "tests are failing after my last change" → Change Request (implicit fix — broken behavior)
       ✓ "the payment flow is completely wrong"   → Change Request (implicit fix — correctness complaint)
       ✗ "why does the login break?"       → Question (interrogative form — not a directive)
+      # Removal/replacement language — Rule 7 confirmation required before /sdd-ff:
+      ✓ "remove the periodic refresh hook"  → Change Request + Rule 7: confirm removal intent
+      ✓ "replace auth middleware with X"    → Change Request + Rule 7: confirm replacement intent
+      ✓ "no longer use the old payment SDK" → Change Request + Rule 7: confirm removal intent
+      ✓ "delete the legacy admin panel"     → Change Request + Rule 7: confirm removal intent
       # also: state descriptions of breakage directed at a named component
       #   ("is broken", "doesn't work", "is wrong", "is missing")
 
@@ -164,6 +172,25 @@ ELSE IF message matches ambiguity pattern (per 4 heuristics above)
 
 ELSE
   → Question: answer directly — no SDD delegation
+    → Step 8 — Spec-first Q&A (non-blocking):
+        IF project has openspec/specs/index.yaml:
+          1. Read index.yaml and extract all domain entries with their keywords arrays
+          2. Tokenize the user's question (lowercase, split on spaces and punctuation)
+          3. Apply stem matching: split each domain name on "-", match each stem (length > 1)
+             against question tokens (case-insensitive substring match)
+             Additionally check if any of the domain's explicit keywords array terms
+             appear in the question tokens
+          4. Collect matching domains, cap at top 3 (consistent with sdd-explore pattern)
+          5. For each matched domain: read openspec/specs/<domain>/spec.md
+          6. Use spec requirements as the authoritative source for the answer
+          7. If the current code behavior (observed or known) contradicts a spec requirement:
+             Surface: "⚠️ Note: The current code does [X], but the spec requires [Y]
+             (openspec/specs/<domain>/spec.md REQ-N). This may indicate spec drift or
+             an incomplete implementation."
+        IF index.yaml is missing OR no domain keywords match:
+          → Answer from code as today (no change in behavior)
+        This step applies to Question pathway ONLY — Change Requests and Explorations
+        are NOT affected by this rule.
     Examples:
       ✓ "what does this function do?" → answer inline
       ✓ "explain the SDD cycle"       → answer inline
@@ -172,6 +199,10 @@ ELSE
       ✓ "what's wrong with the retry logic?" → Question (what-is pattern)
       ✓ "is the payment system broken?"   → Question (interrogative — not a directive)
       ✓ "auth module audit"               → Question/Default (multi-word, no ambiguity match)
+      # Spec-first Q&A examples (when index.yaml is present):
+      ✓ "what happens when welcome video completes?" → matches "fy-video-wiring" (stem: "video")
+      ✓ "how does the orchestrator classify intent?"  → matches "orchestrator-behavior"
+      ✓ "why is the retry logic failing?"             → Question + check specs for "retry" domain
 ```
 
 ### Unbreakable Rules
@@ -266,6 +297,32 @@ SDD meta-cycle for this repo:
 - At the end of the feedback session, I list all proposals created with their full paths.
 - Implementation happens in a **separate session**: the user opens a new session, references a proposal, and triggers `/sdd-ff` or `/sdd-new`.
 
+### 6. Cross-session ff handoff
+- When recommending a `/sdd-ff` that the user will run in a **new session**
+  (trigger: user states "new session", "next chat", "context reset", or context compaction is imminent),
+  I MUST first create `openspec/changes/<slug>/proposal.md` with:
+  1. The architectural or design decision that triggered the change
+  2. The specific goal of the ff (what success looks like)
+  3. The files and artifacts the explore should target
+  4. Any constraints or "do not do" items discovered in this session
+- I MUST include the proposal path in the recommendation message.
+- I MUST offer to run `/memory-update` inline or remind the user to run it.
+- This rule does NOT apply to same-session `/sdd-ff` cycles.
+
+### 7. Conversation context extraction before SDD handoff
+- When classifying a message as a **Change Request** that includes removal/replacement language ("remove X", "no longer X", "delete X", "replace X with Y", "change X to Y"), I MUST acknowledge the removal/replacement intent explicitly before recommending `/sdd-ff`.
+- Confirmation pattern:
+  ```
+  I see you want to [remove/replace] [X]. I'll include that in the SDD context.
+  Ready to proceed? → /sdd-ff <inferred-slug>
+  ```
+- For purely additive changes (no removal/replacement language detected), skip confirmation and recommend `/sdd-ff` directly.
+- This ensures removal intent is captured in the proposal pre-population step of sdd-ff and is not lost across sub-agent boundaries.
+- Examples:
+  - "remove the periodic refresh hook" → confirm removal before /sdd-ff
+  - "replace the auth middleware with the new one" → confirm replacement before /sdd-ff
+  - "add a payment feature" → no removal detected → recommend /sdd-ff directly (no confirmation needed)
+
 ---
 
 ## Plan Mode Rules
@@ -335,6 +392,13 @@ When working on a skill change in plan mode:
 | `/sdd-archive <change>` | Archive completed change |
 | `/sdd-status` | View the active SDD cycle status |
 
+### SDD Maintenance
+
+| Command | Action |
+|---------|--------|
+| `/sdd-spec-gc <domain>` | Audit a single domain's master spec for stale requirements and remove confirmed candidates |
+| `/sdd-spec-gc --all` | Audit all master specs for stale requirements across all domains |
+
 ---
 
 ## Agent Discovery
@@ -372,6 +436,7 @@ When I receive a meta-tool command, I read the corresponding skill and execute i
 | `/memory-update` | `~/.claude/skills/memory-update/SKILL.md` |
 | `/project-claude-organizer` | `~/.claude/skills/project-claude-organizer/SKILL.md` |
 | `/orchestrator-status` | `~/.claude/skills/orchestrator-status/SKILL.md` |
+| `/sdd-spec-gc` | `~/.claude/skills/sdd-spec-gc/SKILL.md` |
 
 ### SDD Orchestrator — Delegation Pattern
 
@@ -566,6 +631,10 @@ Each project has its memory layer in `ai-context/`:
 - `~/.claude/skills/sdd-verify/SKILL.md`
 - `~/.claude/skills/sdd-archive/SKILL.md`
 
+### SDD Maintenance Skills
+> Periodic utilities for keeping the SDD system healthy. Not part of the core phase DAG — run independently on-demand.
+- `~/.claude/skills/sdd-spec-gc/SKILL.md` — spec garbage collection: audits master specs for PROVISIONAL, ORPHANED_REF, CONTRADICTORY, SUPERSEDED, and DUPLICATE requirements; presents dry-run report; removes confirmed candidates after user confirmation
+
 ### Meta-tool Skills
 - `~/.claude/skills/project-setup/SKILL.md`
 - `~/.claude/skills/project-onboard/SKILL.md` — diagnosing the current project state, detecting which of 6 onboarding cases applies, and recommending the exact command sequence
@@ -579,7 +648,7 @@ Each project has its memory layer in `ai-context/`:
 - `~/.claude/skills/memory-update/SKILL.md` — updates ai-context/ with decisions and changes from the current session
 - `~/.claude/skills/codebase-teach/SKILL.md` — analyzes bounded contexts, extracts business rules and data models from source code, writes ai-context/features/<context>.md files, and produces teach-report.md with coverage metrics
 
-### Technology Skills (global catalog — extracted from Gentleman-Skills)
+### Technology Skills (global catalog)
 
 **Frontend / Full-stack:**
 - `~/.claude/skills/react-19/SKILL.md`

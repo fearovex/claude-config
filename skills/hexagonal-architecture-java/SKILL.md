@@ -5,7 +5,6 @@ description: >
   Trigger: When designing Java services with hexagonal architecture, clean architecture, or ports-and-adapters pattern.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

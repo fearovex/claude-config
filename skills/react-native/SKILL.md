@@ -5,7 +5,6 @@ description: >
   Trigger: When building mobile apps, working with React Native components, using Expo, React Navigation, or NativeWind.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

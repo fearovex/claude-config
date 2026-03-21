@@ -117,6 +117,23 @@ I must read:
 - `openspec/specs/<domain>/spec.md` if it exists (current domain spec)
 - `ai-context/architecture.md` if it exists (to understand the current system)
 
+#### Step 1 extended — Validate against Supersedes section
+
+After reading proposal.md, I perform a Supersedes cross-check before writing any spec:
+
+1. **Check for Supersedes section**: look for `## Supersedes` in proposal.md.
+   - **If absent** (older archived change): log `WARNING: proposal.md has no Supersedes section — backwards compat mode; skipping validation` and proceed without validation.
+   - **If present and states "None — purely additive"**: skip validation; proceed to Step 2.
+   - **If present with REMOVED or REPLACED items**: proceed to step 2 below.
+
+2. **For each REMOVED item in Supersedes**: scan the delta spec I am about to write for any requirement that says "preserve X", "X MUST remain", or "backward compatibility with X". If found:
+   - Emit `MUST_RESOLVE` warning: "Spec includes a preservation requirement for '[X]' but proposal says '[X]' is REMOVED. Confirm intent."
+   - Pause for user confirmation before continuing.
+
+3. **For each REPLACED item in Supersedes**: verify the spec describes the new replacement, not the old behavior. If spec only describes old behavior without acknowledging replacement, add a note: `[PENDING: spec does not describe replacement behavior for [X] — clarify with design]`.
+
+4. **For CONTRADICTED items**: verify the spec aligns with the resolution documented in `## Contradiction Resolution` of proposal.md. If mismatch, emit `MUST_RESOLVE` warning.
+
 ### Step 2 — Identify affected domains
 
 From the proposal I extract the domains that need specs:
@@ -273,3 +290,5 @@ For each requirement I include:
 - I do NOT include implementation details (that is `sdd-design`)
 - I do NOT invent behavior — I base everything on the proposal and existing code
 - If something is ambiguous in the proposal, I mark it as `[Pending clarification]` and list it in risks
+- I do NOT add "preserve X" or "backward compatibility with X" requirements that are NOT explicitly stated in the proposal — if the proposal is silent, treat as pending clarification, NOT as implicit preservation
+- If proposal.md has no Supersedes section (archived change compatibility), I skip validation and proceed without error — backwards compat mode is non-blocking

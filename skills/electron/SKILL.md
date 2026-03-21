@@ -5,7 +5,6 @@ description: >
   Trigger: When building Electron apps, working with main/renderer processes, IPC communication, or native OS integrations.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

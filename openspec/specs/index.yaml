@@ -239,6 +239,11 @@ domains:
     keywords: [skills-catalog-format, catalog, registry, format, claude-md, skills-registry]
     related: [skills-catalog-consistency, skill-structure]
 
+  - domain: skill-metadata-attribution
+    summary: Skill metadata attribution — removal of external brand references from skill frontmatter and documentation
+    keywords: [skill-metadata, attribution, frontmatter, author-field, brand-neutrality, documentation]
+    related: [skill-structure, skills-catalog-format]
+
   - domain: skill-structure
     summary: Skill directory structure — one directory per skill with exactly one SKILL.md entry point
     keywords: [skill-structure, directory, skill-md, entry-point, structure, one-per-skill]
@@ -288,3 +293,27 @@ domains:
     summary: Behavioral spec for openspec/specs/index.yaml — structure, correctness invariants, and index-based spec selection by sub-agents
     keywords: [spec, index, yaml, keywords, search, selection, fallback, domain]
     related: [sdd-archive-execution]
+
+  - domain: sdd-explore-replacement-detection
+    summary: sdd-explore Branch Diff, Prior Attempts, and Contradiction Analysis — three new sections for context gap detection
+    keywords: [sdd-explore, exploration, branch-diff, prior-attempts, contradiction, context-gap]
+    related: [sdd-orchestration, orchestrator-behavior, sdd-phase-context-loading]
+
+  - domain: sdd-propose-supersedes-section
+    summary: sdd-propose Supersedes section and conversation context preservation — explicit removal/replacement intent in proposal.md
+    keywords: [sdd-propose, supersedes, removal, replacement, contradiction, proposal, context]
+    related: [sdd-orchestration, sdd-explore-replacement-detection, sdd-tasks-removal-tasks]
+
+  - domain: sdd-tasks-removal-tasks
+    summary: sdd-tasks explicit removal and replacement task generation from proposal Supersedes section
+    keywords: [sdd-tasks, removal, replacement, supersedes, task-generation, ordering, sequencing]
+    related: [sdd-propose-supersedes-section, sdd-phase-context-loading]
+  - domain: spec-header-conventions
+    summary: Canonical structured header format for all spec files and sdd-apply domain consolidation
+    keywords: [spec-header, header-format, canonical, domain-consolidation, sdd-apply, backfill, conventions]
+    related: [sdd-apply, skill-authoring-conventions]
+
+  - domain: spec-garbage-collection
+    summary: Spec GC skill for discovering and removing stale, provisional, orphaned, contradictory, or duplicate requirements from master specs
+    keywords: [spec-gc, garbage-collection, stale, provisional, orphaned, contradictory, dry-run, cleanup]
+    related: [spec-index, orchestrator-behavior]

@@ -5,7 +5,6 @@ description: >
   Trigger: When building AI chat interfaces, using Vercel AI SDK, streaming LLM responses, or integrating tools.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

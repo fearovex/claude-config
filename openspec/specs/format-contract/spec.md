@@ -10,7 +10,7 @@ Base: `docs/format-types.md` (format contract definitions)
 
 ### Requirement 1 — Format Contract Documentation Update
 
-The format contract documentation in `docs/format-types.md` MUST be updated to explicitly recognize and accept variant section heading names for externally-sourced skills from the Gentleman-Skills corpus.
+The format contract documentation in `docs/format-types.md` MUST be updated to explicitly recognize and accept variant section heading names for externally-sourced skills.
 
 #### Scenario: Reference format with standard Patterns section
 
@@ -132,11 +132,13 @@ _(Before: The quick reference table listed only standard section headings withou
 
 Variant section headings (`## Critical Patterns`, `## Code Examples`) are semantic equivalents of their standard counterparts and are accepted because:
 
-1. They originate from high-quality, externally-sourced documentation (Gentleman-Skills corpus)
+1. They originate from high-quality, externally-sourced documentation
 2. They preserve reader-facing clarity without affecting the functional validation logic
 3. They represent production-quality reference documentation that should not be renamed
 
 Variants are **NOT** general guidance for new skills. New skills created via `skill-creator` will continue to generate standard section names (`## Patterns`, `## Examples`, `## Anti-patterns`). Variants are restricted to explicitly recognized patterns from well-vetted external sources.
+
+_(Modified in: 2026-03-20 by change "remove-gentleman-programming" — changed "Gentleman-Skills corpus" to "externally-sourced skills" for brand neutrality)_
 
 ### Affected skills count
 

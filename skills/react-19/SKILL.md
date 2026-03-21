@@ -5,7 +5,6 @@ description: >
   Trigger: When building React components, using hooks, working with forms, or server/client components.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

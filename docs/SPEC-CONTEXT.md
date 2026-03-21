@@ -141,3 +141,58 @@ For changes that intentionally span multiple domains or whose vocabulary does no
 2. `ai-context/architecture.md` and `ai-context/conventions.md` (loaded in Step 0a) remain the behavioral context source
 3. If a specific spec file is known to be relevant despite no vocabulary match, a skill author may add a hard-coded read for that file within the phase skill's Step 1 (not Step 0) — Step 0 preloading remains generic and slug-driven only
 4. Expanding the keyword set in `openspec/specs/index.yaml` for the relevant domain is the recommended fix for persistent vocabulary-mismatch cases
+
+---
+
+## Orchestrator Spec-first Q&A (Question Routing — Step 8)
+
+In addition to the SDD phase skills above, the **orchestrator itself** applies spec context preload when answering user Questions. This is implemented as Step 8 in the Classification Decision Table's `ELSE` (Question) branch.
+
+### When it applies
+
+**Only for the Question intent class.** Change Requests and Explorations are NOT affected.
+
+### Matching algorithm (Question routing)
+
+The Question routing algorithm matches question tokens against domain stems and keywords in `openspec/specs/index.yaml`:
+
+```
+1. Tokenize the user's question: lowercase, split on spaces and punctuation
+2. For each domain in index.yaml:
+   a. Split domain name on "-" to get stems (length > 1)
+   b. Check explicit keywords[] array entries
+   c. If any stem or keyword appears in question tokens → candidate
+3. Cap at top 3 matching domains
+4. Load openspec/specs/<domain>/spec.md for each candidate
+5. Use spec as authoritative source for the answer
+6. Surface contradiction warning if code diverges from spec:
+   "⚠️ Note: The current code does [X], but the spec requires [Y]
+   (openspec/specs/<domain>/spec.md REQ-N). This may indicate spec drift or
+   an incomplete implementation."
+```
+
+### Fallback behavior
+
+| Condition | Behavior |
+|---|---|
+| `openspec/specs/index.yaml` does not exist | Answer from code — no spec preload |
+| No domain keywords/stems match question | Answer from code — no specs loaded |
+| Matched spec file unreadable | Log INFO note; skip that domain; use available specs |
+
+### Examples
+
+| Question | Matched domain | Why |
+|---|---|---|
+| "What happens when the welcome video completes?" | `fy-video-wiring` | Stem `"video"` matches token `"video"` |
+| "How does the orchestrator classify intent?" | `orchestrator-behavior` | Stem `"orchestrator"` matches token `"orchestrator"` |
+| "Why is the retry logic failing?" | none (graceful fallback) | No domain with stem `"retry"` in index |
+
+### Contradiction surfacing
+
+The orchestrator surfaces spec-code contradictions inline as ⚠️ warnings. This is informational — it does not auto-route to a Change Request. The user decides whether to initiate a fix.
+
+### Relationship to sdd-explore spec preload
+
+Both mechanisms use the same 3-domain cap and keyword-based matching. The difference is context: `sdd-explore` loads specs to inform a research artifact (`exploration.md`); the orchestrator Q&A step loads specs to inform a direct inline answer.
+
+See `openspec/specs/orchestrator-behavior/spec.md` for the formal behavioral spec of this feature.

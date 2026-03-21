@@ -5,7 +5,6 @@
 > **Version**: 1.0
 > **Date**: 2026-02-28
 > **Status**: Living document — updated as architecture evolves
-> **Reference**: Based on [agent-teams-lite](https://github.com/Gentleman-Programming/agent-teams-lite) v2.0
 
 ---
 

@@ -117,7 +117,7 @@ documents "how to use X correctly" with concrete code patterns.
 | Rules | `## Rules` | ✅ Required |
 | Process | `## Process` | ❌ Not required — its absence is not a finding |
 
-> **Variant headings**: `## Critical Patterns` is semantically equivalent to `## Patterns`; `## Code Examples` is equivalent to `## Examples`. Both standard and variant names are equally valid — variants appear in externally-sourced skills from the Gentleman-Skills corpus. A reference skill must have at least one pattern section (standard **or** variant) **and** at least one examples section (standard **or** variant) to pass the format check.
+> **Variant headings**: `## Critical Patterns` is semantically equivalent to `## Patterns`; `## Code Examples` is equivalent to `## Examples`. Both standard and variant names are equally valid — variants appear in externally-sourced skills. A reference skill must have at least one pattern section (standard **or** variant) **and** at least one examples section (standard **or** variant) to pass the format check.
 
 **Structural check** (D4b / D9-3):
 - Missing both `## Patterns`/`## Critical Patterns` AND `## Examples`/`## Code Examples` → MEDIUM finding: `"reference skill [name] missing (## Patterns or ## Critical Patterns) or (## Examples or ## Code Examples) section"`
@@ -199,7 +199,7 @@ skills are better served by Format B (which may include an anti-patterns section
 | Rules | `## Rules` | ✅ Required |
 | Process | `## Process` | ❌ Not required — its absence is not a finding |
 
-> **Variant heading**: `## Critical Patterns` is an accepted variant for `## Anti-patterns` when used in an `anti-pattern` format skill. Both are equally valid — the variant appears in externally-sourced skills from the Gentleman-Skills corpus.
+> **Variant heading**: `## Critical Patterns` is an accepted variant for `## Anti-patterns` when used in an `anti-pattern` format skill. Both are equally valid — the variant appears in externally-sourced skills.
 
 > **Note**: If Format C does not suit your skill (e.g., it mixes patterns and anti-patterns),
 > use `format: reference` instead, which accepts both `## Patterns` and `## Anti-patterns` sections.
@@ -269,6 +269,6 @@ format: anti-pattern
 All three formats always require `**Triggers**` and `## Rules`.
 
 > **Variant heading note**: `## Critical Patterns` and `## Code Examples` are approved variant names
-> for externally-sourced skills from the Gentleman-Skills corpus. Both the standard name and the variant
+> for externally-sourced skills. Both the standard name and the variant
 > are equally valid for format compliance. Custom project skills created via `skill-creator` continue to
 > use the standard names (`## Patterns`, `## Examples`, `## Anti-patterns`).

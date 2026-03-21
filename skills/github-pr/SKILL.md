@@ -5,7 +5,6 @@ description: >
   Trigger: When creating PRs, writing PR descriptions, or using gh CLI for pull requests.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

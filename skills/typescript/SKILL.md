@@ -5,7 +5,6 @@ description: >
   Trigger: When writing TypeScript, defining types/interfaces, or using utility types.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

@@ -5,7 +5,6 @@ description: >
   Trigger: When writing E2E tests, using Playwright, implementing page objects, or testing UI flows.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.1"
 format: reference
 ---

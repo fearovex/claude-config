@@ -64,39 +64,75 @@ For each change directory, check the presence of these files:
 
 ---
 
-### Step 4 — Infer current phase
+### Step 4 — Classify and group changes
 
-Based on which artifacts are present, infer the current phase for each change:
+**4a — Infer phase label for each change:**
 
-| Condition                                                 | Current Phase                       |
+| Condition                                                 | Phase Label                         |
 | --------------------------------------------------------- | ----------------------------------- |
 | No artifacts at all                                       | not started                         |
-| proposal.md absent                                        | explore (or not started)            |
-| proposal.md present, specs/ or design.md absent           | propose done — awaiting spec/design |
-| proposal.md + specs/ + design.md present, tasks.md absent | spec+design done — awaiting tasks   |
+| only exploration.md (no proposal.md)                     | explore only — awaiting proposal    |
+| proposal.md present, specs/ and design.md absent         | propose done — awaiting spec/design |
+| proposal.md + specs/ + design.md present, tasks.md absent | spec+design done — awaiting tasks  |
 | tasks.md present, verify-report.md absent                 | tasks done — ready for apply/verify |
 | verify-report.md present                                  | verify done — ready to archive      |
 
+**4b — Detect structural anomalies (informational only, never blocks):**
+
+For each change directory:
+- **Orphan explore folder**: name starts with `explore-` AND only `exploration.md` is present (no `proposal.md`) — flag as `⚠ orphan explore folder`
+- **Double-dated name**: name matches `/^\d{4}-\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-/` — flag as `⚠ double-dated name`
+- **Missing proposal only**: no artifacts at all — flag as `⚠ empty`
+
+**4c — Group changes by action bucket:**
+
+```
+READY TO ARCHIVE    : verify-report.md present
+AWAITING SPEC/DESIGN: proposal.md present, tasks.md absent, (specs/ or design.md absent)
+AWAITING APPLY      : tasks.md present, verify-report.md absent
+EXPLORE ONLY        : only exploration.md, no proposal.md
+ANOMALIES           : orphan explore folders, double-dated names, or empty dirs
+```
+
 ---
 
-### Step 5 — Render output table
+### Step 5 — Render output
+
+Output format (grouped, no redundancy):
 
 ```
-Active SDD changes (openspec/changes/ — excluding archive/):
+● Active SDD Changes
 
-| Change                  | explore | proposal | spec | design | tasks | verify |
-|-------------------------|---------|----------|------|--------|-------|--------|
-| [change-name]           |   [✓/-] |   [✓/-]  | [✓/-]|  [✓/-] | [✓/-] |  [✓/-] |
+── Ready to Archive ──────────────────────────────────────
+  [change-name]   explore ✓  proposal ✓  spec ✓  design ✓  tasks ✓  verify ✓
 
-Current phase:
-- [change-name]: [inferred phase]
+── Awaiting Apply/Verify ─────────────────────────────────
+  [change-name]   explore ✓  proposal ✓  spec ✓  design ✓  tasks ✓  verify -
+
+── Awaiting Spec/Design ──────────────────────────────────
+  [change-name]   explore -  proposal ✓  spec -  design -  tasks -  verify -
+
+── Explore Only (no proposal yet) ───────────────────────
+  [change-name]   explore ✓  proposal -
+
+── Anomalies ─────────────────────────────────────────────
+  [change-name]   ⚠ double-dated name — run /sdd-archive to fix on next archive
+  [change-name]   ⚠ orphan explore folder — consider /sdd-propose or delete manually
 
 Archived: [N] changes in openspec/changes/archive/
+Next actions:
+  - [N] ready to archive → /sdd-archive <name>
+  - [N] awaiting spec/design → /sdd-spec <name> + /sdd-design <name>
+  - [N] anomalies detected (see above)
 ```
 
-Use `✓` for present, `-` for absent.
-
-If `N` archived changes cannot be determined (e.g. archive/ does not exist), show `0`.
+Rules for this format:
+- Each group header is shown only if the group has at least one entry
+- Artifact columns: show only `explore`, `proposal`, `spec`, `design`, `tasks`, `verify` — one line per change, space-separated
+- Use `✓` for present, `-` for absent
+- "Next actions" section is omitted if all groups are empty or only "Archived" has entries
+- Do NOT repeat each change's phase in a separate list — the group it belongs to IS its phase
+- If `N` archived changes cannot be determined (archive/ absent), show `0`
 
 ---
 

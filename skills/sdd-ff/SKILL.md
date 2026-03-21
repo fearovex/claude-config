@@ -97,6 +97,35 @@ Output to user (do NOT ask for confirmation or rename):
 Inferred change name: [slug]
 ```
 
+**Context extraction sub-step** (runs before explore launch, non-blocking):
+
+Scan the user's `/sdd-ff` description for context patterns:
+
+```
+Extract from description (and any prior conversation turns visible in context):
+  - "remove X", "no longer X", "delete X"    → removals list
+  - "replace X with Y", "change X to Y"      → replacements list
+  - "mobile must", "not on web", "desktop only" → platform constraints list
+  - "careful with Y", "provisional pending Z"  → caution notes list
+
+If any patterns found:
+  Pre-populate openspec/changes/[inferred-slug]/proposal.md with skeleton:
+    ## Context Notes (from conversation — preliminary)
+    ### Removals Mentioned
+    - [list of removals]
+    ### Replacements Mentioned
+    - [list of replacements]
+    ### Platform Constraints
+    - [list of constraints]
+    ### Provisional Notes
+    - [list of notes]
+
+If no patterns found:
+  Skip pre-population silently — log INFO: "No context patterns detected — skipping pre-population"
+```
+
+This step is **non-blocking**: any failure produces at most an INFO note. Pre-populated content is preliminary — sdd-propose will refine it.
+
 **Then immediately launch the explore sub-agent** (no user gate):
 
 ```
@@ -114,7 +143,7 @@ Task tool:
     - Project: [absolute path of current working directory]
     - Project governance: [absolute path of current working directory]/CLAUDE.md
     - Change: [inferred-slug]
-    - Previous artifacts: none
+    - Previous artifacts: none (check for pre-seeded proposal.md at openspec/changes/[inferred-slug]/proposal.md)
 
     TASK: Execute the explore phase for change "[inferred-slug]".
 
@@ -127,6 +156,52 @@ Task tool:
 ```
 
 Wait for result. If status is `blocked` or `failed`, stop and report to user. If status is `warning`, continue but surface the warning prominently.
+
+**Contradiction gate sub-step** (runs after explore completes, before launching propose):
+
+```
+Read openspec/changes/[inferred-slug]/exploration.md → ## Contradiction Analysis section.
+
+If section absent or states "No contradictions detected.":
+  → Continue to Step 1 (propose) immediately — no gate.
+
+If section contains only CERTAIN contradictions:
+  → Log: "CERTAIN contradiction(s) detected — will be documented in proposal Contradiction Resolution section."
+  → Continue to Step 1 (propose) immediately — no gate for CERTAIN.
+
+If section contains one or more UNCERTAIN contradictions:
+  → Present blocking gate to user:
+
+    ⚠️ Exploration found UNCERTAIN contradiction(s) before proposing:
+    [For each UNCERTAIN item:]
+      - [Item name]: [explanation of what conflicts with what]
+        Severity: [INFO|WARNING|CRITICAL]
+
+    Does this proposal intend to change/remove the above? Please confirm:
+      Yes    — Proceed; I'll record your decision in the proposal.
+      No     — Halt; please clarify the change description.
+      Review — Show me the full Contradiction Analysis section before I decide.
+
+  → WAIT for user response. Do NOT launch propose until user responds.
+
+  → If user says "Yes":
+      - Record in proposal.md ## Decisions section:
+        ### Contradiction Confirmation
+        Date: [ISO 8601 timestamp]
+        User answer: Confirmed — proceeding with change as described.
+        Items confirmed: [list each UNCERTAIN item]
+      - Continue to Step 1 (propose).
+
+  → If user says "No":
+      - Halt. Report:
+        "Cycle halted at contradiction gate. Please clarify your change description and re-run /sdd-ff."
+      - STOP.
+
+  → If user says "Review":
+      - Display full ## Contradiction Analysis section from exploration.md.
+      - Re-present the gate with the same Yes/No/Review options.
+      - WAIT for a new response.
+```
 
 ---
 
@@ -306,6 +381,11 @@ Do NOT invoke `/sdd-apply` automatically. The user must trigger it explicitly.
 - `$ARGUMENTS` must be provided — fail early with usage if missing
 - The slug is always inferred from the description — do NOT ask the user to provide or confirm a name
 - Exploration runs unconditionally as Step 0 (no user gate)
+- Context extraction (pre-population) runs BEFORE explore launch — it is non-blocking
+- Contradiction gate runs AFTER explore completes and BEFORE propose launches — it is blocking only for UNCERTAIN contradictions
+- CERTAIN contradictions are NOT gated — they are passed to sdd-propose for documentation
+- Prior attempt findings from exploration.md are informational only — they do NOT trigger a gate
+- The contradiction gate requires explicit user response (Yes/No/Review) — there is no bypass or timeout
 - Sub-agents are launched with the Task tool; I (sdd-ff) am the orchestrator, not a sub-agent
 - `spec` and `design` sub-agents are always launched in parallel (single message with two Task calls)
 - If any phase returns `blocked` or `failed`, stop immediately and report — do NOT continue to the next phase

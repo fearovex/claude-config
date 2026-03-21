@@ -24,13 +24,15 @@ The orchestrator MUST classify the user's intent before generating any response 
 - **AND** it MUST either launch `sdd-explore` via Task tool or recommend `/sdd-explore <topic>` to the user
 - **AND** it MUST NOT write a direct analysis response if the analysis involves producing change-related artifacts
 
-#### Scenario: Direct question is answered inline
+#### Scenario: Direct question is answered inline _(modified — 2026-03-19 by change "feedback-sdd-cycle-context-gaps-p6")_
 
 - **GIVEN** the user asks a question seeking factual or conceptual information ("what does this function do?", "explain this pattern", "how does X work?")
 - **WHEN** the orchestrator classifies the intent
 - **THEN** it MUST classify it as Question
 - **AND** it MUST answer directly without routing to an SDD phase
 - **AND** it MUST NOT suggest an SDD command for pure information requests
+- **AND** if the project has `openspec/specs/index.yaml`, the orchestrator MUST first check for matching specs and read them (see "Spec-first Q&A for Questions about project domains" requirement) — then MUST use the spec as the authoritative source for the answer
+_(This modification clarifies that spec reading is now part of the Question pathway, not a separate phase.)_
 
 #### Scenario: Slash command is executed normally
 
@@ -615,3 +617,94 @@ The clarification gate MUST NOT activate for messages that are already clearly c
 - [x] Single-word ambiguous inputs trigger clarification gate, NOT default Question — added 2026-03-14
 - [x] Routing after clarification: 1→Change Request, 2→Exploration, 3→Question, free text→re-classify — added 2026-03-14
 - [x] Gate bypass for slash commands, explicit verbs, and ? punctuation — added 2026-03-14
+
+---
+
+## ADDED — Context Extraction Rule Before SDD Handoff
+*(Added in: 2026-03-19 by change "feedback-sdd-cycle-context-gaps")*
+
+### Requirement: Orchestrator confirms removal/replacement intent before /sdd-ff handoff
+
+When the orchestrator classifies a message as a Change Request that includes explicit removal, replacement, or contradictory language ("remove X", "change X to Y instead", "X is wrong"), the orchestrator MUST confirm the user's intent before recommending `/sdd-ff`.
+
+The confirmation MUST present:
+- Detected intent (removal/replacement)
+- Confirmation options (yes/no/re-explain)
+
+This extraction ensures removal/replacement intent is captured before the SDD cycle begins and is available to `sdd-explore` for context gap detection.
+
+When no removal/replacement language is detected, the orchestrator proceeds directly to the `/sdd-ff` recommendation without additional confirmation.
+
+#### Scenario: User message includes removal intent
+
+- **GIVEN** the user says: "The periodic membership refresh hook is broken — remove it"
+- **WHEN** the orchestrator classifies this as a Change Request
+- **THEN** it MUST emit a confirmation prompt asking to confirm the removal intent before recommending `/sdd-ff`
+
+#### Scenario: User message implies replacement
+
+- **GIVEN** the user says: "The payment flow doesn't work on mobile. Make it work without the polling mechanism."
+- **WHEN** the orchestrator detects both explicit problem and implicit replacement (remove polling)
+- **THEN** it MUST confirm the intent by presenting the possible interpretations before recommending `/sdd-ff`
+
+#### Scenario: User message is purely additive
+
+- **GIVEN** the user says: "Add email notifications for order updates"
+- **WHEN** the orchestrator detects no removal/replacement language
+- **THEN** no additional confirmation is needed
+- **AND** the orchestrator proceeds directly: "I recommend `/sdd-ff add-email-notifications`"
+
+---
+
+### Requirement: Classification Decision Table extended for removal/replacement language
+
+The Classification Decision Table MUST include examples showing that removal/replacement language is a strong Change Request signal and MAY trigger the context extraction confirmation:
+
+```
+✓ "remove the periodic refresh hook"    → Change Request; orchestrator confirms intent
+✓ "change from polling to events"       → Change Request; replacement language detected
+✓ "the login is broken"                 → Change Request; implies fix intent (may be implicit remove)
+```
+
+---
+
+## Rules (context extraction — added 2026-03-19)
+
+- Context extraction applies only to Change Requests, not to Questions or Explorations
+- When removal/replacement language is ambiguous, the orchestrator MUST ask for clarification
+- When intent is clear and additive, no additional confirmation is needed
+- User confirmation at context extraction step feeds directly into the sdd-ff pre-population (Step 0)
+- This rule is inline logic in CLAUDE.md; no new skill or artifact is required
+- The rule MUST NOT block /sdd-ff — it only adds a confirmation gate for clarity
+
+---
+
+### Requirement: Spec-first Q&A for Questions about project domains
+*(Added in: 2026-03-19 by change "feedback-sdd-cycle-context-gaps-p6")*
+
+Before answering any Question that references a named component, feature, flow, or behavior in a project that has `openspec/specs/index.yaml`, the orchestrator MUST check for matching specs and read them before answering.
+
+#### Scenario: Question about domain with matching spec
+
+- **GIVEN** the user asks a question about an existing project feature or behavior (e.g., "what happens when the welcome video completes?", "how does the retry logic work?")
+- **AND** the project has `openspec/specs/index.yaml` with a domain whose keywords match the question topic
+- **WHEN** the orchestrator classifies the intent as Question
+- **THEN** it MUST read `openspec/specs/index.yaml` and find matching domain(s) using keyword matching (case-insensitive stem matching against the question text)
+- **AND** it MUST read the matching spec file(s) from `openspec/specs/<domain>/spec.md`
+- **AND** it MUST use the spec as the authoritative source for the answer (not code)
+- **AND** if code behavior contradicts the spec, it MUST surface the discrepancy explicitly with a note like: "⚠️ Note: The current code does X, but the spec requires Y (openspec/specs/<domain>/spec.md REQ-N). This may indicate spec drift or an incomplete implementation."
+
+#### Scenario: Question about domain with no spec coverage
+
+- **GIVEN** the user asks a question about a project component
+- **AND** the project has `openspec/specs/index.yaml` but no domain's keywords match the question topic
+- **WHEN** the orchestrator searches for matching specs
+- **THEN** it MUST NOT produce an error
+- **AND** it MUST answer directly from code as today (no change in behavior)
+
+#### Scenario: Spec-first Q&A does not apply to Change Requests or Explorations
+
+- **GIVEN** a user message is classified as Change Request or Exploration
+- **WHEN** the orchestrator applies routing
+- **THEN** it MUST NOT apply the spec-first Q&A rule
+- **AND** it MUST follow the existing Change Request or Exploration routing rules

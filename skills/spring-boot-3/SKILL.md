@@ -5,7 +5,6 @@ description: >
   Trigger: When building Spring Boot applications, configuring beans, or implementing REST services.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

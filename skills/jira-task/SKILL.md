@@ -5,7 +5,6 @@ description: >
   Trigger: When creating Jira tickets, tasks, or issues for features, bugs, or enhancements.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

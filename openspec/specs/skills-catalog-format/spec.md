@@ -32,7 +32,10 @@ Description: The format contract and tooling MUST accept `## Critical Patterns` 
 - **WHEN** the file is read after this requirement is satisfied
 - **THEN** it MUST document that `## Critical Patterns` and `## Code Examples` are accepted variant names in the Format B (reference) contract section (lines 115–127 expected location)
 - **AND** it MUST document that `## Critical Patterns` is an accepted variant in the Format C (anti-pattern) contract section (lines 195–202 expected location)
-- **AND** the documentation MUST include a note explaining that variants appear in externally-sourced skills from the Gentleman-Skills corpus and are equally valid
+- **AND** the documentation MUST include a note explaining that variants appear in externally-sourced skills and are equally valid
+- **AND** the documentation MUST NOT reference a specific external brand or organization by name
+
+_(Modified in: 2026-03-20 by change "remove-gentleman-programming" — changed "Gentleman-Skills corpus" to "externally-sourced skills")_
 
 ### Requirement: project-audit section detection rule updated
 

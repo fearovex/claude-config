@@ -5,7 +5,6 @@ description: >
   Trigger: When managing global state in React, using Zustand, or implementing state slices.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

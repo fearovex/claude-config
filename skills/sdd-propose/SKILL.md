@@ -143,6 +143,19 @@ openspec/changes/<change-name>/
 
 ### Step 4 — Write proposal.md
 
+#### Step 4a — Generate Supersedes section
+
+Before writing the proposal, I scan for replacement/removal intent:
+
+1. Read `openspec/changes/<change-name>/exploration.md` if it exists. Check `## Branch Diff`, `## Prior Attempts`, and `## Contradiction Analysis` sections.
+2. Scan the user's description and any pre-seeded `## Context Notes` in the proposal for patterns: "remove X", "no longer X", "delete X", "replace X with Y".
+3. From the above, build the `## Supersedes` section:
+   - **If nothing is being removed or replaced**: state `"None — this is a purely additive change."`
+   - **If removals or replacements are found**: list each item under `### REMOVED`, `### REPLACED`, or `### CONTRADICTED` subsections as appropriate.
+4. **Validation**: if a Supersedes entry claims to "remove" something but describes adding, emit a `MUST_RESOLVE` warning and pause for user confirmation.
+
+#### Step 4b — Write proposal.md
+
 I create `openspec/changes/<change-name>/proposal.md`:
 
 ```markdown
@@ -158,6 +171,26 @@ Status: Draft
 ## Motivation
 
 [Why this is necessary now. Business or technical context.]
+
+## Supersedes
+
+[ALWAYS present — even if nothing is superseded. If purely additive: "None — this is a purely additive change."]
+
+### REMOVED (if applicable)
+
+- **[Feature or component name]** (`path/to/file`)
+  Reason: [why it is being removed]
+
+### REPLACED (if applicable)
+
+| Old | New | Reason |
+|-----|-----|--------|
+| [old feature] | [new feature] | [why] |
+
+### CONTRADICTED (if applicable)
+
+- **[Feature or behavior]**: prior context says "[X]", this proposal says "[NOT X]"
+  Resolution: [contract superseded / breaking change / deprecation period / stakeholder coordination required]
 
 ## Scope
 
@@ -210,7 +243,56 @@ Must be concrete: which files, which commands, which steps.]
 [Low (hours) / Medium (1-2 days) / High (several days)]
 ```
 
-### Step 5 — PRD Shell Generation
+### Step 5 — Preserve conversation context
+
+This step is **non-blocking**: if no conversation context is available, skip silently.
+
+1. Scan the user's original request and any pre-seeded `## Context Notes` in proposal.md for:
+   - Explicit removal/replacement intents ("remove X", "no longer needed", "delete Y")
+   - Platform or environment constraints ("mobile must not", "not on web", "desktop only")
+   - Cautions or provisional notes ("careful with Z", "provisional, pending W")
+2. If any of the above are found, append a `## Context` section to proposal.md:
+
+```markdown
+## Context
+
+Recorded from conversation at [YYYY-MM-DDTHH:MMZ]:
+
+### Explicit Intents
+
+- **[intent]**: [exact wording or paraphrase from user]
+
+### Platform Constraints
+
+- **[constraint]**: [description]
+
+### Provisional Notes
+
+- **[note]**: [description and condition]
+```
+
+3. If nothing notable is found: skip this section — do NOT add an empty `## Context` section.
+
+### Step 6 — Contradiction Resolution documentation
+
+This step is **non-blocking**: only runs if contradictions were detected in exploration.md.
+
+1. Read `openspec/changes/<change-name>/exploration.md` `## Contradiction Analysis` section.
+2. For each **CERTAIN** contradiction found, add a `## Contradiction Resolution` section to proposal.md documenting each one and its resolution approach:
+
+```markdown
+## Contradiction Resolution
+
+### [Feature or behavior name]
+
+**Prior context**: [what the prior spec or archived change said]
+**This proposal**: [what this change intends to do instead]
+**Resolution approach**: [one of: contract superseded / breaking change with migration / deprecation period / stakeholder coordination required]
+```
+
+3. For each **UNCERTAIN** contradiction: do NOT add it here — those are handled by the sdd-ff contradiction gate before propose runs. If propose runs outside of sdd-ff (direct invocation), document the UNCERTAIN contradictions in `## Risks` instead.
+
+### Step 7 — PRD Shell Generation
 
 This step is **non-blocking**: any failure produces a warning in the output, never `status: blocked` or `status: failed`.
 
@@ -223,7 +305,7 @@ This step is **non-blocking**: any failure produces a warning in the output, nev
 4. **User note**: inform the user that `prd.md` is optional and intended for product-facing changes. It can be left blank or deleted if the change is purely technical.
 5. **Artifacts**: add `openspec/changes/<change-name>/prd.md` to the artifacts list **only** if it was created in this run (not if it already existed or was skipped).
 
-### Step 6 — Summary to orchestrator
+### Step 8 — Summary to orchestrator
 
 I return a clear executive summary:
 

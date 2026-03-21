@@ -4,6 +4,290 @@
 
 ---
 
+## [2026-03-20] — remove-gentleman-programming (applied)
+
+**Type**: Cosmetic cleanup — brand reference removal across 7 file groups
+**Agent**: Claude Sonnet 4.6 (sdd-apply)
+
+**Summary**: Removed all live references to "Gentleman-Programming" / "Gentleman-Skills" from active configuration files. 17 skill SKILL.md frontmatter `author:` lines deleted; 1 CLAUDE.md section header neutralized; 3 notes in `docs/format-types.md` rephrased; 1 attribution line in `docs/architecture-definition-report.md` removed; 2 spec lines in `openspec/specs/format-contract/spec.md` rephrased; 1 spec line in `openspec/specs/skills-catalog-format/spec.md` rephrased; 1 note in `ai-context/known-issues.md` rephrased. Archive files and existing changelog entries untouched.
+
+---
+
+## [2026-03-19] — feedback-sdd-cycle-context-gaps-p6 (archived)
+
+**Type**: Enhancement — spec-first Q&A + spec garbage collection skill
+**Agent**: Claude Sonnet 4.6 (sdd-archive)
+
+**What was done**: Archived change `2026-03-19-feedback-sdd-cycle-context-gaps-p6`. Added spec-first Q&A behavior to the orchestrator Question routing pathway: before answering domain questions, the orchestrator reads `openspec/specs/index.yaml`, finds matching domains via keyword matching, loads top-3 specs, and surfaces contradictions. Created new `sdd-spec-gc` maintenance skill for auditing and cleaning stale requirements from master specs (5 detection categories, dry-run report, confirmation gate, changelog recording). Registered skill in CLAUDE.md.
+
+**Files changed**:
+- `CLAUDE.md` (repo + ~/.claude/) — Question routing Step 8 (spec-first Q&A); sdd-spec-gc in Skills Registry and dispatch table
+- `~/.claude/skills/sdd-spec-gc/SKILL.md` — New maintenance skill (runtime only; repo copy pending)
+- `openspec/specs/orchestrator-behavior/spec.md` — Modified "Direct question answered inline"; added "Spec-first Q&A" requirement
+- `openspec/specs/spec-garbage-collection/spec.md` — New domain spec created from delta
+- `openspec/specs/index.yaml` — Added spec-garbage-collection domain entry
+- `docs/SPEC-CONTEXT.md` — Spec-first Q&A section added
+- `docs/templates/sdd-spec-gc-report-template.md` — New GC report template
+
+**Decisions made**:
+- Spec-first Q&A implemented as inline CLAUDE.md logic (not a skill delegation) for latency and simplicity
+- Keyword matching: stem-split on "-", case-insensitive, top-3 domain cap
+- GC skill is standalone maintenance skill (same tier as project-audit/fix); no integration with SDD phase DAG
+- ORPHANED_REF detection is best-effort: UNCERTAIN flag used when search is inconclusive; user reviews before removal
+- Sync gap noted: skills/sdd-spec-gc/SKILL.md (repo copy) not created in this cycle
+
+---
+
+## [2026-03-19] — context-handoff-between-sessions (archived)
+
+**Type**: Convention — cross-session ff handoff mechanism
+**Agent**: Claude Sonnet 4.6 (sdd-archive)
+
+**What was done**: Archived change `2026-03-18-context-handoff-between-sessions`. Added Unbreakable Rule 6 to CLAUDE.md requiring the orchestrator to seed a `proposal.md` before recommending a `/sdd-ff` that will execute in a new session. Updated `sdd-explore` Step 0 with a non-blocking sub-step that reads the pre-seeded `proposal.md` when present, enriching the exploration scope. Both changes deployed to `~/.claude/` via install.sh.
+
+**Files changed**:
+- `CLAUDE.md` (repo + ~/.claude/) — Unbreakable Rule 6: Cross-session ff handoff added
+- `skills/sdd-explore/SKILL.md` (repo + ~/.claude/) — Step 0 Handoff context preload sub-step added
+- `openspec/changes/archive/2026-03-19-2026-03-18-context-handoff-between-sessions/` — change archived with CLOSURE.md
+
+**Decisions made**:
+- Rule 6 triggers only on explicit new-session deferral signals; same-session cycles excluded
+- Pre-seeded `proposal.md` is advisory context for sdd-explore, not a final proposal — sdd-propose may overwrite it
+- No dedicated `/context-handoff` skill created; Rule 6 convention in CLAUDE.md is sufficient
+
+---
+
+## [2026-03-19] — spec-headers-domain-consolidation (archived)
+
+**Type**: Maintenance — spec header normalization and domain consolidation
+**Agent**: Claude Sonnet 4.6 (sdd-archive)
+
+**What was done**: Archived change `2026-03-14-spec-headers-domain-consolidation`. Normalized legacy spec headers to canonical `Change:` / `Date:` structured format across 5 target files; consolidated `sdd-apply-execution` spec into `sdd-apply/spec.md`; removed `sdd-apply-execution` domain directory; updated `ai-context/architecture.md` references. Created new master spec domain `spec-header-conventions`.
+
+**Files changed**:
+- `openspec/specs/spec-header-conventions/spec.md` — new master spec created from delta
+- `openspec/specs/index.yaml` — new domain entry appended
+- `openspec/changes/archive/2026-03-19-2026-03-14-spec-headers-domain-consolidation/` — change archived with CLOSURE.md
+
+**Decisions made**:
+- Canonical spec header format is `# Spec: <title>` → blank → `Change:` → `Date:` — enforced via spec-header-conventions master spec
+- One skill, one spec file: `sdd-apply-execution` merged into `sdd-apply` to prevent split behavior specs
+
+---
+
+## [2026-03-19] — feedback-sdd-cycle-context-gaps-p6 (implemented)
+
+**Type**: Feature — Spec authority in Q&A + spec garbage collection skill
+**Agent**: Claude Sonnet 4.6 (sdd-apply)
+
+**What was done**: Implemented proposals 6a (orchestrator spec-first Q&A) and 6b (sdd-spec-gc skill).
+
+**Files changed**:
+- `CLAUDE.md` — Added Step 8 (Spec-first Q&A) to Question routing `ELSE` branch; updated Question routing table entry; added "SDD Maintenance" commands section; added `/sdd-spec-gc` to skill dispatch table; added "SDD Maintenance Skills" section to Skills Registry
+- `~/.claude/skills/sdd-spec-gc/SKILL.md` — New skill: spec GC with 5 detection categories, dry-run report, user confirmation gate, apply + record steps
+- `docs/SPEC-CONTEXT.md` — Added "Orchestrator Spec-first Q&A (Question Routing — Step 8)" section
+- `docs/templates/sdd-spec-gc-report-template.md` — New report template (informational)
+- `ai-context/architecture.md` — Added decision #24 documenting spec authority architecture
+
+**Decisions made**:
+- Spec-first Q&A: Question routing only; non-blocking; graceful fallback when index.yaml absent or no match
+- Q&A keyword matching: stem split on "-" + explicit keywords[] array, top-3 cap (same as sdd-explore)
+- Contradiction surfacing: ⚠️ inline warning with spec ref + REQ-N; informational only, no auto-routing
+- sdd-spec-gc: ORPHANED_REF detection is best-effort grep; UNCERTAIN flag prevents false-positive removals
+- sdd-spec-gc: registered under new "SDD Maintenance Skills" registry section (not a phase skill, not a meta-tool)
+- GC cadence recommendation: every 5–10 archived SDD cycles
+
+**Change ref**: `openspec/changes/2026-03-19-feedback-sdd-cycle-context-gaps-p6/`
+
+---
+
+## [2026-03-19] — feedback-sdd-cycle-context-gaps-p6 (proposals created)
+
+**Type**: Feedback session — continued SDD improvement proposals
+**Agent**: Claude Sonnet 4.6 (orchestrator)
+
+**What was done**: Two additional proposals created addressing remaining gaps identified in the same feedback session.
+
+**Proposals created**:
+- `openspec/changes/2026-03-19-feedback-sdd-cycle-context-gaps-p6/proposal-6a-orchestrator-reads-specs-before-answering.md` — Rule 8: read `openspec/specs/index.yaml` + relevant domain spec before answering project Q&A; surface spec/code discrepancies explicitly
+- `openspec/changes/2026-03-19-feedback-sdd-cycle-context-gaps-p6/proposal-6b-sdd-spec-gc-skill.md` — new skill `/sdd-spec-gc`: audits master specs for PROVISIONAL/ORPHANED/CONTRADICTORY/DUPLICATE requirements; dry-run + user-confirmed cleanup; project-agnostic
+
+**Decisions made**:
+- Spec-first Q&A only triggers when `openspec/specs/index.yaml` exists and a domain keyword matches — no behavior change for projects without specs
+- `sdd-spec-gc` is read-only until confirmed; never removes without surfacing reason and category
+- Recommended cadence: every 5-10 archived cycles per domain
+
+**Notes**: Implementation via `/sdd-ff 2026-03-19-feedback-sdd-cycle-context-gaps-p6` in new session.
+
+---
+
+## [2026-03-19] — feedback-sdd-cycle-context-gaps (archived)
+
+**Type**: SDD cycle — full ff execution and archive
+**Agent**: Claude Sonnet 4.6 (sdd-archive sub-agent)
+
+**What was done**: Executed full sdd-ff cycle for context gap fixes; applied all changes to skills and specs; archived the change. Six delta specs merged to master specs; three new spec domains created.
+
+**Modified files**:
+- `skills/sdd-explore/SKILL.md` — Branch Diff, Prior Attempts, Contradiction Analysis sections added
+- `skills/sdd-propose/SKILL.md` — Supersedes section, Context section, Contradiction Resolution added
+- `skills/sdd-spec/SKILL.md` — Supersedes validation step added
+- `skills/sdd-tasks/SKILL.md` — Removal task generation from Supersedes section added
+- `skills/sdd-ff/SKILL.md` — Contradiction gate and proposal pre-population Step 0 added
+- `CLAUDE.md` — Unbreakable Rule 7 (context extraction before SDD handoff) added
+- `openspec/specs/sdd-explore-replacement-detection/spec.md` — new domain (created)
+- `openspec/specs/sdd-propose-supersedes-section/spec.md` — new domain (created)
+- `openspec/specs/sdd-tasks-removal-tasks/spec.md` — new domain (created)
+- `openspec/specs/sdd-phase-context-loading/spec.md` — sdd-spec supersedes validation appended
+- `openspec/specs/sdd-orchestration/spec.md` — sdd-ff contradiction gate appended
+- `openspec/specs/orchestrator-behavior/spec.md` — context extraction Rule 7 appended
+- `openspec/specs/index.yaml` — 3 new entries added
+
+**Decisions made**:
+- Exploration phase is the right place to detect branch diffs, prior attempts, and contradictions
+- CERTAIN contradictions are captured in exploration and flow to proposal; only UNCERTAIN ones need a user gate in sdd-ff
+- Supersedes section in proposal.md is the authoritative scope boundary for removal/replacement
+- Context extraction is inline CLAUDE.md logic (Rule 7); no new skill or artifact needed
+
+**Notes**: Change archived at `openspec/changes/archive/2026-03-19-feedback-sdd-cycle-context-gaps/`
+
+---
+
+## [2026-03-19] — feedback-sdd-cycle-context-gaps (proposals created)
+
+**Type**: Feedback session — SDD cycle improvement proposals
+**Agent**: Claude Sonnet 4.6 (orchestrator)
+
+**What was done**: Analyzed a real project session where the SDD cycle failed to implement a requested change correctly across multiple sessions. Identified 5 systemic gaps in the sdd-ff cycle and created proposals for each.
+
+**Proposals created**:
+- `openspec/changes/2026-03-19-feedback-sdd-cycle-context-gaps/proposal-1-explore-must-find-prior-implementations.md` — explore must scan branch diff for prior code to remove
+- `openspec/changes/2026-03-19-feedback-sdd-cycle-context-gaps/proposal-2-propose-must-enumerate-removals.md` — propose must have explicit `## Supersedes` section
+- `openspec/changes/2026-03-19-feedback-sdd-cycle-context-gaps/proposal-3-spec-must-not-protect-unconfirmed-priors.md` — spec must not invent preservation requirements
+- `openspec/changes/2026-03-19-feedback-sdd-cycle-context-gaps/proposal-5a-orchestrator-must-prepopulate-proposal-from-conversation.md` — orchestrator must pre-populate proposal.md from conversation context before launching sdd-ff
+- `openspec/changes/2026-03-19-feedback-sdd-cycle-context-gaps/proposal-5b-explore-must-detect-prior-attempts-and-contradictions.md` — explore must detect prior archive cycles + context contradictions; sdd-ff must implement hybrid gate (Option C) for UNCERTAIN contradictions
+
+**Root cause chain identified**:
+```
+explore no ve branch diff (P1)
+explore no ve ciclos anteriores (P5b)
+explore no detecta notas "provisional" (P5b)
+    → propose no lista removals (P2)
+    → propose no tiene contexto de conversación (P5a)
+        → spec inventa preservation requirements (P3)
+            → apply ignora removals y restricciones
+```
+
+**Decisions made**:
+- Hybrid gate (Option C) selected for contradiction handling: pause sdd-ff only when contradictions are UNCERTAIN; auto-proceed when all are SUPERSEDED or STILL_APPLIES
+- proposal-4 superseded by proposal-5b (consolidated)
+- Implementation order: 5b → 5a → 1 → 2 → 3
+
+**Notes**: Implementation to happen in a new session via `/sdd-ff 2026-03-19-feedback-sdd-cycle-context-gaps`.
+
+---
+
+## [2026-03-19] — sdd-archive-orphan-validation (ARCHIVED)
+
+**Type**: Enhancement / skill improvement
+**Agent**: Claude Sonnet 4.6 (sdd-archive sub-agent)
+
+**What was done**: Archived the `2026-03-19-sdd-archive-orphan-validation` SDD cycle. Added a completeness validation gate to `sdd-archive` Step 1 with CRITICAL (proposal.md, tasks.md) and WARNING (design.md, specs/) tiers. Master spec updated with 3 new requirements and 12 scenarios. All 7 tasks verified PASS, 13/13 scenarios COMPLIANT.
+
+**Modified files**:
+- `skills/sdd-archive/SKILL.md` — Step 1 Completeness Check block added; two new Rules entries
+- `openspec/specs/sdd-archive-execution/spec.md` — 3 requirements + 12 scenarios appended (attribution: sdd-archive-orphan-validation)
+- `openspec/changes/archive/2026-03-19-sdd-archive-orphan-validation/` — created (change archived)
+- `openspec/changes/archive/2026-03-19-sdd-archive-orphan-validation/CLOSURE.md` — created
+
+**Decisions made**:
+- Two-tier model: CRITICAL (hard block, no escape) for always-present artifacts; WARNING (option 2 acknowledgment) for ~86%-present artifacts
+- `exploration.md` and `prd.md` explicitly excluded from completeness check (optional by convention)
+- `Skipped phases:` field in CLOSURE.md is conditional — only written when user selects option 2
+
+---
+
+## [2026-03-19] — cleanup-orphan-changes (ARCHIVED)
+
+**Type**: Housekeeping / archive
+**Agent**: Claude Sonnet 4.6 (sdd-archive sub-agent)
+
+**What was done**: Archived the `2026-03-19-cleanup-orphan-changes` SDD cycle. Delta spec for `sdd-archive-execution` was already merged into the master spec during apply. CLOSURE.md written. All 8 tasks verified complete (PASS, no CRITICAL issues).
+
+**Modified files**:
+- `openspec/changes/archive/2026-03-19-2026-03-19-cleanup-orphan-changes/` — created (change archived)
+- `openspec/changes/archive/2026-03-19-2026-03-19-cleanup-orphan-changes/CLOSURE.md` — created
+
+---
+
+## [2026-03-19] — cleanup-orphan-changes (APPLIED)
+
+**Type**: Housekeeping / orphan disposition + spec update + ADR
+**Agent**: Claude Sonnet 4.6 (sdd-apply sub-agent)
+
+**What was done**: Disposed of two orphan change directories and formalized the orphan convention in the master spec and a new ADR.
+
+1. **Archived `spec-hygiene/`** → `openspec/changes/archive/2026-03-14-spec-hygiene/` — moved `exploration.md` and wrote `CLOSURE.md` (informational audit, no action required, archived without full SDD cycle).
+2. **Deleted `2026-03-14-specs-sqlite-store/`** — removed from working tree; content preserved in git at commit `6a9b1d4`.
+3. **Appended `## Orphan Precondition` section** to `openspec/specs/sdd-archive-execution/spec.md` — defines orphan classification (4 criteria + exclusion list), three disposal options (revive/archive/delete), and the non-blocking Step 0 gate in `sdd-archive`.
+4. **Created ADR 039** at `docs/adr/039-orphan-change-disposition-convention.md` — documents the 7-day threshold, three disposal options, and MUST_RESOLVE gate decision.
+
+**Modified files**:
+- `openspec/changes/archive/2026-03-14-spec-hygiene/exploration.md` — moved from `spec-hygiene/`
+- `openspec/changes/archive/2026-03-14-spec-hygiene/CLOSURE.md` — created
+- `openspec/changes/spec-hygiene/` — removed (archived)
+- `openspec/changes/2026-03-14-specs-sqlite-store/` — deleted (content preserved in git at `6a9b1d4`)
+- `openspec/specs/sdd-archive-execution/spec.md` — `## Orphan Precondition` section appended
+- `docs/adr/039-orphan-change-disposition-convention.md` — created
+
+**Decisions made**:
+- `spec-hygiene/` archived (not deleted) because its `exploration.md` contains a full spec-corpus audit with findings worth preserving
+- `2026-03-14-specs-sqlite-store/` deleted (not archived) because its content is superseded by ADR 034; archiving would create a misleading entry
+- Orphan age threshold set to 7 days — aligns with the existing `ai-context/` staleness signal in `sdd-design` Step 0
+
+---
+
+## [2026-03-19] — sdd-archive-orphan-validation (APPLIED)
+
+**Type**: Feature / additive validation step
+**Agent**: Claude Sonnet 4.6 (sdd-apply sub-agent)
+
+**What was done**: Added a two-tier completeness validation block at the top of `sdd-archive` Step 1, before the existing `verify-report.md` check. CRITICAL artifacts (`proposal.md`, `tasks.md`) block with no proceed option; WARNING artifacts (`design.md`, non-empty `specs/`) present a two-option acknowledgment prompt. When option 2 is selected, `CLOSURE.md` records a `Skipped phases:` field. Updated the `sdd-archive-execution` master spec with all new requirements and scenarios. Deployed via `install.sh`.
+
+**Modified files**:
+- `skills/sdd-archive/SKILL.md` — completeness check block inserted at top of Step 1; CLOSURE.md template updated with conditional `Skipped phases:` field; two new Rules entries added
+- `openspec/specs/sdd-archive-execution/spec.md` — three new requirement sections and updated Rules appended (completeness validation, CLOSURE.md skipped phases, exploration.md/prd.md exclusion)
+- `~/.claude/skills/sdd-archive/SKILL.md` — deployed (install.sh)
+
+**Decisions made**:
+- CRITICAL/WARNING two-tier model reuses MUST_RESOLVE/ADVISORY mental model from sdd-tasks — no new patterns introduced
+- `exploration.md` and `prd.md` explicitly excluded from all checks (optional by convention)
+- `Skipped phases:` field in CLOSURE.md is informational only; omitted on happy-path archives
+- Completeness check is purely terminal — only in sdd-archive, never in earlier phase skills
+
+---
+
+## [2026-03-18] — context-handoff-between-sessions (APPLIED)
+
+**Type**: Feature / additive rule + skill sub-step
+**Agent**: Claude Sonnet 4.6 (sdd-apply sub-agent)
+
+**What was done**: Implemented the two-part cross-session context handoff mechanism: (1) added Unbreakable Rule 6 to `CLAUDE.md` requiring the orchestrator to seed a `proposal.md` before recommending any cross-session `/sdd-ff`; (2) added a non-blocking "Handoff context preload" sub-step to `sdd-explore/SKILL.md` Step 0 that reads a pre-seeded `proposal.md` and surfaces it as a `## Handoff Context` section in `exploration.md`. Deployed via `install.sh`.
+
+**Modified files**:
+- `CLAUDE.md` — Rule 6 "Cross-session ff handoff" added after Rule 5 (Feedback persistence)
+- `skills/sdd-explore/SKILL.md` — Handoff context preload sub-step added after Spec context preload sub-step in Step 0
+- `~/.claude/CLAUDE.md` — deployed (install.sh)
+- `~/.claude/skills/sdd-explore/SKILL.md` — deployed (install.sh)
+
+**Decisions made**:
+- Handoff file reuses existing `proposal.md` path — no new artifact type introduced
+- sdd-explore is the consumption point (runs before any other phase; enriches exploration.md which propose consumes)
+- Sub-step is non-blocking: absent proposal.md → INFO note only, never blocked/failed
+- Rule 6 explicitly excludes same-session ff cycles to avoid noise
+
+---
+
 ## [2026-03-18] — specs-opus-routing (ARCHIVED)
 
 **Type**: SDD archive phase

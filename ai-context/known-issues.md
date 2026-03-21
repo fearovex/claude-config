@@ -107,7 +107,7 @@ Skills have no automated tests. The only validation is running `/project-audit` 
 
 `skills/django-drf/SKILL.md` uses domain-specific section headings (`## ViewSet Pattern`, `## Serializer Patterns`) that satisfy neither the standard contract (`## Patterns`, `## Examples`) nor the accepted variant contract (`## Critical Patterns`, `## Code Examples`). This causes a MEDIUM D4b finding in `/project-audit`.
 
-**Root cause**: The skill was imported from the Gentleman-Skills corpus with domain-specific headings before the format contract was codified. The headings are semantically meaningful but do not match the regex used by D4b.
+**Root cause**: The skill was imported from an external source with domain-specific headings before the format contract was codified. The headings are semantically meaningful but do not match the regex used by D4b.
 
 **Impact**: `/project-audit` will emit 1 MEDIUM D4b finding for `django-drf` even after the `fix-format-contract` change.
 

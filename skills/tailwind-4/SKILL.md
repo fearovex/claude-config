@@ -5,7 +5,6 @@ description: >
   Trigger: When styling with Tailwind, using className, conditional styles, or dark mode.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

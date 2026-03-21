@@ -5,7 +5,6 @@ description: >
   Trigger: When building Next.js apps, working with app router, server/client components, or API routes.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

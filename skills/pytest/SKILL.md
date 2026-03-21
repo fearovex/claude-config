@@ -5,7 +5,6 @@ description: >
   Trigger: When writing Python tests, using pytest, mocking dependencies, or testing async code.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 format: reference
 ---

@@ -88,3 +88,7 @@ ADR files are append-only by convention: once accepted, the original Context, De
 | [034](034-specs-search-optimization-architecture.md) | Spec Index — Flat YAML as Primary Storage with SQLite/FTS5 as Migration Path | Proposed | 2026-03-14 |
 | [035](035-specs-verify-config-pattern.md) | Verify Section Pattern — Grouped verify: Top-Level Key in openspec/config.yaml | Proposed | 2026-03-17 |
 | [036](036-opus-routing-convention.md) | Model Routing Convention — Three-Level Priority Chain for Orchestrator Task Calls | Proposed | 2026-03-18 |
+| [037](037-context-handoff-between-sessions-convention.md) | Cross-Session FF Handoff Convention — Orchestrator Seeds proposal.md Before Deferring to New Session | Proposed | 2026-03-18 |
+| [038](038-sdd-archive-orphan-validation-convention.md) | SDD Archive Orphan Validation Convention — Two-Tier Severity Gate Before Archiving | Proposed | 2026-03-19 |
+| [039](039-orphan-change-disposition-convention.md) | Orphan Change Disposition Convention — 7-day threshold, three disposal options, and MUST_RESOLVE gate in sdd-archive | Proposed | 2026-03-19 |
+| [040](040-context-contradiction-handling-convention.md) | Context Contradiction Handling Convention — Unified artifact contracts for replacement changes, prior-attempt discovery, and contradiction detection | Proposed | 2026-03-19 |

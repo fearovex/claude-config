@@ -323,8 +323,8 @@ Remaining phases:
   → /sdd-verify [inferred-slug]  — verify against specs
   → /sdd-archive [inferred-slug] — archive when done (auto-updates ai-context/ memory)
 
-Ready to implement? Run:
-  /sdd-apply [inferred-slug]
+Continue with implementation? Reply **yes** to proceed or **no** to pause.
+_(Manual: `/sdd-apply [inferred-slug]`)_
 ```
 
 Do NOT invoke `/sdd-apply` automatically. The user must trigger it explicitly.

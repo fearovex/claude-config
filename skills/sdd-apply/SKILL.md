@@ -579,8 +579,8 @@ Before marking any code task `[x]`, I evaluate each criterion below. For each it
 
 > **Implementation complete — next step:** When all phases are done, the only permitted next-step suggestion is:
 > ```
-> Implementation complete. Next step:
->   /sdd-verify <change-name>  — verify against specs before committing
+> Continue with verification? Reply **yes** to proceed or **no** to pause.
+> _(Manual: `/sdd-verify <change-name>`)_
 > ```
 > The summary MUST NOT suggest `/commit` or `git commit` at any phase.
 

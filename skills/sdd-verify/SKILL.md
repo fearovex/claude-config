@@ -547,6 +547,9 @@ Verifier: sdd-verify
 }
 ```
 
+Continue with archive? Reply **yes** to proceed or **no** to pause.
+_(Manual: `/sdd-archive <slug>`)_
+
 ---
 
 ## Rules

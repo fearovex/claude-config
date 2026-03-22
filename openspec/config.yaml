@@ -267,10 +267,10 @@ testing:
 #   2. Per-phase: model_routing.phases map     (overrides named phases only)
 # Resolution order: CLI flag > per-phase config > claude-sonnet-4-5 default
 #
-# model_routing:
-#   phases:
-#     explore: claude-opus-4-5    # sdd-explore phase
-#     propose: claude-sonnet-4-5  # sdd-propose phase
-#     spec:    claude-sonnet-4-5  # sdd-spec phase
-#     design:  claude-opus-4-5    # sdd-design phase (recommended: Opus for architectural reasoning)
-#     tasks:   claude-sonnet-4-5  # sdd-tasks phase
+model_routing:
+  phases:
+    explore: claude-sonnet-4-5  # sdd-explore phase — file reading, mechanical
+    propose: claude-opus-4-5    # sdd-propose phase — conversation synthesis, high intelligence
+    spec:    claude-sonnet-4-5  # sdd-spec phase — structured REQ translation
+    design:  claude-opus-4-5    # sdd-design phase — architectural reasoning
+    tasks:   claude-sonnet-4-5  # sdd-tasks phase — mechanical breakdown

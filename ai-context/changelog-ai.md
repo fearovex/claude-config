@@ -4,6 +4,26 @@
 
 ---
 
+## [2026-03-26] — ai-context-maintenance-skill (applied)
+
+**Type**: SDD cycle — apply + archive complete
+**What was done**: Created the `memory-maintain` skill — a new procedural skill in the `memory-*` family that performs periodic housekeeping on the `ai-context/` memory layer. The skill implements a 7-step process: load project context, scan changelog for overflow, scan known-issues for resolved items, scan ai-context/ for index generation, detect CLAUDE.md Active Constraints gap, present dry-run preview + confirmation gate, execute writes, produce maintenance report. Key behaviors: keeps last 30 changelog entries (moves older ones to `changelog-ai-archive.md`), moves `(FIXED)`/`(RESOLVED)` items to `known-issues-archive.md`, always regenerates `ai-context/index.md` (idempotent). CLAUDE.md registered with command and Skills Registry entry. Delta spec for 8 new requirements merged into `openspec/specs/memory-management/spec.md`.
+**Modified files**:
+- `skills/memory-maintain/SKILL.md` — new procedural skill (7-step process, dry-run-first pattern)
+- `CLAUDE.md` — added `/memory-maintain` command + Skills Registry entry under Meta-tools
+- `openspec/specs/index.yaml` — added keywords `maintain`, `maintenance`, `archive`, `housekeeping` to `memory-management` domain
+- `openspec/specs/memory-management/spec.md` — 8 new requirements appended (delta spec merge)
+- `openspec/changes/archive/2026-03-26-ai-context-maintenance-skill/` — change archived with CLOSURE.md
+**Decisions made**:
+- Archive threshold is count-based (30 entries), not date-based — simpler and predictable
+- Index.md always regenerated (idempotent) — eliminates stale-index drift risk
+- CLAUDE.md gap detection is advisory INFO only — skill never writes to CLAUDE.md
+- Dry-run-first pattern mirrors sdd-spec-gc and project-claude-organizer — single confirmation gate
+- Entry boundary heuristic: `ENTRY_BOUNDARY_REGEX = /^##\s+\[/` matches actual changelog format
+- Known-issues resolution: `RESOLVED_MARKER_REGEX = /\(FIXED\)|\(RESOLVED\)/i` on H2 headings only
+
+---
+
 ## [2026-03-22] — standardize-phase-completion-messages (applied)
 
 **Type**: SDD cycle — apply complete

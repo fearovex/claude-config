@@ -305,7 +305,7 @@ Skill changes in plan mode: `openspec/changes/YYYY-MM-DD-<slug>/` with `proposal
 
 ## Commands
 
-`/project-setup` — deploy SDD + memory structure | `/project-onboard` — diagnose state, recommend first command | `/project-audit` — audit config, generate audit-report.md | `/project-analyze` — deep codebase analysis, update ai-context/ | `/project-fix` — apply corrections from audit-report.md | `/project-update` — sync CLAUDE.md with global catalog | `/skill-create <name>` — create new skill | `/skill-add <name>` — add global skill to project | `/memory-init` — generate ai-context/ from scratch | `/memory-update` — record session changes to ai-context/ | `/codebase-teach` — extract domain knowledge to ai-context/features/ | `/project-claude-organizer` — reorganize .claude/ folder | `/orchestrator-status` — show orchestrator state
+`/project-setup` — deploy SDD + memory structure | `/project-onboard` — diagnose state, recommend first command | `/project-audit` — audit config, generate audit-report.md | `/project-analyze` — deep codebase analysis, update ai-context/ | `/project-fix` — apply corrections from audit-report.md | `/project-update` — sync CLAUDE.md with global catalog | `/skill-create <name>` — create new skill | `/skill-add <name>` — add global skill to project | `/memory-init` — generate ai-context/ from scratch | `/memory-update` — record session changes to ai-context/ | `/memory-maintain` — perform ai-context/ housekeeping (archive old changelog entries, separate resolved known-issues, regenerate index) | `/codebase-teach` — extract domain knowledge to ai-context/features/ | `/project-claude-organizer` — reorganize .claude/ folder | `/orchestrator-status` — show orchestrator state
 
 `/sdd-new <change>` — full SDD cycle | `/sdd-ff <change>` — fast-forward cycle | `/sdd-explore <topic>` — investigate without changing | `/sdd-propose` — create proposal | `/sdd-spec` — write specs | `/sdd-design` — create design | `/sdd-tasks` — break down tasks | `/sdd-apply` — implement | `/sdd-verify` — verify against specs | `/sdd-archive` — archive completed change | `/sdd-status` — view active cycle
 
@@ -380,6 +380,7 @@ Read ai-context/ files at session start. Update with `/memory-update` after sign
 - `~/.claude/skills/skill-add/SKILL.md`
 - `~/.claude/skills/memory-init/SKILL.md`
 - `~/.claude/skills/memory-update/SKILL.md`
+- `~/.claude/skills/memory-maintain/SKILL.md`
 - `~/.claude/skills/codebase-teach/SKILL.md`
 
 ### Technology (global catalog)

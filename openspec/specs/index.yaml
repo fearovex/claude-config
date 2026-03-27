@@ -96,7 +96,7 @@ domains:
 
   - domain: memory-management
     summary: ai-context/ memory layer — which files exist, their content, and update responsibilities
-    keywords: [memory, ai-context, memory-update, memory-init, stack, architecture, conventions]
+    keywords: [memory, ai-context, memory-update, memory-init, stack, architecture, conventions, maintain, maintenance, archive, housekeeping]
     related: [feature-domain-knowledge, sdd-context-loading, sdd-phase-context-loading]
 
   - domain: openspec-config-documentation

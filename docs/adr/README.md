@@ -95,3 +95,4 @@ ADR files are append-only by convention: once accepted, the original Context, De
 | [041](041-slim-orchestrator-context.md) | Slim Orchestrator Context — Inline-vs-Skill Boundary and Budget Governance | Accepted | 2026-03-22 |
 | [042](042-orchestrator-preflight-advisory-gates.md) | Orchestrator Pre-flight Advisory Gates — Inline Two-Gate Architecture | Proposed | 2026-03-22 |
 | [043](043-context-aware-session-handoff-convention.md) | Context-Aware Session Handoff Convention — Replaces Opt-In Rule 6 Trigger with Heuristic Detection | Proposed | 2026-03-22 |
+| [044](044-ai-context-archive-file-convention.md) | AI Context Archive File Convention — flat `-archive.md` files for changelog and known-issues backlog cleanup | Proposed | 2026-03-26 |

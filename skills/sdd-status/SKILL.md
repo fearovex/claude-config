@@ -1,36 +1,45 @@
 ---
 name: sdd-status
 description: >
-  Shows the status of all active SDD changes by inspecting openspec/changes/ on disk.
-  Trigger: /sdd-status, show active changes, what changes are in progress, SDD status.
+  Shows the status of all active SDD changes and orchestrator state. Supports engram and openspec modes.
+  Trigger: /sdd-status, show active changes, what changes are in progress, SDD status, orchestrator status.
 format: procedural
 model: haiku
 ---
 
 # sdd-status
 
-> Shows the status of all active SDD changes by inspecting openspec/changes/ on disk.
+> Shows the status of all active SDD changes and orchestrator configuration. Supports engram and openspec modes.
 
-**Triggers**: `/sdd-status`, SDD status, active changes, show open changes, what changes are in progress
+**Triggers**: `/sdd-status`, SDD status, active changes, show open changes, what changes are in progress, orchestrator status
 
 ---
 
 ## Process
 
-### Step 1 — Locate openspec/changes/
+### Step 0 — Detect persistence mode
 
-Check if `openspec/changes/` exists in the current project.
+Follow `skills/_shared/persistence-contract.md` **Mode Detection for Standalone Skills**:
+1. If `openspec/config.yaml` has `artifact_store.mode` → use that value
+2. If absent: check Engram MCP reachability → if reachable: `engram`, else `none`
 
-If it does NOT exist:
+### Step 1 — Locate active changes
 
+**engram mode**: Search engram for active SDD state artifacts:
+```
+mem_search(query: "sdd/", project: "{project}") → list all SDD-related observations
+```
+Filter for artifacts that do NOT have an `archive-report` topic_key (those are completed).
+
+**openspec / hybrid mode**: Check if `openspec/changes/` exists. If absent and mode is openspec:
 ```
 No openspec/changes/ directory found.
-
-This project has no SDD changes yet.
 To start a new change: /sdd-explore <topic> or /sdd-propose <change-name>
 ```
 
-Stop here.
+**none mode**: Report "No persistence configured — cannot show change status."
+
+Stop here if no changes found in any mode.
 
 ---
 
@@ -136,9 +145,27 @@ Rules for this format:
 
 ---
 
+### Step 6 — Orchestrator state (absorbed from orchestrator-status)
+
+Read the project's `CLAUDE.md` and report:
+- Persistence mode: engram / openspec / hybrid / none
+- Skills registry count (from `## Skills` section)
+- Configuration source path
+
+Include this as a header section BEFORE the active changes output:
+
+```
+● Orchestrator
+  Mode: [engram|openspec|hybrid|none]
+  Skills: [N] registered
+  Config: [path to CLAUDE.md]
+```
+
+---
+
 ## Rules
 
-- Filesystem-only: I only inspect files and directories — no git history, no git status, no network
+- Read-only: I only inspect files, directories, and engram — no mutations
 - I never modify any files in this phase
 - If `openspec/changes/` does not exist, I report gracefully and suggest `/sdd-explore <topic>` or `/sdd-propose <change-name>`
 - Archived changes (under `archive/`) are counted but not listed in the active table

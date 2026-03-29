@@ -116,7 +116,7 @@ ERROR: Skill [name] not found in .claude/skills/ or ~/.claude/skills/.
 
 ## Adding a Project-Local Skill Override
 
-Use `/skill-add <name>` to copy a global skill into `.claude/skills/<name>/SKILL.md`. The copied file becomes the project-local version and will be resolved first from that point on.
+Use `/skill-create <name>` to copy a global skill into `.claude/skills/<name>/SKILL.md`. The copied file becomes the project-local version and will be resolved first from that point on.
 
 Alternatively, create `.claude/skills/<name>/SKILL.md` manually for entirely custom project skills.
 

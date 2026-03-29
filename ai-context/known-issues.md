@@ -103,27 +103,3 @@ Skills have no automated tests. The only validation is running `/project-audit` 
 
 ---
 
-## django-drf skill uses custom non-standard section headings
-
-`skills/django-drf/SKILL.md` uses domain-specific section headings (`## ViewSet Pattern`, `## Serializer Patterns`) that satisfy neither the standard contract (`## Patterns`, `## Examples`) nor the accepted variant contract (`## Critical Patterns`, `## Code Examples`). This causes a MEDIUM D4b finding in `/project-audit`.
-
-**Root cause**: The skill was imported from an external source with domain-specific headings before the format contract was codified. The headings are semantically meaningful but do not match the regex used by D4b.
-
-**Impact**: `/project-audit` will emit 1 MEDIUM D4b finding for `django-drf` even after the `fix-format-contract` change.
-
-**Planned fix**: Create a separate SDD change to either rename the headings to standard names or annotate the skill as a known exception in the audit logic.
-
----
-
-## ai-context/ marker-awareness gap between skills
-
-`/project-analyze` writes `[auto-updated]` markers (`<!-- [auto-updated]: <id> -- last run: YYYY-MM-DD -->` ... `<!-- [/auto-updated] -->`) in `ai-context/stack.md`, `ai-context/architecture.md`, and `ai-context/conventions.md`. However, `/memory-update` and `/project-update` are not aware of these markers — they perform incremental full-file updates and could theoretically write content that overlaps with or corrupts marker boundaries.
-
-**Risk level**: Theoretical — not observed in practice. The three skills are typically run in different contexts (analyze for codebase scanning, memory-update for session recording, project-update for config sync).
-
-**When it does NOT matter**:
-- Only one of the three skills is used in a given session
-- `/project-analyze` is run last, so its markers are freshly written
-- The user reviews ai-context/ files after running multiple skills
-
-**Deferred solution**: A per-section ownership model (Approach B from the audit-and-analyze-capabilities exploration) would let each skill declare which sections it owns. This is deferred until marker conflicts are observed in practice.

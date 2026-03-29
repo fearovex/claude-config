@@ -17,7 +17,7 @@ A feedback session is any session where the primary input from the user is:
 - Improvement ideas ("it would be better if W")
 - Post-mortem notes ("what went wrong was…")
 
-It is **not** a feedback session when the user explicitly opens with an implementation command (`/sdd-ff`, `/sdd-new`, etc.) — even if they also mention improvements.
+It is **not** a feedback session when the user explicitly opens with an implementation command (`/sdd-explore`, `/sdd-propose`, etc.) — even if they also mention improvements.
 
 ---
 
@@ -28,7 +28,7 @@ It is **not** a feedback session when the user explicitly opens with an implemen
    ```
    openspec/changes/YYYY-MM-DD-<slug>/proposal.md
    ```
-3. Do NOT start any SDD phase (`/sdd-ff`, `/sdd-spec`, `/sdd-design`, `/sdd-tasks`, `/sdd-apply`).
+3. Do NOT start any SDD phase (`/sdd-explore`, `/sdd-spec`, `/sdd-design`, `/sdd-tasks`, `/sdd-apply`).
 4. At the end of the session, list all proposals created with their paths.
 
 ---
@@ -54,7 +54,7 @@ After the feedback session ends:
 
 1. Open a **new session** in the project.
 2. Reference the proposal: `"Implement openspec/changes/YYYY-MM-DD-<slug>/proposal.md"`.
-3. Run `/sdd-ff <slug>` or `/sdd-new <slug>` — the orchestrator reads the proposal and starts the SDD cycle.
+3. Run `/sdd-propose <slug>` (skip exploration if proposal is already written) or `/sdd-explore <slug>` — the orchestrator reads the proposal and starts the SDD cycle.
 
 ---
 
@@ -67,7 +67,7 @@ openspec/
     │   └── proposal.md          ← created in feedback session
     ├── 2026-03-10-add-audit-badge/
     │   └── proposal.md          ← created in feedback session
-    └── 2026-03-10-fix-skill-trigger-wording/   ← after /sdd-ff in new session
+    └── 2026-03-10-fix-skill-trigger-wording/   ← after /sdd-propose in new session
         ├── proposal.md
         ├── specs/
         ├── design.md
@@ -159,6 +159,6 @@ Feedback session complete. Proposals created:
   openspec/changes/2026-03-10-design-adr-detection/proposal.md
 
 To implement, open a new session and run:
-  /sdd-ff spec-scenario-traceability
-  /sdd-ff design-adr-detection
+  /sdd-propose spec-scenario-traceability
+  /sdd-propose design-adr-detection
 ```

@@ -15,7 +15,7 @@ Two components ship inside this repo:
 
 1. **Skill catalog** (`skills/`) — one directory per skill, each with a `SKILL.md` entry point.
    Skills cover SDD phases (explore → propose → spec → design → tasks → apply → verify → archive),
-   meta-tools (audit, fix, setup), and technology stacks (React, TypeScript, Django, Java, etc.).
+   meta-tools (audit, fix, setup), and technology stacks (React, TypeScript, etc.).
 
 2. **Memory layer** (`ai-context/`) — five Markdown files that persist project knowledge between
    Claude Code sessions: stack, architecture, conventions, known issues, and a changelog.
@@ -64,7 +64,7 @@ orchestrator configuration are immediately available.
 Running `install.sh` deploys the following to `~/.claude/`:
 
 - `CLAUDE.md` — the orchestrator instructions Claude reads at every session start
-- `skills/` — the full skill catalog (40+ skills)
+- `skills/` — the full skill catalog (~33 skills)
 - `hooks/` — Claude Code event hooks
 - `settings.json` — MCP server registrations (GitHub, filesystem)
 - `openspec/` — SDD artifact storage for this repo itself
@@ -75,12 +75,10 @@ Running `install.sh` deploys the following to `~/.claude/`:
 | Category | Examples |
 |----------|---------|
 | SDD phases | `sdd-explore`, `sdd-propose`, `sdd-spec`, `sdd-design`, `sdd-tasks`, `sdd-apply`, `sdd-verify`, `sdd-archive` |
-| Meta-tools | `project-setup`, `project-audit`, `project-fix`, `project-update`, `project-onboard` |
-| Memory | `memory-init`, `memory-update`, `codebase-teach` |
-| Frontend | `react-19`, `nextjs-15`, `typescript`, `zustand-5`, `zod-4`, `tailwind-4`, `ai-sdk-5` |
-| Backend | `django-drf`, `spring-boot-3`, `hexagonal-architecture-java`, `java-21` |
-| Testing | `playwright`, `pytest` |
-| Tooling | `github-pr`, `jira-task`, `jira-epic`, `smart-commit` |
+| Meta-tools | `project-setup`, `project-audit`, `project-fix`, `project-onboard` |
+| Memory | `memory-manage`, `codebase-teach` |
+| Frontend | `react-19`, `nextjs-15`, `typescript`, `zustand-5`, `tailwind-4` |
+| Tooling | `smart-commit`, `config-export` |
 | Design principles | `solid-ddd` (loaded automatically by `sdd-apply` on non-doc changes) |
 
 ### Memory layer
@@ -95,17 +93,16 @@ The `ai-context/` directory holds five files Claude reads at the start of each s
 | `known-issues.md` | Known bugs, gotchas, current limitations |
 | `changelog-ai.md` | Log of AI-authored changes |
 
-Run `/memory-init` to generate these files from scratch. Run `/memory-update` at the end of
-each session to capture decisions made during the session.
+Run `/memory-manage` to generate these files from scratch or update them at the end of each session.
 
 ### Intent classification overview
 
 When you type a free-form message, Claude classifies your intent before responding:
 
-- **Change request** (fix, add, implement, create…) → recommends `/sdd-ff <slug>`
+- **Change request** (fix, add, implement, create…) → recommends `/sdd-explore` + `/sdd-propose <slug>`
 - **Exploration** (review, analyze, investigate…) → auto-launches `sdd-explore`
 - **Question** (what is, how does, explain…) → answers directly
-- **Slash command** (`/sdd-ff`, `/project-audit`…) → executes immediately
+- **Slash command** (`/sdd-explore`, `/project-audit`…) → executes immediately
 
 This routing ensures implementation work always follows the SDD cycle rather than being
 written ad hoc.
@@ -174,33 +171,31 @@ intent_classification:
 A conflict occurs when a project's Claude config drifts from the expected structure: a skill
 entry is missing, a SKILL.md lacks a required section, or a format field is invalid.
 
-The three-step resolution workflow:
+The two-step resolution workflow:
 
 ```
 Step 1: /project-audit   →  audit-report.md  (find problems)
 Step 2: /project-fix     →  applies fixes     (correct problems)
-Step 3: /project-update  →  sync CLAUDE.md    (update registry)
 ```
 
 ### Realistic scenario
 
-You add a new skill (`jira-epic`) to the global catalog but forget to register it in the
+You add a new skill (`go-testing`) to the global catalog but forget to register it in the
 project's `CLAUDE.md`. Running `/project-audit` produces:
 
 ```
 ## Dimension 6 — Skills Registry
 Status: FAIL
-Finding: Skill `jira-epic` is present in ~/.claude/skills/ but not listed in
+Finding: Skill `go-testing` is present in ~/.claude/skills/ but not listed in
          the project's CLAUDE.md Skills Registry section.
-Fix: Add entry under "### Tooling / Process":
-     - `~/.claude/skills/jira-epic/SKILL.md` — Jira epic authoring
+Fix: Add entry under "### Testing":
+     - `~/.claude/skills/go-testing/SKILL.md` — Go testing patterns
 ```
 
 **Resolution:**
 
 1. Run `/project-fix` — it reads `audit-report.md` and applies the correction automatically.
-2. Run `/project-update` — it syncs the project `CLAUDE.md` with any other global changes.
-3. Run `bash install.sh` to deploy the updated config to `~/.claude/`.
+2. Run `bash install.sh` to deploy the updated config to `~/.claude/`.
 
 If the audit reports a format violation (missing `## Rules` section in a procedural SKILL.md),
 `/project-fix` scaffolds the missing section with a placeholder and logs a `TODO` for you to fill in.
@@ -217,20 +212,14 @@ If the audit reports a format violation (missing `## Rules` section in a procedu
 | `/project-onboard` | Detect onboarding case (1–6) and recommend first command |
 | `/project-audit` | Audit Claude config across 10 dimensions — generates `audit-report.md` |
 | `/project-fix` | Apply all corrections from `audit-report.md` |
-| `/project-update` | Update project `CLAUDE.md` with global catalog changes |
-| `/project-analyze` | Deep codebase re-scan — updates `ai-context/` `[auto-updated]` sections |
-| `/skill-create <name>` | Scaffold a new skill directory with a compliant `SKILL.md` |
-| `/skill-add <name>` | Add a global catalog skill to the project `CLAUDE.md` registry |
-| `/memory-init` | Generate all `ai-context/` files from scratch |
-| `/memory-update` | Record session decisions into `ai-context/` |
+| `/skill-create <name>` | Scaffold a new skill directory or register an existing global skill |
+| `/memory-manage` | Initialize, update, or maintain all `ai-context/` files |
 | `/codebase-teach` | Extract domain knowledge into `ai-context/features/` files |
 
 ### SDD phases
 
 | Command | What it does |
 |---------|-------------|
-| `/sdd-ff <change>` | Fast-forward: propose → spec + design → tasks in one shot |
-| `/sdd-new <change>` | Full SDD cycle with optional explore and confirmation gates |
 | `/sdd-explore <topic>` | Investigate without committing to any change |
 | `/sdd-propose <change>` | Create a proposal document |
 | `/sdd-spec <change>` | Write delta specifications (WHAT the change must do) |
@@ -253,13 +242,13 @@ See [ORCHESTRATION.md](./ORCHESTRATION.md) for the full phase DAG and orchestrat
 - [ ] Run `cd ~/agent-config && bash install.sh`
 - [ ] Open any project in Claude Code and confirm skills are available (type `/sdd-status`)
 - [ ] Set `GITHUB_TOKEN` environment variable if you use the GitHub MCP server
-- [ ] (Optional) Run `/memory-init` in each project to generate `ai-context/` files
+- [ ] (Optional) Run `/memory-manage` in each project to generate `ai-context/` files
 
 ### First SDD cycle
 
 - [ ] Open a Claude Code session in your project
-- [ ] Describe the change you want and confirm Claude recommends `/sdd-ff`
-- [ ] Run `/sdd-ff <inferred-slug>` and wait for the full plan (explore → propose → spec → design → tasks)
+- [ ] Run `/sdd-explore <topic>` to investigate the codebase area
+- [ ] Run `/sdd-propose <slug>` to create a proposal, then proceed with spec + design + tasks
 - [ ] Review the artifacts in `openspec/changes/<slug>/`
 - [ ] Approve and run `/sdd-apply <slug>`
 - [ ] Run `bash install.sh` if the change modifies skills or CLAUDE.md

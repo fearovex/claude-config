@@ -29,7 +29,7 @@ The Claude Code SDD system uses a **hub-and-spoke orchestrator model**:
 ## Phase DAG
 
 ```
-explore (optional, mandatory in sdd-ff and sdd-new)
+explore (optional but recommended)
       │
       ▼
   propose
@@ -167,11 +167,7 @@ After a `blocked` or `failed`, the user must resolve the issue and re-trigger th
 
 | Orchestrator | Gate |
 |---|---|
-| `sdd-new` | After propose (Y/N to continue to spec+design); after spec+design (Y/N to continue to tasks) |
-| `sdd-ff` | After tasks (asks before apply, but does NOT block) |
 | `sdd-archive` | Always — archive is irreversible |
-
-`sdd-ff` has no mid-cycle gates — it runs explore → propose → spec+design → tasks automatically, then pauses before apply.
 
 ---
 
@@ -188,7 +184,7 @@ The system uses **openspec** (filesystem) as its persistence layer:
 | Feature domain knowledge | `ai-context/features/<domain>.md` |
 | ADRs | `docs/adr/<NNN>-<slug>.md` |
 
-All files are versioned in git. There is no runtime memory layer beyond the filesystem.
+All files are versioned in git. The primary persistence layer is the filesystem (openspec/). Engram provides an additional persistent memory layer across sessions when available — engram is the default for SDD artifact persistence, with openspec as the fallback.
 
 ---
 
@@ -200,7 +196,7 @@ To add a new SDD phase (e.g., `sdd-review`):
 2. Add it to the phase DAG comment in `CLAUDE.md`
 3. Register it in `agents.md`
 4. Update `openspec/agent-execution-contract.md` if it introduces new return fields
-5. Optionally update `sdd-ff` or `sdd-new` to include it in the orchestrated cycle
+5. Optionally update the orchestrator instructions in `CLAUDE.md` to include it in the coordinated cycle
 
 ---
 

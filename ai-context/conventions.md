@@ -106,27 +106,6 @@ See: `openspec/specs/orchestrator-behavior/spec.md` for the full requirement spe
 
 ---
 
-### Orchestrator skills
-
-Some skills are **orchestrators**: they use the Task tool directly inside the SKILL.md to delegate work to sub-agents. This is the correct pattern for skills that coordinate multiple SDD phases.
-
-| Skill | Type | Uses Task tool |
-|-------|------|---------------|
-| `sdd-ff` | Orchestrator | Yes — launches propose, spec+design (parallel), tasks sub-agents |
-| `sdd-new` | Orchestrator | Yes — same as sdd-ff, plus optional explore + confirmation gates |
-| All other skills | Executor | No — each skill does its own work directly |
-
-**When to use Task tool delegation inside a SKILL.md:**
-- The skill coordinates multiple independent SDD phases
-- Each phase requires a fresh context (long output, separate concern)
-- The skill is an entry point that users invoke directly (e.g. `/sdd-ff`)
-
-**When NOT to use Task tool inside a SKILL.md:**
-- The skill does its own focused work (reading files, writing output, inspecting filesystem)
-- Adding delegation would create unnecessary indirection for a single-step task
-
-Orchestrator skills (sdd-ff, sdd-new) are first-class CLI entry points that replace the ad-hoc CLAUDE.md orchestration pattern. They must be self-sufficient SKILL.md files — they cannot rely on CLAUDE.md being read at runtime.
-
 ---
 
 ## Git conventions
@@ -141,7 +120,7 @@ Orchestrator skills (sdd-ff, sdd-new) are first-class CLI entry points that repl
 
 **Minimum for any skill change:**
 ```
-/sdd-ff <change-name>   →   user approves   →   /sdd-apply   →   install.sh   →   git commit
+/sdd-explore + /sdd-propose <change-name>   →   user approves   →   /sdd-apply   →   install.sh   →   git commit
 ```
 
 **Required for breaking changes to orchestrator or SDD phase skills:**
@@ -189,7 +168,7 @@ This is the ONLY directory that flows `~/.claude/ → repo/`.
 
 Sample: 20 files across skills/, ai-context/
 Method: auto-detected (SKILL.md files from SDD, meta-tool, and tech skill categories + ai-context/ memory files)
-Directories sampled: skills/sdd-ff, skills/sdd-propose, skills/sdd-apply, skills/sdd-archive, skills/project-audit, skills/project-fix, skills/memory-init, skills/react-19, skills/elixir-antipatterns, skills/smart-commit, skills/config-export, skills/claude-folder-audit, skills/feature-domain-expert, ai-context/
+Directories sampled: skills/sdd-explore, skills/sdd-propose, skills/sdd-apply, skills/sdd-archive, skills/project-audit, skills/project-fix, skills/memory-manage, skills/react-19, skills/smart-commit, skills/config-export, skills/feature-domain-expert, ai-context/
 
 ### Naming
 - Skill directories: kebab-case — e.g. `project-audit`, `sdd-propose`, `react-19`

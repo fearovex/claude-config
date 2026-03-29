@@ -45,7 +45,7 @@ If any prerequisite fails, resolve it before running the onboarding sequence.
 
 ---
 
-### Step 2 — `/memory-init`
+### Step 2 — `/memory-manage`
 
 **What it does**: Reads the project from scratch and generates substantive `ai-context/` files:
 - `stack.md` — detects language, framework, key dependencies with real versions from `package.json`, `pyproject.toml`, etc.
@@ -112,10 +112,9 @@ Once the sequence is complete:
 /project-audit   # target: score ≥ 75, SDD Readiness = FULL or PARTIAL
 
 # Start a new feature with SDD
-/sdd-new add-my-feature   # launches full SDD cycle
-
-# Or fast-forward (for well-understood changes)
-/sdd-ff add-my-feature
+/sdd-explore add-my-feature   # investigate the codebase area first
+/sdd-propose add-my-feature   # create a proposal
+# then proceed with /sdd-spec, /sdd-design, /sdd-tasks, /sdd-apply
 ```
 
 For projects with existing `.claude/skills/` that need review, Dimension 9 of `/project-audit` will surface:
@@ -128,5 +127,5 @@ For projects with existing `.claude/skills/` that need review, Dimension 9 of `/
 ## Maintenance
 
 - Run `/project-audit` periodically (after major feature additions or stack upgrades) to catch drift
-- Run `/memory-update` after significant AI-assisted work to keep `ai-context/` current
+- Run `/memory-manage` after significant AI-assisted work to keep `ai-context/` current
 - Update `ai-context/known-issues.md` manually as production issues are discovered

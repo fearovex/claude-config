@@ -36,7 +36,7 @@ at most an INFO-level note. This step MUST NOT produce `status: blocked` or `sta
 For each file (items 1–3):
 - If absent: log `INFO: [filename] not found — proceeding without it.`
 - If present: extract `Last updated:` or `Last analyzed:` date. If date is older than 7 days:
-  log `NOTE: [filename] last updated [date] — context may be stale. Consider running /memory-update or /project-analyze.`
+  log `NOTE: [filename] last updated [date] — context may be stale. Consider running /memory-manage.`
 
 Loaded context is used as enrichment throughout all subsequent steps. It informs architectural
 coherence, naming consistency, and skill alignment checks — but does NOT override explicit
@@ -131,7 +131,7 @@ If the extracted date is older than 7 days from the current date, emit:
 
 ```
 NOTE: [filename] last updated [date] — context may be stale.
-Consider running /memory-update or /project-analyze.
+Consider running /memory-manage.
 ```
 
 The skill MUST continue and use the stale data rather than aborting.

@@ -23,7 +23,7 @@ other projects.
 
 ## Business Rules and Invariants
 
-- Every skill modification MUST be preceded by at minimum `/sdd-ff` before `/sdd-apply`. No skill
+- Every skill modification MUST be preceded by at minimum `/sdd-explore` + `/sdd-propose` before `/sdd-apply`. No skill
   file may be changed without a completed proposal, spec, design, and tasks plan on record.
 - Every archived change MUST have a `verify-report.md` with at least one `[x]` criterion. A change
   without a verify-report is ineligible for archiving.
@@ -51,7 +51,7 @@ other projects.
 |--------|------------|-------------|
 | Skill | Directory name (kebab-case), `SKILL.md` entry point, YAML frontmatter (`name`, `description`, `format`) | One SKILL.md per directory; `format` must be `procedural`, `reference`, or `anti-pattern` |
 | SDD Change | `proposal.md`, `specs/<domain>/spec.md`, `design.md`, `tasks.md`, optional `verify-report.md` | Stored under `openspec/changes/<change-name>/`; archived to `openspec/changes/archive/YYYY-MM-DD-<name>/` |
-| ai-context file | One of: `stack.md`, `architecture.md`, `conventions.md`, `known-issues.md`, `changelog-ai.md` | Live in `ai-context/`; updated by `memory-init`, `memory-update`, and `project-analyze` |
+| ai-context file | One of: `stack.md`, `architecture.md`, `conventions.md`, `known-issues.md`, `changelog-ai.md` | Live in `ai-context/`; updated by `memory-manage` |
 | Feature file | `ai-context/features/<domain>.md`; six sections: Domain Overview, Business Rules and Invariants, Data Model Summary, Integration Points, Decision Log, Known Gotchas | Flat directory — no subdirectories; `_template.md` is excluded from SDD phase preloading |
 | openspec config | `openspec/config.yaml`; controls SDD mode, domains, and optional feature_docs block | `feature_docs:` block is commented out in V1 |
 
@@ -78,17 +78,16 @@ of individual changes — they represent the durable system state.
 
 ### 2026-02-23 — Three-tier skill architecture (global vs. project-local vs. orchestrator)
 
-**Decision**: Skills are categorized into three tiers: (1) global skills deployed to `~/.claude/`
-for all projects, (2) project-local skills in `.claude/skills/` for a specific project, and (3)
-orchestrator skills (sdd-ff, sdd-new) that use the Task tool to delegate to sub-agents.
+**Decision**: Skills are categorized into two tiers: (1) global skills deployed to `~/.claude/`
+for all projects, (2) project-local skills in `.claude/skills/` for a specific project.
 
 **Rationale**: Global placement avoids duplication across projects. Project-local placement isolates
-domain-specific skills. The orchestrator tier acknowledges that coordinating multiple long-running
-SDD phases requires fresh context isolation per phase.
+domain-specific skills. The orchestrator (CLAUDE.md) coordinates SDD phases by delegating to
+sub-agents via the Task tool.
 
-**Impact**: Any new meta-system skill (memory-init, project-audit, etc.) belongs in the global
+**Impact**: Any new meta-system skill (memory-manage, project-audit, etc.) belongs in the global
 catalog and is deployed via `install.sh`. Project-specific skills must not be placed in the global
-catalog. The Task tool delegation pattern is mandatory for orchestrator-type skills.
+catalog.
 
 ### 2026-02-27 — sync.sh vs. install.sh separation of concerns
 
@@ -116,19 +115,9 @@ durable domain rules that predate and outlast any individual change. The feature
 gap without altering the existing spec format.
 
 **Impact**: `sdd-propose` and `sdd-spec` each gain a non-blocking Step 0 that preloads matching
-feature files as enrichment context. `memory-init` gains a Step 7 that scaffolds stubs on first
-run. `memory-update` gains a Step 3b that appends session-acquired domain knowledge. The new
-`feature-domain-expert` skill serves as the authoring guide. `project-analyze` explicitly does NOT
-write to `ai-context/features/`.
-
-### 2026-03-04 — project-claude-organizer: post-migration cleanup with confirmed deletion
-
-**Decision**: After each applicable legacy migration category (`copy`, `append`, `scaffold`, `user-choice`) completes in Step 5.7, the skill offers to delete the successfully migrated source files via an explicit per-category yes/no prompt. `delegate` and `section-distribute` strategies are permanently exempt. Deletion is per-file (not directory), and only files with successful migration outcomes are eligible.
-> Added: 2026-03-04
-
-**Rationale**: The previous "never delete" invariant left `.claude/` structurally unchanged after migration, defeating the purpose of reorganization. Users had to manually remove source directories after the skill ran.
-
-**Impact**: ADR 021 documents this convention. Rule 5 was added to `project-claude-organizer/SKILL.md`. The source-file preservation invariant is now conditional (dual condition: successful migration AND explicit user confirmation). The skill tagline blockquote at line 17 was not updated in this cycle and remains stale — a future cleanup should address it.
+feature files as enrichment context. `memory-manage` scaffolds stubs on first run and appends
+session-acquired domain knowledge. The new `feature-domain-expert` skill serves as the authoring
+guide.
 
 ---
 

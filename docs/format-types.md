@@ -40,8 +40,8 @@ order*. The consumer follows the steps to completion.
 **When to use**: SDD phase skills, meta-tool skills, orchestrator skills, CI/CD workflow skills,
 any skill that describes an ordered procedure.
 
-**Examples in catalog**: `sdd-apply`, `sdd-ff`, `project-audit`, `project-fix`, `memory-update`,
-`smart-commit`, `playwright`, `pytest`
+**Examples in catalog**: `sdd-apply`, `sdd-explore`, `project-audit`, `project-fix`, `memory-manage`,
+`smart-commit`
 
 **Required sections**:
 
@@ -103,9 +103,8 @@ or library. The consumer reads the skill to *know what to write*. There is no or
 **When to use**: Technology skills, library skills, framework integration skills, any skill that
 documents "how to use X correctly" with concrete code patterns.
 
-**Examples in catalog**: `react-19`, `nextjs-15`, `typescript`, `zustand-5`, `zod-4`, `tailwind-4`,
-`ai-sdk-5`, `react-native`, `electron`, `django-drf`, `spring-boot-3`, `hexagonal-architecture-java`,
-`java-21`, `excel-expert`, `image-ocr`, `claude-code-expert`, `github-pr`, `jira-task`, `jira-epic`
+**Examples in catalog**: `react-19`, `nextjs-15`, `typescript`, `zustand-5`, `tailwind-4`,
+`react-native`, `solid-ddd`, `go-testing`
 
 **Required sections**:
 
@@ -188,7 +187,7 @@ format: reference
 **When to use**: Skills focused primarily on what to avoid, with fix examples. Rare — most technology
 skills are better served by Format B (which may include an anti-patterns section alongside patterns).
 
-**Examples in catalog**: `elixir-antipatterns`
+**Examples in catalog**: (use this format for any skill that catalogs bad practices with fixes)
 
 **Required sections**:
 

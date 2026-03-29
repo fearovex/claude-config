@@ -28,9 +28,8 @@ agent-config/
 ├── sync.sh                # One-way: ~/.claude/memory/ → repo/memory/  (capture auto-memory)
 ├── skills/                # Skill catalog
 │   ├── sdd-*/             # SDD phase skills (8 phases)
-│   ├── project-*/         # Meta-tool skills (setup, audit, fix, update)
-│   ├── memory-init/       # Memory initialization (ai-context/ from scratch)
-│   ├── memory-update/     # Memory update (session decisions → ai-context/)
+│   ├── project-*/         # Meta-tool skills (setup, audit, fix)
+│   ├── memory-manage/     # Memory management (initialize, update, maintain ai-context/)
 │   ├── skill-creator/     # Skill scaffolding tool
 │   └── [tech-skills]/     # Technology catalog (react-19, nextjs-15, typescript, etc.)
 ├── hooks/                 # Claude Code event hooks
@@ -74,10 +73,8 @@ SKILL.md on demand and executes its instructions.
 | `project-setup` | Deploys SDD + memory structure in a new project |
 | `project-audit` | Audits a project's Claude config across 10 dimensions, generates `audit-report.md` |
 | `project-fix` | Reads `audit-report.md` and applies all corrections |
-| `project-update` | Updates the project `CLAUDE.md` with user-level changes |
-| `memory-init` | Generates `ai-context/` files by reading the project from scratch |
-| `memory-update` | Updates `ai-context/` with work done in the current session |
-| `skill-creator` | Scaffolds a new skill directory with a compliant `SKILL.md` |
+| `memory-manage` | Initializes, updates, or maintains `ai-context/` files (all modes) |
+| `skill-creator` | Scaffolds a new skill directory or registers an existing global skill |
 
 ### Technology Skills
 
@@ -89,45 +86,22 @@ SKILL.md on demand and executes its instructions.
 | `nextjs-15` | Next.js 15 app router, server components, routing |
 | `typescript` | TypeScript strict-mode conventions |
 | `zustand-5` | Zustand 5 state management |
-| `zod-4` | Zod 4 schema validation |
 | `tailwind-4` | Tailwind CSS 4 utility-first styling |
-| `ai-sdk-5` | Vercel AI SDK 5 for LLM integrations |
 | `react-native` | React Native mobile development |
-| `electron` | Electron desktop app development |
-
-**Backend**
-
-| Skill | Description |
-|-------|-------------|
-| `django-drf` | Django + Django REST Framework |
-| `spring-boot-3` | Spring Boot 3 Java services |
-| `hexagonal-architecture-java` | Hexagonal / ports-and-adapters architecture in Java |
-| `java-21` | Java 21 features and idioms |
-
-**Testing**
-
-| Skill | Description |
-|-------|-------------|
-| `playwright` | End-to-end testing with Playwright |
-| `pytest` | Python testing with pytest |
 
 **Tooling / Process**
 
 | Skill | Description |
 |-------|-------------|
-| `github-pr` | GitHub pull request workflow |
-| `jira-task` | Jira task creation and management |
-| `jira-epic` | Jira epic authoring |
 | `smart-commit` | Conventional commit message generation |
-| `elixir-antipatterns` | Elixir anti-pattern detection and fixes |
+| `config-export` | Exports Claude config to Copilot, Gemini, and Cursor formats |
 
-**Platforms / Misc**
+**Design / Testing**
 
 | Skill | Description |
 |-------|-------------|
-| `claude-code-expert` | CLAUDE.md config, custom skills, hooks, MCP, advanced workflows |
-| `excel-expert` | Excel file creation and analysis (ExcelJS, SheetJS, openpyxl, pandas) |
-| `image-ocr` | OCR text extraction from images (Tesseract, EasyOCR, Claude Vision, etc.) |
+| `solid-ddd` | Language-agnostic SOLID principles and DDD tactical patterns |
+| `go-testing` | Go testing patterns including Bubbletea TUI testing |
 
 ---
 
@@ -172,7 +146,7 @@ It does not sync skills, hooks, `CLAUDE.md`, `ai-context/`, or `openspec/`.
 The meta-SDD cycle for this repo:
 
 ```
-/sdd-ff <change-name>  →  review artifacts  →  /sdd-apply  →  install.sh  →  git commit
+/sdd-explore <change-name>  →  /sdd-propose <change-name>  →  review  →  /sdd-apply  →  install.sh  →  git commit
 ```
 
 For breaking changes to the orchestrator or SDD phase skills, the full cycle is required:
@@ -191,18 +165,13 @@ Open a Claude Code session inside any project that has `~/.claude/` installed.
 | `/project-setup` | Deploy SDD + memory structure in the current project |
 | `/project-audit` | Audit the project's Claude config — generates `audit-report.md` (10 dimensions) |
 | `/project-fix` | Apply all corrections from `audit-report.md` |
-| `/project-update` | Update the project `CLAUDE.md` with user-level changes |
-| `/skill-create <name>` | Create a new skill (global or project-specific) |
-| `/skill-add <name>` | Add a skill from the global catalog to the current project |
-| `/memory-init` | Generate `ai-context/` files by reading the project from scratch |
-| `/memory-update` | Update `ai-context/` with work done in the current session |
+| `/skill-create <name>` | Create a new skill or register an existing global skill |
+| `/memory-manage` | Initialize, update, or maintain `ai-context/` files |
 
 ### SDD Development Cycle
 
 | Command | Action |
 |---------|--------|
-| `/sdd-new <change>` | Start a complete SDD cycle for a change |
-| `/sdd-ff <change>` | Fast-forward: propose → spec + design (parallel) → tasks |
 | `/sdd-explore <topic>` | Explore a topic without committing to changes |
 | `/sdd-propose <change>` | Create a proposal |
 | `/sdd-spec <change>` | Write delta specifications |
@@ -242,8 +211,8 @@ explore (optional)
  archive
 ```
 
-The fast-forward shortcut `/sdd-ff <change>` runs propose → spec + design → tasks in one shot
-and presents the full plan for approval before any code is written.
+Start with `/sdd-explore <topic>` to investigate, then `/sdd-propose <change>` to create a proposal.
+Proceed through spec + design + tasks, then apply and verify before archiving.
 
 SDD artifacts are stored in `openspec/changes/<change-name>/` and archived to
 `openspec/changes/archive/YYYY-MM-DD-<name>/` when complete.
@@ -259,7 +228,7 @@ SDD artifacts are stored in `openspec/changes/<change-name>/` and archived to
 2. **Skill structure** — every skill is a directory with exactly one `SKILL.md` entry point.
    `SKILL.md` must contain: trigger definition, process steps, rules section.
 
-3. **SDD compliance** — every skill modification requires at minimum `/sdd-ff` before apply.
+3. **SDD compliance** — every skill modification requires at minimum `/sdd-explore` + `/sdd-propose` before apply.
    Every archived change must have a `verify-report.md` with at least one checked criterion.
 
 4. **Sync discipline** — use `install.sh` for config changes and `sync.sh` only for
@@ -268,8 +237,9 @@ SDD artifacts are stored in `openspec/changes/<change-name>/` and archived to
 ### Meta-SDD cycle for this repo
 
 ```bash
-# 1. Plan and spec the change
-/sdd-ff <change-name>
+# 1. Explore and plan the change
+/sdd-explore <change-name>
+/sdd-propose <change-name>
 
 # 2. Review the generated proposal, spec, design, and tasks in openspec/changes/<change-name>/
 

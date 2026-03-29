@@ -75,10 +75,10 @@ format: reference   # valid values: procedural | reference | anti-pattern
 Any change to a skill or the global CLAUDE.md must go through:
 
 ```
-/sdd-ff <change-name>   →   review   →   /sdd-apply   →   install.sh + git commit
+/sdd-explore <change-name>  →  /sdd-propose <change-name>  →  review  →  /sdd-apply  →  install.sh + git commit
 ```
 
-Fast-forward is the minimum cycle. For breaking changes to core skills (orchestrator, SDD phases), full cycle is required.
+This is the minimum cycle. For breaking changes to core skills (orchestrator, SDD phases), full cycle is required.
 
 ## Communication between skills via artifacts
 
@@ -87,26 +87,23 @@ Skills that need to pass state to each other use **file artifacts**:
 | Artifact | Producer | Consumer | Location |
 |----------|---------|---------|----------|
 | `audit-report.md` | project-audit | project-fix | `.claude/audit-report.md` in project |
-| `analysis-report.md` | project-analyze | project-audit (D7), user | project root |
 | `openspec/config.yaml` | project-setup / project-fix | all SDD phases | `openspec/` in project — also contains the optional `feature_docs:` top-level key (config-driven detection source for D10); when absent, project-audit falls back to heuristic detection |
 | `openspec/changes/*/proposal.md` | sdd-propose | sdd-spec, sdd-design | `openspec/changes/<name>/` |
 | `openspec/changes/*/tasks.md` | sdd-tasks | sdd-apply | `openspec/changes/<name>/` |
-| `ai-context/*.md` | memory-init / memory-update / project-fix | all skills | `ai-context/` in project |
+| `ai-context/*.md` | memory-manage / project-fix | all skills | `ai-context/` in project |
 | `ai-context/onboarding.md` | (human / project-fix) | humans / new project sessions | `ai-context/` in project — canonical external project onboarding sequence |
 | `ai-context/scenarios.md` | (human / project-onboard) | humans / new project sessions | `ai-context/` in project — 6-case onboarding guide, case-based entry point for users at different project states |
 | `ai-context/quick-reference.md` | (human) | humans | `ai-context/` in project — single-page SDD quick reference: situation table, command glossary, flow diagram |
 | `skills/project-onboard/SKILL.md` | SDD cycle | Claude at session start / on demand | `~/.claude/skills/project-onboard/` — automated project state diagnostic, triggered by `/project-onboard` |
-| `~/.claude/skills/memory-update/SKILL.md` | (read by sdd-archive Step 6) | sdd-archive sub-agent | `~/.claude/skills/memory-update/` — auto-invoked inline by sdd-archive after successful archive; non-blocking (archive success is independent of memory-update outcome) |
+| `~/.claude/skills/memory-manage/SKILL.md` | (read by sdd-archive Step 6) | sdd-archive sub-agent | `~/.claude/skills/memory-manage/` — auto-invoked inline by sdd-archive after successful archive; non-blocking (archive success is independent of memory-manage outcome) |
 | `docs/templates/prd-template.md` | proposal-prd-and-adr-system SDD cycle | humans / Claude sessions starting product-level changes | `docs/templates/` — optional PRD template; feeds into `proposal.md`, not a replacement |
 | `docs/templates/adr-template.md` | proposal-prd-and-adr-system SDD cycle | humans adding new ADRs | `docs/templates/` — Nygard format ADR template |
 | `docs/adr/README.md` + `docs/adr/NNN-*.md` | proposal-prd-and-adr-system SDD cycle | humans / Claude sessions making architectural decisions | `docs/adr/` — ADR index + individual decision records; must be updated when new ADRs are added |
 | `openspec/changes/*/prd.md` | sdd-propose (Step 5, optional) | humans / product-level change authors | `openspec/changes/<name>/` — auto-created shell when `docs/templates/prd-template.md` exists and no `prd.md` is present; idempotent (never overwrites existing file); non-blocking if template absent |
 | `docs/adr/NNN-<slug>.md` | sdd-design (Step 5, optional) | humans / architecture reviewers | `docs/adr/` — auto-created when Technical Decisions table in `design.md` contains a keyword-significant architectural decision; numbering via filesystem count; non-blocking if template or README.md absent |
-| `~/.claude/claude-folder-audit-report.md` | claude-folder-audit (runtime artifact, never committed) | humans / operators | `~/.claude/` — generated on each `/claude-folder-audit` invocation; overwritten on re-run; contains findings with HIGH/MEDIUM/LOW/INFO severity; includes Findings Summary table, per-check detail sections, and Recommended Next Steps |
-| `claude-organizer-report.md` | project-claude-organizer (runtime artifact, never committed) | humans / operators | `.claude/claude-organizer-report.md` in the target project — generated on each `/project-claude-organizer` invocation; overwritten on re-run; contains plan executed (items created, documentation files copied to ai-context/, unexpected items flagged, items already correct) and recommended next steps; includes `### Commands scaffolded` subsection listing per-file scaffold outcomes (scaffolded, already exists, advisory only) when commands/ is present; includes `### Skills audit` subsection rendering SKILL_AUDIT_FINDINGS as a table (Skill | Finding | Severity) when .claude/skills/ is present |
 | `docs/adr/` (D12 — ADR Coverage) | N/A (human-maintained) | project-audit (D12) | `docs/adr/` — informational audit dimension; no score impact. Checks `README.md` existence (HIGH finding if absent) and each `docs/adr/NNN-*.md` for a `## Status` section (MEDIUM finding per ADR missing Status). Activated only when CLAUDE.md references `docs/adr/`; skipped with "N/A" when no reference found. Findings placed in `required_actions` and are actionable by `/project-fix`. |
 | `openspec/specs/` (D13 — Spec Coverage) | sdd-spec | project-audit (D13) | `openspec/specs/` — informational audit dimension; no score impact. Activated when `openspec/specs/` exists and is non-empty. Checks each domain directory for a `spec.md` (MEDIUM finding per missing file) and scans referenced paths in each spec for existence (INFO finding per stale path, added to `violations[]` only). Skipped with "N/A" when directory is absent or empty. Findings placed in `required_actions` and are actionable by `/project-fix`. |
-| `ai-context/features/*.md` | `memory-init` (scaffold on first run) / `memory-update` (session updates) / human authors | `sdd-propose` (Step 0, optional), `sdd-spec` (Step 0, optional) | `ai-context/features/` in project | `project-analyze` does NOT write to `ai-context/features/`; `_template.md` is never loaded by SDD phases |
+| `ai-context/features/*.md` | `memory-manage` (scaffold on first run, session updates) / human authors | `sdd-propose` (Step 0, optional), `sdd-spec` (Step 0, optional) | `ai-context/features/` in project | `_template.md` is never loaded by SDD phases |
 
 ## Key architectural decisions
 
@@ -194,7 +191,7 @@ Project mode runs **8 checks** (P1–P8). Each check is listed below with its su
 | P8 | .claude/ folder inventory | Unexpected items directly under .claude/ vs. expected set; empty hook files in hooks/ | MEDIUM |
 
 **Phase C content quality sub-checks (P1-C, P2-C, P3-C):**
-- P1-Phase C: Reads CLAUDE.md and validates mandatory section headings (`## Tech Stack`, `## Architecture`, `## Unbreakable Rules`, `## Plan Mode Rules`, `## Skills Registry`); line count thresholds (MEDIUM if <30 lines, LOW if 30–50 lines); SDD command presence (`/sdd-ff` or `/sdd-new`); Skills Registry path entries.
+- P1-Phase C: Reads CLAUDE.md and validates mandatory section headings (`## Tech Stack`, `## Architecture`, `## Unbreakable Rules`, `## Plan Mode Rules`, `## Skills Registry`); line count thresholds (MEDIUM if <30 lines, LOW if 30–50 lines); SDD command presence (`/sdd-explore` or `/sdd-propose`); Skills Registry path entries.
 - P2-Phase C and P3-Phase C: Validates SKILL.md frontmatter presence (leading `---` block); extracts `format:` value (LOW if absent or unrecognized, defaults to procedural); runs section contract per format type (procedural: `**Triggers**`/`## Triggers` + `## Process`/`### Step N` + `## Rules`; reference: `**Triggers**`/`## Triggers` + `## Patterns`/`## Examples` + `## Rules`; anti-pattern: `**Triggers**`/`## Triggers` + `## Anti-patterns` + `## Rules`); body line count (LOW if <30); TODO marker detection (INFO).
 - P4 orphaned skills are explicitly excluded from Phase C content sub-checks.
 
@@ -211,17 +208,17 @@ Each `skills/` subdirectory is a distinct capability with one `SKILL.md` entry p
 ```
 agent-config/ (observed 2026-03-08)
 ├── CLAUDE.md, README.md, settings.json, install.sh, sync.sh, .gitattributes
-├── skills/          49 skill directories
-│   ├── sdd-*/       11 SDD phase/orchestrator skills (explore, propose, spec,
-│   │                  design, tasks, apply, verify, archive, ff, new, status)
-│   ├── project-*/   6 meta-tool skills (setup, onboard, audit, analyze, fix, update)
-│   ├── memory-*/    2 memory management skills (memory-init, memory-update)
-│   ├── skill-*/     2 skill management skills (skill-creator, skill-add)
-│   ├── claude-*/    2 system skills (claude-code-expert, claude-folder-audit)
+├── skills/          ~33 skill directories
+│   ├── sdd-*/       9 SDD phase skills (explore, propose, spec,
+│   │                  design, tasks, apply, verify, archive, status)
+│   ├── project-*/   4 meta-tool skills (setup, onboard, audit, fix)
+│   ├── memory-manage/  1 unified memory management skill
+│   ├── skill-creator/  1 skill management skill
 │   ├── config-export/  1 config export skill
 │   ├── feature-domain-expert/  1 domain knowledge skill
 │   ├── smart-commit/   1 commit automation skill
-│   └── [tech-skills]   18 technology catalog skills
+│   ├── solid-ddd/, go-testing/  2 design/testing skills
+│   └── [tech-skills]   ~10 technology catalog skills
 ├── hooks/           smart-commit-context.js (Node.js)
 ├── openspec/        config.yaml + changes/ (0 active) + specs/ (38 domains) + archive/
 ├── ai-context/      8 files: stack, architecture, conventions, known-issues,

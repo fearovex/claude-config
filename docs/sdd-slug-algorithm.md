@@ -1,10 +1,10 @@
 # SDD Change Slug Algorithm
 
-> Canonical reference for the slug generation algorithm used by `/sdd-ff` and `/sdd-new`.
+> Canonical reference for the slug generation algorithm used by `/sdd-explore` and `/sdd-propose`.
 
 ## Overview
 
-When a user invokes `/sdd-ff <description>` or `/sdd-new <description>`, the orchestrator
+When a user invokes `/sdd-explore <description>` or `/sdd-propose <description>`, the orchestrator
 infers a short slug from the description using a deterministic algorithm. The slug becomes
 the directory name in `openspec/changes/[slug]/` and the identifier for all related artifacts.
 
@@ -50,8 +50,8 @@ the directory name in `openspec/changes/[slug]/` and the identifier for all rela
 
 ## Used by
 
-- `/sdd-ff` — Step 0: infer slug from description, launch explore with the inferred slug
-- `/sdd-new` — Step 0: same algorithm, collision detection, then launch propose
+- `/sdd-explore` — Step 0: infer slug from description, begin investigation
+- `/sdd-propose` — Step 0: same algorithm, collision detection, then create proposal
 
 ## Notes
 

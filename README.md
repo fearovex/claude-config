@@ -13,7 +13,6 @@ Changes made here are deployed to `~/.claude/` (the Claude Code runtime director
 Only Claude's auto-memory is captured back via `sync.sh`.
 
 For the canonical reference on all commands, flow, and rules, read [CLAUDE.md](./CLAUDE.md).
-For the canonical reference on all commands, flow, and rules, read [CLAUDE.md](./CLAUDE.md).
 
 ---
 
@@ -25,7 +24,7 @@ agent-config/
 ├── settings.json          # Claude Code user-level settings (MCP servers, permissions)
 ├── install.sh             # One-way: repo → ~/.claude/  (deploy to runtime)
 ├── sync.sh                # One-way: ~/.claude/memory/ → repo/  (capture auto-memory)
-├── skills/                # Skill catalog (~33 skills)
+├── skills/                # Skill catalog (31 skills)
 │   ├── _shared/           # Shared contracts (persistence, phase-common, conventions)
 │   ├── sdd-*/             # SDD phase skills (8 phases + init + status)
 │   ├── project-*/         # Meta-tool skills (setup, audit, fix, onboard)
@@ -64,9 +63,12 @@ SKILL.md on demand and executes its instructions.
 | Skill | Description |
 |-------|-------------|
 | `project-setup` | Deploys SDD + memory structure in a new project |
+| `project-onboard` | Diagnoses project state and recommends onboarding command sequence |
 | `project-audit` | Audits a project's Claude config across 10 dimensions, generates `audit-report.md` |
 | `project-fix` | Reads `audit-report.md` and applies all corrections |
 | `memory-manage` | Initializes, updates, or maintains `ai-context/` files (all modes) |
+| `codebase-teach` | Analyzes bounded contexts and writes `ai-context/features/` documentation |
+| `feature-domain-expert` | Authors and consumes feature-level domain knowledge files |
 | `skill-creator` | Scaffolds a new skill directory or registers an existing global skill |
 
 ### Technology Skills
@@ -88,6 +90,9 @@ SKILL.md on demand and executes its instructions.
 |-------|-------------|
 | `smart-commit` | Conventional commit message generation |
 | `config-export` | Exports Claude config to Copilot, Gemini, and Cursor formats |
+| `branch-pr` | PR creation workflow following the issue-first enforcement system |
+| `issue-creation` | GitHub issue creation workflow |
+| `judgment-day` | Parallel adversarial review protocol using two independent judge sub-agents |
 
 **Design / Testing**
 

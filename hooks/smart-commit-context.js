@@ -22,9 +22,9 @@ process.stdin.on('end', () => {
 
     // Keywords that indicate a commit-related request
     const commitKeywords = [
-      'commit', 'hacer commit', 'smart commit', 'commitear',
-      'stage', 'git add', 'git commit', 'preparar commit',
-      'analizar cambios', 'subir cambios', 'push', 'commit inteligente'
+      'commit', 'smart commit',
+      'stage', 'git add', 'git commit',
+      'push', 'staged changes', 'analyze changes'
     ];
 
     const isCommitRelated = commitKeywords.some((kw) => prompt.includes(kw));
@@ -64,8 +64,8 @@ process.stdin.on('end', () => {
       }
 
       const context = statusOutput
-        ? `## Git Context (smart-commit hook)\n\n⚠️ No hay archivos en stage todavía.\n\n### Working Tree Status\n\`\`\`\n${statusOutput}\n\`\`\``
-        : `## Git Context (smart-commit hook)\n\n⚠️ No hay archivos en stage y el working tree está limpio.`;
+        ? `## Git Context (smart-commit hook)\n\n⚠️ No files are staged yet.\n\n### Working Tree Status\n\`\`\`\n${statusOutput}\n\`\`\``
+        : `## Git Context (smart-commit hook)\n\n⚠️ No files are staged and the working tree is clean.`;
 
       process.stdout.write(JSON.stringify({
         continue: true,
@@ -90,7 +90,7 @@ process.stdin.on('end', () => {
     try {
       const fullDiff = execSync('git diff --staged', execOpts).trim();
       stagedDiff = fullDiff.length > 4000
-        ? fullDiff.slice(0, 4000) + '\n\n... (diff truncado — usa `git diff --staged` para ver el resto)'
+        ? fullDiff.slice(0, 4000) + '\n\n... (diff truncated — run `git diff --staged` to see the rest)'
         : fullDiff;
     } catch {
       // ignore
@@ -108,7 +108,7 @@ process.stdin.on('end', () => {
     const context = [
       '## Git Context (auto-injected by smart-commit hook)',
       '',
-      `### Staged Files (${stagedFiles.split('\n').length} archivos)`,
+      `### Staged Files (${stagedFiles.split('\n').length} files)`,
       '```',
       stagedFiles,
       '```',

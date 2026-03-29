@@ -296,14 +296,10 @@ Show the content to be created and confirm with the user before writing.
 
 Current catalog available in `~/.claude/skills/`:
 
-### Meta-tools and SDD
+### SDD Phase Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `project-setup` | Project setup with SDD |
-| `project-audit` | Configuration audit |
-| `skill-creator` | Skill creation |
-| `memory-manage` | Manage ai-context/ (init/update/maintain) |
 | `sdd-explore` | SDD exploration phase |
 | `sdd-propose` | SDD proposal phase |
 | `sdd-spec` | SDD specifications phase |
@@ -312,52 +308,44 @@ Current catalog available in `~/.claude/skills/`:
 | `sdd-apply` | SDD implementation phase |
 | `sdd-verify` | SDD verification phase |
 | `sdd-archive` | SDD archive phase |
+| `sdd-init` | SDD initialization in a project |
+| `sdd-status` | SDD active changes status |
 
-### Frontend / Full-stack
+### Infrastructure / Meta-tools
 
 | Skill | Purpose |
 |-------|---------|
-| `react-19` | React 19 with React Compiler, Server Components, use() hook |
+| `project-setup` | Deploy SDD + memory structure in a new project |
+| `project-audit` | Configuration audit |
+| `project-fix` | Apply audit corrections |
+| `project-onboard` | Diagnose and recommend onboarding sequence |
+| `memory-manage` | Manage ai-context/ (init/update/maintain) |
+| `codebase-teach` | Analyze bounded contexts and write ai-context/features/ docs |
+| `feature-domain-expert` | Author and consume feature-level domain knowledge files |
+| `config-export` | Export Claude config to Copilot, Gemini, Cursor formats |
+| `skill-creator` | Skill creation |
+| `smart-commit` | Conventional commit message generation |
+
+### Workflow
+
+| Skill | Purpose |
+|-------|---------|
+| `branch-pr` | PR creation workflow |
+| `issue-creation` | GitHub issue creation workflow |
+| `judgment-day` | Parallel adversarial review protocol |
+
+### Technology
+
+| Skill | Purpose |
+|-------|---------|
+| `go-testing` | Go testing patterns including Bubbletea TUI testing |
 | `nextjs-15` | Next.js 15 App Router, Server Actions, data fetching |
+| `react-19` | React 19 with React Compiler, Server Components, use() hook |
+| `react-native` | React Native with Expo, navigation, NativeWind |
+| `solid-ddd` | Language-agnostic SOLID principles and DDD tactical patterns |
+| `tailwind-4` | Tailwind CSS 4, cn() utility, dynamic styles |
 | `typescript` | TypeScript strict mode, utility types, advanced patterns |
 | `zustand-5` | State management with Zustand 5, slices, persistence |
-| `zod-4` | Schema validation with Zod 4, breaking changes from v3 |
-| `tailwind-4` | Tailwind CSS 4, cn() utility, dynamic styles |
-| `ai-sdk-5` | Vercel AI SDK 5, useChat, streaming, tool integration |
-| `react-native` | React Native with Expo, navigation, NativeWind |
-| `electron` | Electron desktop apps, IPC, auto-updater |
-
-### Backend
-
-| Skill | Purpose |
-|-------|---------|
-| `django-drf` | Django REST Framework, ViewSets, Serializers |
-| `spring-boot-3` | Spring Boot 3.3+, constructor injection, @ConfigurationProperties |
-| `hexagonal-architecture-java` | Hexagonal architecture in Java, Ports & Adapters |
-| `java-21` | Java 21, records, sealed types, virtual threads |
-
-### Testing
-
-| Skill | Purpose |
-|-------|---------|
-| `playwright` | E2E testing with Playwright, Page Object Model |
-| `pytest` | Python testing with pytest, fixtures, mocking, async |
-
-### Tooling / Process
-
-| Skill | Purpose |
-|-------|---------|
-| `github-pr` | Pull Requests with conventional commits and gh CLI |
-| `jira-task` | Create Jira tasks with standard structure and Wiki markup |
-| `jira-epic` | Create Jira epics with overview, requirements, and decomposition |
-
-### Languages / Frameworks
-
-| Skill | Purpose |
-|-------|---------|
-| `elixir-antipatterns` | Elixir/Phoenix anti-patterns: error handling, Ecto, testing |
-
-> **Note**: `angular` is not available (404 in the source repo). It can be created with `/skill-create angular`.
 
 ---
 

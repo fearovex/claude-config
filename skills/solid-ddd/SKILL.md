@@ -355,23 +355,6 @@ DomainEvent OrderPlaced {
 
 ---
 
-## Relationship with Other Skills
-
-**`solid-ddd` and `hexagonal-architecture-java` are complementary, not competing.**
-
-| Skill | Scope |
-|-------|-------|
-| `solid-ddd` (this skill) | Language-agnostic SOLID principles and DDD tactical patterns. Applies to any language, any project type. |
-| `hexagonal-architecture-java` | Java-specific implementation idioms for Hexagonal (Ports & Adapters) Architecture. Covers Java annotations, Spring stereotypes, package layout, adapter conventions. |
-
-Both skills may be loaded simultaneously without conflict. When working on a Java DDD project:
-- Use `solid-ddd` for principle-level decisions (SRP, DIP, Entity vs. Value Object).
-- Use `hexagonal-architecture-java` for Java idiom decisions (which annotation to use, how to name adapter classes, how to wire ports in Spring).
-
-Do NOT use `hexagonal-architecture-java` as a substitute for `solid-ddd` — it does not document the underlying principles, only Java-specific mechanics.
-
----
-
 ## Rules
 
 - Apply SRP before adding a second responsibility to any class, module, or function — extract first, then implement.
@@ -382,4 +365,3 @@ Do NOT use `hexagonal-architecture-java` as a substitute for `solid-ddd` — it 
 - Application Services MUST be thin orchestrators. Business logic inside an Application Service is a violation — move it to the domain object or Domain Service.
 - Domain Events MUST be named in past tense and treated as immutable facts.
 - Code examples in this skill are illustrative only (labeled with language). They are not production templates.
-- When `hexagonal-architecture-java` is also loaded, defer to `solid-ddd` for principle decisions and to `hexagonal-architecture-java` for Java-specific idiom decisions. No conflict resolution is needed — they address different questions.

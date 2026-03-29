@@ -313,8 +313,8 @@ After the archive is complete, I automatically update `ai-context/` with the dec
 
 **Process:**
 
-1. Read `~/.claude/skills/memory-update/SKILL.md`
-2. Execute the `/memory-update` process inline, using the archived change as session context:
+1. Read `~/.claude/skills/memory-manage/SKILL.md`
+2. Execute the `/memory-manage` process in "update" mode inline, using the archived change as session context:
    - Change name: `<change-name>`
    - Archive path: `openspec/changes/archive/YYYY-MM-DD-<archive_slug>/`
    - Artifacts: proposal, specs, design, tasks
@@ -329,7 +329,7 @@ After the archive is complete, I automatically update `ai-context/` with the dec
 - **On failure** (skill not found, write error, any other issue): report a warning and continue:
   ```
   Warning: Memory update failed — [reason]. Archive completed successfully.
-  Suggestion: Run /memory-update manually to update ai-context/.
+  Suggestion: Run /memory-manage (update mode) manually to update ai-context/.
   ```
 
 The archive is **always** considered successful regardless of the memory-update outcome.

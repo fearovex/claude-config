@@ -2,8 +2,7 @@
 # install.sh — Deploys repo configuration to ~/.claude/ (the Claude Code runtime).
 #
 # Direction : repo/  →  ~/.claude/
-# Scope     : ALL directories (CLAUDE.md, settings.json, keybindings.json, skills/, hooks/,
-#              openspec/, ai-context/, memory/, output-styles/, mcp/)
+# Scope     : CLAUDE.md, settings.json, keybindings.json, skills/, hooks/, output-styles/, mcp/
 # Note      : memory/ flows the REVERSE direction via sync.sh — run sync.sh periodically
 #             to capture Claude's automatic memory updates back into the repo.
 #
@@ -83,11 +82,8 @@ CLAUDE_DIR="$(detect_claude_dir)"
 echo "Installing agent-config → $CLAUDE_DIR ..."
 
 mkdir -p "$CLAUDE_DIR"
-mkdir -p "$CLAUDE_DIR/memory"
 mkdir -p "$CLAUDE_DIR/skills"
 mkdir -p "$CLAUDE_DIR/hooks"
-mkdir -p "$CLAUDE_DIR/openspec"
-mkdir -p "$CLAUDE_DIR/ai-context"
 mkdir -p "$CLAUDE_DIR/output-styles"
 mkdir -p "$CLAUDE_DIR/mcp"
 
@@ -106,11 +102,8 @@ copy_dir() {
   fi
 }
 
-copy_dir "$REPO_DIR/memory"        "$CLAUDE_DIR/memory"
 copy_dir "$REPO_DIR/skills"        "$CLAUDE_DIR/skills"
 copy_dir "$REPO_DIR/hooks"         "$CLAUDE_DIR/hooks"
-copy_dir "$REPO_DIR/openspec"      "$CLAUDE_DIR/openspec"
-copy_dir "$REPO_DIR/ai-context"    "$CLAUDE_DIR/ai-context"
 copy_dir "$REPO_DIR/output-styles" "$CLAUDE_DIR/output-styles"
 copy_dir "$REPO_DIR/mcp"           "$CLAUDE_DIR/mcp"
 
@@ -197,9 +190,6 @@ echo ""
 echo "Done! Claude Code is ready with:"
 echo "  - CLAUDE.md (SDD orchestrator + Engram protocol + Gentleman persona)"
 echo "  - $(ls "$CLAUDE_DIR/skills/" | wc -l) skills loaded"
-echo "  - Memory at $CLAUDE_DIR/memory/"
-echo "  - SDD config at $CLAUDE_DIR/openspec/"
-echo "  - AI context at $CLAUDE_DIR/ai-context/"
 echo "  - Output style: Gentleman ($CLAUDE_DIR/output-styles/)"
 echo "  - Keybindings at $CLAUDE_DIR/keybindings.json"
 echo "  - MCP configs at $CLAUDE_DIR/mcp/ (engram, context7)"

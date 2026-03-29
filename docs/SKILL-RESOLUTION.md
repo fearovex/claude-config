@@ -124,6 +124,4 @@ Alternatively, create `.claude/skills/<name>/SKILL.md` manually for entirely cus
 
 ## See Also
 
-- `agents.md` — canonical agent registry
-- `skills/README.md` — skill authoring guide
-- `openspec/agent-execution-contract.md` — sub-agent I/O specification
+- `skills/README.md` — skill authoring guide and registry

@@ -10,7 +10,7 @@ A **skill** is a directory containing exactly one `SKILL.md` file. The SKILL.md 
 
 ```
 skills/
-└── sdd-ff/
+└── sdd-explore/
     └── SKILL.md   ← the only required file
 ```
 
@@ -87,7 +87,7 @@ Task tool:
     - risks: identified risks (if any)
 ```
 
-For the full I/O contract, see `openspec/agent-execution-contract.md`.
+For the full I/O contract, see the sub-agent launch pattern in CLAUDE.md.
 
 ---
 
@@ -135,14 +135,9 @@ Use `/skill-create <name>` to scaffold a new skill directory. The skill-creator 
 
 ## Registry
 
-The canonical agent registry is in `agents.md`. It lists all skills with their format, model, I/O spec, and capability boundaries.
-
 Skills in this repository (global catalog):
 
-- **SDD Orchestrators**: `sdd-ff`, `sdd-new`, `sdd-status`
-- **SDD Phases**: `sdd-explore`, `sdd-propose`, `sdd-spec`, `sdd-design`, `sdd-tasks`, `sdd-apply`, `sdd-verify`, `sdd-archive`
-- **Meta-tools**: `project-setup`, `project-onboard`, `project-audit`, `project-analyze`, `project-fix`, `project-update`, `skill-creator`, `skill-add`, `memory-init`, `memory-update`, `codebase-teach`, `project-claude-organizer`, `claude-folder-audit`
-- **Technology**: `react-19`, `nextjs-15`, `typescript`, `zustand-5`, `zod-4`, `tailwind-4`, `ai-sdk-5`, `react-native`, `electron`, `django-drf`, `spring-boot-3`, `hexagonal-architecture-java`, `java-21`, `playwright`, `pytest`
-- **Tooling**: `github-pr`, `jira-task`, `jira-epic`, `smart-commit`, `elixir-antipatterns`
-- **Design Principles**: `solid-ddd`, `feature-domain-expert`
-- **Platform Tools**: `claude-code-expert`, `excel-expert`, `image-ocr`, `config-export`
+- **SDD**: `sdd-apply`, `sdd-archive`, `sdd-design`, `sdd-explore`, `sdd-init`, `sdd-propose`, `sdd-spec`, `sdd-status`, `sdd-tasks`, `sdd-verify`
+- **Infrastructure**: `project-audit`, `project-fix`, `project-onboard`, `project-setup`, `memory-manage`, `codebase-teach`, `feature-domain-expert`, `config-export`, `skill-creator`, `smart-commit`
+- **Workflow**: `branch-pr`, `issue-creation`, `judgment-day`
+- **Technology**: `go-testing`, `nextjs-15`, `react-19`, `react-native`, `solid-ddd`, `tailwind-4`, `typescript`, `zustand-5`

@@ -6,7 +6,7 @@ description: >
 format: procedural
 model: sonnet
 metadata:
-  version: "2.1"
+  version: "3.0"
 ---
 
 # sdd-spec
@@ -37,8 +37,7 @@ When the orchestrator launches this sub-agent, it resolves the skill path using:
 
 ```
 1. .claude/skills/sdd-spec/SKILL.md     (project-local — highest priority)
-2. openspec/config.yaml skill_overrides (explicit redirect)
-3. ~/.claude/skills/sdd-spec/SKILL.md   (global catalog — fallback)
+2. ~/.claude/skills/sdd-spec/SKILL.md   (global catalog — fallback)
 ```
 
 Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md` for the full algorithm.
@@ -61,7 +60,7 @@ After loading project context and before identifying affected domains, I perform
 3. **Load matches**: If one or more files match, read each file and inject its content as enrichment context before writing the spec. If no file matches, skip silently — do NOT produce an error or warning.
 4. **Multiple matches**: If more than one file matches, load all matching files.
 5. **Non-blocking contract**: This step MUST NEVER produce `status: blocked` or `status: failed`. Any file read error is treated as a miss (skip silently).
-6. **Enrichment note**: Feature file content is treated as enrichment context — it surfaces business rules, invariants, and known gotchas that should inform the spec's requirements and THEN clauses. It is NOT a replacement for reading the existing `openspec/specs/<domain>/spec.md` when one exists. Both files MUST be read when both are present.
+6. **Enrichment note**: Feature file content is treated as enrichment context — it surfaces business rules, invariants, and known gotchas that should inform the spec's requirements and THEN clauses. Both feature files and any existing domain specs MUST be read when both are present.
 7. **Orchestrator reporting**: When one or more feature files are loaded, the `summary` field MUST note that domain context was preloaded (e.g., "domain context loaded from ai-context/features/auth.md"). Each loaded file path MUST appear in the `artifacts` list (read, not written).
 
 ### Step 0c — Spec context preload
@@ -72,26 +71,19 @@ Follow `skills/_shared/sdd-phase-common.md` **Section G** (Spec Context Preload)
 
 ### Step 1 — Read prior artifacts
 
-**Mode detection (inline, non-blocking):**
-Read `artifact_store.mode` from orchestrator launch context.
-- If absent and Engram MCP is reachable → default to `engram`
-- If absent and Engram MCP is not reachable → default to `none`
-
 I must read:
 
 - The proposal artifact (the WHAT and WHY):
-  - **engram**: `mem_search(query: "sdd/{change-name}/proposal")` → `mem_get_observation(id)` for full content.
-  - **openspec** / **hybrid**: `openspec/changes/<change-name>/proposal.md`
-  - **none**: proposal content passed inline from orchestrator.
-- `openspec/specs/<domain>/spec.md` if it exists (current domain spec — always filesystem)
+  - `mem_search(query: "sdd/{change-name}/proposal")` → `mem_get_observation(id)` for full content.
+  - If not found and Engram not reachable: proposal content passed inline from orchestrator.
 - `ai-context/architecture.md` if it exists (to understand the current system)
 
 #### Step 1 extended — Validate against Supersedes section
 
-After reading proposal.md, I perform a Supersedes cross-check before writing any spec:
+After reading the proposal, I perform a Supersedes cross-check before writing any spec:
 
-1. **Check for Supersedes section**: look for `## Supersedes` in proposal.md.
-   - **If absent** (older archived change): log `WARNING: proposal.md has no Supersedes section — backwards compat mode; skipping validation` and proceed without validation.
+1. **Check for Supersedes section**: look for `## Supersedes` in the proposal.
+   - **If absent** (older archived change): log `WARNING: proposal has no Supersedes section — backwards compat mode; skipping validation` and proceed without validation.
    - **If present and states "None — purely additive"**: skip validation; proceed to Step 2.
    - **If present with REMOVED or REPLACED items**: proceed to step 2 below.
 
@@ -101,7 +93,7 @@ After reading proposal.md, I perform a Supersedes cross-check before writing any
 
 3. **For each REPLACED item in Supersedes**: verify the spec describes the new replacement, not the old behavior. If spec only describes old behavior without acknowledging replacement, add a note: `[PENDING: spec does not describe replacement behavior for [X] — clarify with design]`.
 
-4. **For CONTRADICTED items**: verify the spec aligns with the resolution documented in `## Contradiction Resolution` of proposal.md. If mismatch, emit `MUST_RESOLVE` warning.
+4. **For CONTRADICTED items**: verify the spec aligns with the resolution documented in `## Contradiction Resolution` of the proposal. If mismatch, emit `MUST_RESOLVE` warning.
 
 ### Step 2 — Identify affected domains
 
@@ -112,41 +104,13 @@ From the proposal I extract the domains that need specs:
 
 ### Step 3 — Write delta specs
 
-**Sub-step 3.0 — Ensure index.yaml exists (runs once before writing the first domain spec):**
+For each affected domain, I persist the delta spec to engram:
 
-```
-IF openspec/specs/index.yaml does not exist:
-  CREATE openspec/specs/index.yaml with this exact content:
+Call `mem_save` with `topic_key: sdd/{change-name}/spec`, `type: architecture`, `project: {project}`, content = all domain specs concatenated (separated by `---`). Do NOT write any file.
 
-# openspec/specs/index.yaml
-# Spec domain index — enables index-driven spec lookup for SDD phase skills.
-# Each entry: domain (matches openspec/specs/<domain>/ directory name exactly),
-# summary (one-line description), keywords (3-8 change-slug terms),
-# related (optional list of co-relevant domain names in this index).
-#
-# Maintained by: sdd-archive (appends one entry per new spec domain created).
-# Selection algorithm: see docs/SPEC-CONTEXT.md — "Using the spec index".
-# Migration trigger: 100+ domains → consider SQLite/FTS5 (see ADR 034).
+If Engram MCP is not reachable: skip persistence. Return spec content inline only.
 
-domains: []
-
-  Log: "INFO: openspec/specs/index.yaml created (was absent)"
-  If creation fails: log "INFO: index.yaml creation failed — skipping (non-blocking)" and continue
-
-IF openspec/specs/index.yaml already exists: skip silently
-```
-
-This sub-step runs ONCE per sdd-spec invocation, before writing any domain spec. It is non-blocking — any failure produces at most an INFO note.
-
-For each affected domain, I persist the delta spec based on the active persistence mode:
-
-**Write dispatch:**
-- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/spec`, `type: architecture`, `project: {project}`, content = all domain specs concatenated (separated by `---`). Do NOT write any file.
-- **openspec**: Write `openspec/changes/<change-name>/specs/<domain>/spec.md` for each domain.
-- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem writes.
-- **none**: Skip all write operations. Return spec content inline only.
-
-Content format (applies to all write modes):
+Content format:
 
 #### If NO existing spec — Full spec:
 
@@ -183,7 +147,6 @@ Date: [YYYY-MM-DD]
 
 Change: [change-name]
 Date: [YYYY-MM-DD]
-Base: openspec/specs/[domain]/spec.md
 
 ## ADDED — New requirements
 
@@ -273,11 +236,7 @@ For each requirement I include:
 {
   "status": "ok|warning|blocked",
   "summary": "Specs for [change-name]: [N] domains, [M] requirements, [K] scenarios.",
-  "artifacts": "<mode-dependent — see write dispatch in Step 3>",
-  // engram   → ["engram:sdd/{change-name}/spec"]
-  // openspec → ["openspec/changes/<name>/specs/<domain1>/spec.md", "openspec/changes/<name>/specs/<domain2>/spec.md"]
-  // hybrid   → both engram + openspec refs
-  // none     → []
+  "artifacts": ["engram:sdd/{change-name}/spec"],
   "next_recommended": ["sdd-tasks (after sdd-design)"],
   "risks": []
 }
@@ -294,4 +253,4 @@ For each requirement I include:
 - I do NOT invent behavior — I base everything on the proposal and existing code
 - If something is ambiguous in the proposal, I mark it as `[Pending clarification]` and list it in risks
 - I do NOT add "preserve X" or "backward compatibility with X" requirements that are NOT explicitly stated in the proposal — if the proposal is silent, treat as pending clarification, NOT as implicit preservation
-- If proposal.md has no Supersedes section (archived change compatibility), I skip validation and proceed without error — backwards compat mode is non-blocking
+- If the proposal has no Supersedes section (archived change compatibility), I skip validation and proceed without error — backwards compat mode is non-blocking

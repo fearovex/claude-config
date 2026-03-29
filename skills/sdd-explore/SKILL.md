@@ -6,7 +6,7 @@ description: >
 format: procedural
 model: sonnet
 metadata:
-  version: "2.1"
+  version: "3.0"
 ---
 
 # sdd-explore
@@ -38,8 +38,7 @@ When the orchestrator launches this sub-agent, it resolves the skill path using:
 
 ```
 1. .claude/skills/sdd-explore/SKILL.md     (project-local — highest priority)
-2. openspec/config.yaml skill_overrides    (explicit redirect)
-3. ~/.claude/skills/sdd-explore/SKILL.md   (global catalog — fallback)
+2. ~/.claude/skills/sdd-explore/SKILL.md   (global catalog — fallback)
 ```
 
 Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md` for the full algorithm.
@@ -55,14 +54,14 @@ Follow `skills/_shared/sdd-phase-common.md` **Section F** (Project Context Load)
 This sub-step is **non-blocking**: any failure (missing file, unreadable file, no slug) MUST produce
 at most an INFO-level note. This sub-step MUST NOT produce `status: blocked` or `status: failed`.
 
-1. Resolve the change slug from the invocation context (same slug used in the change directory path).
-2. Check whether `openspec/changes/<slug>/proposal.md` exists.
-3. If absent: skip silently — log `INFO: no pre-seeded proposal.md found — proceeding without handoff context.`
-4. If present: read the file. Treat its content as **supplemental intent enrichment**:
+1. Resolve the change slug from the invocation context.
+2. Check whether a proposal already exists in engram: `mem_search(query: "sdd/<slug>/proposal")`.
+3. If absent: skip silently — log `INFO: no pre-seeded proposal found — proceeding without handoff context.`
+4. If present: retrieve via `mem_get_observation(id)`. Treat its content as **supplemental intent enrichment**:
    - It informs what the explore should prioritize, not what the codebase shows.
    - It MUST NOT override live codebase findings.
-   - Log: `Handoff context loaded from: openspec/changes/<slug>/proposal.md`
-5. When loaded, include a `## Handoff Context` section in the exploration.md output
+   - Log: `Handoff context loaded from engram: sdd/<slug>/proposal`
+5. When loaded, include a `## Handoff Context` section in the exploration output
    (placed before `## Current State`) summarizing:
    - Decision that triggered the change
    - Goal and success criteria from the seeded proposal
@@ -87,7 +86,7 @@ This step is **non-blocking**: any failure (git unavailable, no working tree, em
 1. Run `git status --short` to identify modified, staged, and untracked files in the current working tree.
 2. Filter results to files relevant to the domain being explored (match by path prefix, filename, or keyword overlap with the change name).
 3. Classify each file as: `modified`, `staged`, `deleted`, or `untracked`.
-4. Write output to the `## Branch Diff` section in `exploration.md`.
+4. Write output to the `## Branch Diff` section.
 
 **If git is unavailable or diff is empty**: log `INFO: branch diff unavailable or empty — skipping Branch Diff section` and include an empty `## Branch Diff` section with that note.
 
@@ -103,41 +102,41 @@ Files modified in current branch relevant to this change:
 
 ### Step 3 — Prior Attempts archive scan
 
-This step is **non-blocking**: any failure (archive absent, unreadable files) MUST produce at most an INFO-level note.
+This step is **non-blocking**: any failure MUST produce at most an INFO-level note.
 
-1. Check whether `openspec/changes/archive/` exists. If absent: log `INFO: no archive directory found — skipping Prior Attempts section` and write an empty `## Prior Attempts` section.
-2. List all subdirectories matching `YYYY-MM-DD-*` pattern.
-3. For each archived change:
-   a. Extract keywords from its slug (split on `-`, discard stop words like `fix`, `add`, `the`, `a`).
-   b. Compute keyword overlap with the current change slug.
-   c. If overlap >= 1 keyword: include in results.
-4. For each included result: read `verify-report.md` (outcome) or note folder-only listing if absent.
-5. Write output to the `## Prior Attempts` section in `exploration.md`.
+Search engram for prior archived changes related to this topic:
+```
+mem_search(query: "sdd/archive-report", project: "{project}")
+```
+
+Filter results by keyword overlap with the current change slug. For each related result, retrieve via `mem_get_observation(id)` to check outcome.
+
+Write output to the `## Prior Attempts` section.
 
 **Output format:**
 ```
 ## Prior Attempts
 
 Prior archived changes related to this topic:
-- 2026-02-15-auth-flow-v1: COMPLETED (verify-report present)
-- 2026-02-20-auth-flow-v2: ABANDONED (no verify-report)
+- auth-flow-v1: COMPLETED
+- auth-flow-v2: ABANDONED
 
-[or: "No prior attempts found in archive."]
+[or: "No prior attempts found."]
 ```
 
 ### Step 4 — Contradiction Analysis
 
 This step is **non-blocking**: contradictions are informational and MUST NOT cause `status: blocked` or `status: failed`. At most, contradictions may cause `status: warning`.
 
-1. Compare the user's stated intent (from change description and any pre-seeded proposal.md `## Context Notes`) against:
-   - Loaded specs from Step 0c (behavioral contracts)
+1. Compare the user's stated intent (from change description and any pre-seeded proposal) against:
+   - Loaded feature files from Step 0 (behavioral contracts)
    - Prior attempt outcomes from Step 3
    - `ai-context/` files
 2. For each potential contradiction detected, classify severity:
    - **CERTAIN**: the user says "remove X" AND a loaded spec explicitly states "X MUST exist" — no ambiguity
    - **UNCERTAIN**: the user intent implies removing or changing X, but there is no explicit spec contract — ambiguous
 3. Assign impact level: `INFO` (minimal), `WARNING` (notable), `CRITICAL` (breaking)
-4. Write output to the `## Contradiction Analysis` section in `exploration.md`.
+4. Write output to the `## Contradiction Analysis` section.
 5. Do NOT block exploration — the status remains `ok` unless contradictions are severe enough to set `status: warning`.
 
 **Output format:**
@@ -187,32 +186,23 @@ For each possible approach I generate a comparison table:
 If `<change-name>` starts with `explore-`, warn before writing:
 
 ```
-⚠ Note: The change name "[change-name]" starts with "explore-".
+Note: The change name "[change-name]" starts with "explore-".
 Standalone explore folders (e.g. explore-fy-topic) are not part of a full SDD planning cycle
 and will not be automatically cleaned up or archived.
 
 If you intend this as a full SDD change, use a descriptive slug and continue with /sdd-propose:
-  /sdd-propose <description>   ← starts the planning cycle from proposal
+  /sdd-propose <description>   <- starts the planning cycle from proposal
 
 If you intend this as a one-off investigation, proceed as-is.
 ```
 
 This warning is informational only — writing proceeds regardless of the name.
 
-If invoked as `/sdd-explore <change-name>`, I persist the exploration artifact based on the active persistence mode.
+If invoked as `/sdd-explore <change-name>`, I persist the exploration artifact.
 
-**Mode detection (inline, non-blocking):**
-Read `artifact_store.mode` from orchestrator launch context.
-- If absent and Engram MCP is reachable → default to `engram`
-- If absent and Engram MCP is not reachable → default to `none`
-
-**Write dispatch:**
-
-- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/explore`, `type: architecture`, `project: {project}`, content = full exploration markdown. Do NOT write any file.
+**Write:** Call `mem_save` with `topic_key: sdd/{change-name}/explore`, `type: architecture`, `project: {project}`, content = full exploration markdown. Do NOT write any file.
   - If no change name provided: log `INFO: no change name — skipping artifact persistence` and skip.
-- **openspec**: Write `openspec/changes/<change-name>/exploration.md` with full exploration content. No `mem_save` call.
-- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem write.
-- **none**: Skip all write operations. Return exploration content inline only.
+  - If Engram MCP is not reachable: skip persistence. Return exploration content inline only.
 
 **Persisted artifact** (compact — only what downstream phases consume):
 
@@ -227,7 +217,7 @@ Read `artifact_store.mode` from orchestrator launch context.
 [or: "No relevant changes in current branch."]
 
 ## Prior Attempts
-- [YYYY-MM-DD-slug]: [outcome]
+- [slug]: [outcome]
 [or: "None found."]
 
 ## Contradiction Analysis
@@ -253,11 +243,7 @@ The full analysis — including Affected Areas table, Analyzed Approaches with p
 {
   "status": "ok|warning|blocked",
   "summary": "Analysis of [topic]: [2-3 lines of the main finding]",
-  "artifacts": "<mode-dependent — see write dispatch in Step 8>",
-  // engram   → ["engram:sdd/{change-name}/explore"]
-  // openspec → ["openspec/changes/<name>/exploration.md"]
-  // hybrid   → ["engram:sdd/{change-name}/explore", "openspec/changes/<name>/exploration.md"]
-  // none     → []
+  "artifacts": ["engram:sdd/{change-name}/explore"],
   "next_recommended": ["sdd-propose"],
   "risks": ["[risk if found]"]
 }

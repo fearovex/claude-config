@@ -3,7 +3,7 @@
 #
 # Direction : ~/.claude/memory/  →  repo/memory/
 # Scope     : memory/ ONLY
-# Excluded  : skills/, hooks/, ai-context/, openspec/, CLAUDE.md, settings.json
+# Excluded  : skills/, hooks/, ai-context/, CLAUDE.md, settings.json
 #             (all of those are repo-authoritative — edit in repo, deploy via install.sh)
 #
 # When to run:

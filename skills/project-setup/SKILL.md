@@ -1,14 +1,14 @@
 ---
 name: project-setup
 description: >
-  Deploys the complete SDD architecture with hybrid memory layer (ai-context/) in the current project.
+  Deploys the complete SDD architecture with engram persistence and ai-context/ memory layer in the current project.
   Trigger: /project-setup, initialize new project, setup SDD, configure claude project.
 format: procedural
 ---
 
 # project-setup
 
-> Deploys the complete SDD architecture with a hybrid memory layer in the current project.
+> Deploys the complete SDD architecture with engram persistence and ai-context/ memory layer in the current project.
 
 **Triggers**: `/project-setup`, initialize project, setup sdd, configure claude project, new sdd project
 
@@ -20,7 +20,7 @@ When the user runs `/project-setup`, I analyze the current project and generate:
 
 1. `CLAUDE.md` at the project root with real detected context
 2. `ai-context/` with the 5 memory files initialized
-3. `openspec/config.yaml` for the SDD cycle
+3. Engram project context for the SDD cycle
 4. Registry of relevant skills based on the detected stack
 
 ---
@@ -249,127 +249,13 @@ This file records significant changes made by Claude.
 [Entries are added here chronologically]
 ```
 
-### Step 4 — Create openspec/config.yaml
+### Step 4 — Persist project context to engram
 
-**Mode selection** (run before generating config):
-- Check if Engram MCP is reachable (call `mem_context`).
-- If reachable → set `artifact_store.mode: engram`. Log `INFO: Engram detected — setting artifact_store.mode to engram`.
-- If not reachable → set `artifact_store.mode: openspec`. Log `INFO: Engram not available — defaulting artifact_store.mode to openspec`.
+**Check if Engram MCP is reachable** (call `mem_context`):
+- If reachable: save project context to engram via `mem_save` with `topic_key: sdd-init/{project-name}`. Log `INFO: Engram detected — project context persisted to engram`.
+- If not reachable: log `WARNING: Engram not available — project context not persisted. SDD artifacts will be ephemeral.`
 
-```yaml
-project:
-  name: "[detected name]"
-  description: "[description from README or inferred]"
-  stack:
-    language: "[language]"
-    framework: "[framework]"
-    database: "[db or none]"
-  conventions:
-    naming: "[snake_case|camelCase|kebab-case]"
-    structure: "[feature|layer|mono]"
-
-artifact_store:
-  mode: [engram|openspec — selected by mode detection above]
-
-rules:
-  proposal:
-    - "Must include rollback plan"
-    - "Must define measurable success criteria"
-  specs:
-    - "Use Given/When/Then for all scenarios"
-    - "Include edge cases and error states"
-  design:
-    - "Each decision must have a justification"
-    - "Prefer existing project patterns"
-  tasks:
-    - "Atomic and verifiable tasks"
-    - "Include file paths in description"
-  apply:
-    - "Follow project conventions"
-    - "Run tests before marking complete"
-  verify:
-    - "Verify compliance with specs first"
-    - "Then verify adherence to design"
-
-# ---------------------------------------------------------------------------
-# verify (optional) — Auto-detected verification commands for /sdd-verify
-# ---------------------------------------------------------------------------
-# Populated automatically by project-setup on initialization and optionally
-# by memory-init when the section is absent.
-# Priority in sdd-verify Step 6:
-#   Level 1: verify_commands (manual override — highest, unchanged)
-#   Level 2: verify.test_commands (this section)
-#   Level 3: auto-detection table (package.json, pytest, Makefile, etc.)
-#
-# test_commands (list of strings, optional):
-#   Commands to run the project test suite. Empty list is treated as absent.
-#
-# build_command (string, optional):
-#   Single command to build the project. Overrides auto-detected build.
-#
-# type_check_command (string, optional):
-#   Single command to run type checking. Overrides auto-detected type check.
-#
-# [CONDITIONAL BLOCK — emit only when a test runner is detected]:
-# verify:
-#   test_commands:
-#     - "[detected test command: npm test / pytest / make test / ./gradlew test / mix test]"
-#   [build_command: "[detected build command]"  # emit only when detected]
-#   [type_check_command: "[detected type check command]"  # emit only when detected]
-```
-
-**Conditional verify: section generation logic:**
-
-```
-detect_test_runner():
-  if package.json with scripts.test → "npm test"
-    (or "yarn test" if yarn.lock, "pnpm test" if pnpm-lock.yaml)
-  elif pyproject.toml / pytest.ini / setup.cfg → "pytest"
-  elif Makefile with test target → "make test"
-  elif build.gradle or gradlew → "./gradlew test"
-  elif mix.exs → "mix test"
-  else → None
-
-detect_build_command():
-  if package.json with scripts.build → "npm run build" (or yarn/pnpm variant)
-  elif package.json with scripts.typecheck → "npm run typecheck"
-  elif tsconfig.json + TypeScript in devDependencies → "npx tsc --noEmit"
-  else → None
-
-detect_type_check_command():
-  if tsconfig.json + TypeScript in devDependencies and scripts.typecheck absent → "npx tsc --noEmit"
-  else → None (build_command covers this case)
-
-if detect_test_runner() is not None:
-    emit verify: section with test_commands: [detected runner]
-    if detect_build_command() is not None:
-        emit build_command: [detected command]
-    if detect_type_check_command() is not None (and different from build_command):
-        emit type_check_command: [detected command]
-else:
-    omit verify: section entirely (absence is valid — sdd-verify falls back to auto-detection)
-    failure during detection MUST NOT abort config.yaml generation
-```
-
-### Step 5 — Scaffold openspec/specs/index.yaml
-
-This step is **non-blocking**: any failure (permission error, write error) MUST produce at most an INFO-level note. This step MUST NOT produce `status: blocked` or `status: failed`.
-
-1. Check whether `openspec/specs/index.yaml` exists.
-2. If absent: create it with the following minimal scaffold content:
-   ```yaml
-   # openspec/specs/index.yaml
-   # Maps spec domains to keywords for index-first spec context lookup.
-   # Each phase skill reads this file in Step 0 to select relevant specs.
-   # Format: domains is a flat list; each entry requires domain, summary, and keywords (3–8 terms).
-   domains: []
-   ```
-   Log: `✓ openspec/specs/index.yaml scaffolded (empty domains list).`
-3. If already exists: log `INFO: openspec/specs/index.yaml already present — skipping scaffold.`
-
-Step is idempotent — running `/project-setup` multiple times will not overwrite an existing index.yaml. Failure to create the file logs an INFO note and does not abort setup.
-
-### Step 6 — Final report
+### Step 5 — Final report
 
 I present to the user:
 
@@ -388,7 +274,6 @@ Files created:
   - ai-context/conventions.md
   - ai-context/known-issues.md
   - ai-context/changelog-ai.md
-  - openspec/config.yaml
 
 Next steps:
   1. Review and adjust CLAUDE.md with details I could not detect

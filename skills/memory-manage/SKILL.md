@@ -8,7 +8,7 @@ format: procedural
 
 # memory-manage
 
-> Unified management of the ai-context/ hybrid memory layer. Three modes: init, update, maintain.
+> Unified management of the ai-context/ memory layer. Three modes: init, update, maintain.
 
 **Triggers**: `/memory-init`, `/memory-update`, `/memory-maintain`, initialize memory, update memory, maintain memory, memory housekeeping, clean ai-context
 

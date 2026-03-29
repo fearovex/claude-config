@@ -3,7 +3,7 @@ title: <!-- Replace with a short, descriptive title for the product requirement 
 status: Draft
 author: <!-- Your name or team -->
 date: <!-- YYYY-MM-DD -->
-related-change: <!-- openspec/changes/CHANGE-NAME (leave blank if none) -->
+related-change: <!-- SDD change name (leave blank if none) -->
 ---
 
 # PRD: <!-- Replace with title -->
@@ -60,7 +60,7 @@ related-change: <!-- openspec/changes/CHANGE-NAME (leave blank if none) -->
      Example:
      - Templates must be valid Markdown renderable by GitHub and Claude Code
      - No new dependencies introduced
-     - Compatible with existing openspec/ SDD artifact structure -->
+     - Compatible with existing SDD artifact structure -->
 
 - <!-- NFR 1 -->
 - <!-- NFR 2 -->

@@ -154,9 +154,7 @@ SDD is the structured planning layer for substantial changes.
 ### Artifact Store Policy
 
 - `engram` — default when available; persistent memory across sessions
-- `openspec` — file-based artifacts; use only when user explicitly requests
-- `hybrid` — both backends; cross-session recovery + local files; more tokens per op
-- `none` — return results inline only; recommend enabling engram or openspec
+- `none` — return results inline only; recommend enabling engram
 
 ### Commands
 
@@ -255,7 +253,7 @@ Each phase has explicit read/write rules:
 | `sdd-verify` | spec + tasks | `verify-report` |
 | `sdd-archive` | all artifacts | `archive-report` |
 
-For phases with required dependencies, sub-agent reads directly from the backend — orchestrator passes artifact references (topic keys or file paths), NOT content itself.
+For phases with required dependencies, sub-agent reads directly from engram — orchestrator passes artifact references (topic keys), NOT content itself.
 
 #### Engram Topic Key Format
 
@@ -278,10 +276,9 @@ Sub-agents retrieve full content via two steps:
 
 ### State and Conventions
 
-Convention files under the agent's global skills directory (global) or `.agent/skills/_shared/` (workspace): `engram-convention.md`, `persistence-contract.md`, `openspec-convention.md`.
+Convention files under the agent's global skills directory (global) or `.agent/skills/_shared/` (workspace): `engram-convention.md`, `persistence-contract.md`.
 
 ### Recovery Rule
 
 - `engram` → `mem_search(...)` → `mem_get_observation(...)`
-- `openspec` → read `openspec/changes/*/state.yaml`
 - `none` → state not persisted — explain to user

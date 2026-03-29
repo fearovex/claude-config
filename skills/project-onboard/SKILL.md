@@ -38,7 +38,7 @@ Warnings:
 
 ## Recommended Command Sequence
 
-1. /project-setup     — creates .claude/CLAUDE.md, openspec/config.yaml, ai-context/ skeleton
+1. /project-setup     — creates .claude/CLAUDE.md, ai-context/ skeleton, persists context to engram
 2. /memory-init       — generates ai-context/ files from real project content
 3. /project-audit     — produces audit-report.md with score and findings
 4. /project-fix       — applies all corrections from the audit report
@@ -52,36 +52,35 @@ Stop here if Case 1.
 
 ---
 
-### Check 2 — openspec/config.yaml exists
+### Check 2 — Engram MCP reachable
 
-Read `openspec/config.yaml`.
+Check if Engram MCP is reachable (call `mem_context`).
 
-**If absent**: first check if Engram MCP is reachable (call `mem_context`).
-- If Engram is reachable AND openspec/ is absent → this is an **engram-mode project**. SDD infrastructure lives in Engram, not the filesystem. Treat the project as healthy for this check and continue to Check 3.
-- If Engram is NOT reachable AND openspec/ is absent → **Case 2** (below).
+- If Engram is reachable → SDD infrastructure lives in Engram. Treat the project as healthy for this check and continue to Check 3.
+- If Engram is NOT reachable → **Case 2** (below).
 
-**If absent and Engram not reachable → Case 2: CLAUDE.md present but no SDD infrastructure**
+**If Engram not reachable → Case 2: CLAUDE.md present but no SDD persistence**
 
 ```
 ## Diagnosis
 
-Project state: Case 2 — CLAUDE.md Without SDD Infrastructure
+Project state: Case 2 — CLAUDE.md Without SDD Persistence
 
 Detected:
 - .claude/CLAUDE.md: FOUND
-- openspec/config.yaml: NOT FOUND
 - Engram MCP: NOT REACHABLE
-- SDD cannot function without openspec/ or Engram
+- SDD cannot persist artifacts without Engram
 
 Warnings:
 - [list any ai-context/ files found or note if ai-context/ is absent]
 
 ## Recommended Command Sequence
 
-1. /project-audit     — diagnose the full scope of what is missing
-2. /project-fix       — creates openspec/ structure, adds SDD section to CLAUDE.md
-3. /memory-init       — if ai-context/ is empty or absent
-4. /project-audit     — verify score improved
+1. Ensure Engram MCP server is running and configured
+2. /project-audit     — diagnose the full scope of what is missing
+3. /project-fix       — adds SDD section to CLAUDE.md
+4. /memory-init       — if ai-context/ is empty or absent
+5. /project-audit     — verify score improved
 
 ## Notes
 project-fix will ask before every change — review each proposed action carefully.
@@ -106,7 +105,7 @@ Project state: Case 3 — Partial SDD (ai-context/ is sparse)
 
 Detected:
 - .claude/CLAUDE.md: FOUND
-- openspec/config.yaml: FOUND
+- Engram MCP: REACHABLE
 - ai-context/ populated files: [N] of 5 (minimum needed: 3)
 - Missing or empty: [list each absent/stub file]
 
@@ -144,9 +143,9 @@ Warnings:
 
 ### Check 5 — Orphaned SDD changes
 
-Read `openspec/changes/` directory, excluding `archive/`. For each subdirectory, check whether `tasks.md` and `verify-report.md` exist.
+Search engram for active SDD changes: `mem_search(query: "sdd/", project: "{project}")`. Filter for changes that have a state artifact but no archive-report, and check if they have tasks and verify-report artifacts.
 
-**If any change is missing `tasks.md` OR `verify-report.md` → Case 5: Orphaned or stale changes**
+**If any change is missing `tasks` OR `verify-report` artifacts → Case 5: Orphaned or stale changes**
 
 ```
 ## Diagnosis
@@ -155,11 +154,11 @@ Project state: Case 5 — Orphaned SDD Changes
 
 Detected:
 - .claude/CLAUDE.md: FOUND
-- openspec/config.yaml: FOUND
+- Engram MCP: REACHABLE
 - ai-context/: adequate ([N] populated files)
 - Orphaned changes:
-  - [change-name]: missing [tasks.md | verify-report.md]
-  - [change-name]: missing [tasks.md | verify-report.md]
+  - [change-name]: missing [tasks | verify-report]
+  - [change-name]: missing [tasks | verify-report]
 
 Warnings:
 - [local skills warning if Check 4 triggered]
@@ -174,7 +173,7 @@ Warnings:
 3. /project-audit    — verify D3 shows no orphaned changes
 
 ## Notes
-To discard a dead-end change: manually move its folder to openspec/changes/archive/YYYY-MM-DD-<name>/
+To discard a dead-end change: run /sdd-archive <name> to close it in engram.
 See ai-context/scenarios.md → Case 5 for failure modes and recovery steps.
 ```
 
@@ -193,9 +192,9 @@ Project state: Case 6 — Fully Configured
 
 Detected:
 - .claude/CLAUDE.md: FOUND
-- openspec/config.yaml: FOUND
+- Engram MCP: REACHABLE
 - ai-context/: adequate ([N] populated files)
-- openspec/changes/: no orphaned changes
+- Engram: no orphaned SDD changes
 
 Warnings:
 - [local skills warning if Check 4 triggered]

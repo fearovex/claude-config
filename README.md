@@ -36,7 +36,7 @@ agent-config/
 └── output-styles/         # Output persona (gentleman.md)
 ```
 
-**Persistence**: Engram (default) for cross-session memory. OpenSpec (fallback) for file-based artifacts. Both created in TARGET projects by `/project-setup` — not stored in this repo.
+**Persistence**: Engram (default) for cross-session memory. Created in TARGET projects by `/project-setup` — not stored in this repo.
 
 ---
 
@@ -56,7 +56,7 @@ SKILL.md on demand and executes its instructions.
 | `sdd-tasks` | Breaks the design into a phased task plan |
 | `sdd-apply` | Implements tasks following specs and design |
 | `sdd-verify` | Verifies implementation against acceptance criteria |
-| `sdd-archive` | Archives a completed change into `openspec/changes/archive/` |
+| `sdd-archive` | Archives a completed change by saving a closure report to engram |
 
 ### Meta-tool Skills
 
@@ -137,7 +137,7 @@ git commit -m "chore: sync user memory"
 
 `sync.sh` is a one-way operation: `~/.claude/memory/` → `repo/memory/`.
 
-It does not sync skills, hooks, `CLAUDE.md`, `ai-context/`, or `openspec/`.
+It does not sync skills, hooks, `CLAUDE.md`, or `ai-context/`.
 
 ### Making Changes to Skills or CLAUDE.md
 
@@ -212,8 +212,7 @@ explore (optional)
 Start with `/sdd-explore <topic>` to investigate, then `/sdd-propose <change>` to create a proposal.
 Proceed through spec + design + tasks, then apply and verify before archiving.
 
-SDD artifacts are stored in `openspec/changes/<change-name>/` and archived to
-`openspec/changes/archive/YYYY-MM-DD-<name>/` when complete.
+SDD artifacts are persisted to Engram using topic keys under `sdd/<change-name>/`.
 
 ---
 
@@ -239,7 +238,7 @@ SDD artifacts are stored in `openspec/changes/<change-name>/` and archived to
 /sdd-explore <change-name>
 /sdd-propose <change-name>
 
-# 2. Review the generated proposal, spec, design, and tasks in openspec/changes/<change-name>/
+# 2. Review the generated proposal, spec, design, and tasks (persisted in engram)
 
 # 3. Implement
 /sdd-apply <change-name>

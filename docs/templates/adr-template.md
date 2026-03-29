@@ -27,7 +27,7 @@ Proposed
 <!-- State the decision in active voice starting with "We will..." or "The system uses...".
      Be specific. This section should be unambiguous enough that a new contributor
      can understand exactly what was decided without reading any other document.
-     Example: "We will store all SDD artifacts as Markdown files inside openspec/changes/
+     Example: "We will store all SDD artifacts in Engram using topic keys under sdd/{change-name}/
      so that decisions and plans are version-controlled alongside the configuration." -->
 
 We will ...

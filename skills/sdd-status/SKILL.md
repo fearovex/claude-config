@@ -1,7 +1,7 @@
 ---
 name: sdd-status
 description: >
-  Shows the status of all active SDD changes and orchestrator state. Supports engram and openspec modes.
+  Shows the status of all active SDD changes and orchestrator state. Uses engram for persistence.
   Trigger: /sdd-status, show active changes, what changes are in progress, SDD status, orchestrator status.
 format: procedural
 model: haiku
@@ -9,7 +9,7 @@ model: haiku
 
 # sdd-status
 
-> Shows the status of all active SDD changes and orchestrator configuration. Supports engram and openspec modes.
+> Shows the status of all active SDD changes and orchestrator configuration.
 
 **Triggers**: `/sdd-status`, SDD status, active changes, show open changes, what changes are in progress, orchestrator status
 
@@ -20,8 +20,7 @@ model: haiku
 ### Step 0 — Detect persistence mode
 
 Follow `skills/_shared/persistence-contract.md` **Mode Detection for Standalone Skills**:
-1. If `openspec/config.yaml` has `artifact_store.mode` → use that value
-2. If absent: check Engram MCP reachability → if reachable: `engram`, else `none`
+1. Check Engram MCP reachability → if reachable: `engram`, else `none`
 
 ### Step 1 — Locate active changes
 
@@ -31,132 +30,89 @@ mem_search(query: "sdd/", project: "{project}") → list all SDD-related observa
 ```
 Filter for artifacts that do NOT have an `archive-report` topic_key (those are completed).
 
-**openspec / hybrid mode**: Check if `openspec/changes/` exists. If absent and mode is openspec:
-```
-No openspec/changes/ directory found.
-To start a new change: /sdd-explore <topic> or /sdd-propose <change-name>
-```
-
 **none mode**: Report "No persistence configured — cannot show change status."
 
-Stop here if no changes found in any mode.
+Stop here if no changes found.
 
 ---
 
-### Step 2 — List active change directories
+### Step 2 — Classify and group changes
 
-Read all directories directly under `openspec/changes/` EXCLUDING `archive/`.
+For each active change found in engram, check which artifact types exist:
 
-Each subdirectory is a change. If there are no non-archive directories:
+- `explore` → marks explore phase done
+- `proposal` → marks propose phase done
+- `spec` → marks spec phase done
+- `design` → marks design phase done
+- `tasks` → marks tasks phase done
+- `verify-report` → marks verify phase done
 
-```
-No active changes found in openspec/changes/.
-
-Archived: [N] changes in openspec/changes/archive/
-To start a new change: /sdd-explore <topic> or /sdd-propose <change-name>
-```
-
-Stop here.
-
----
-
-### Step 3 — Check artifacts for each change
-
-For each change directory, check the presence of these files:
-
-- `exploration.md` → marks explore phase done
-- `proposal.md` → marks propose phase done
-- `specs/` directory (non-empty) → marks spec phase done
-- `design.md` → marks design phase done
-- `tasks.md` → marks tasks phase done
-- `verify-report.md` → marks verify phase done
-
----
-
-### Step 4 — Classify and group changes
-
-**4a — Infer phase label for each change:**
+**Infer phase label for each change:**
 
 | Condition                                                 | Phase Label                         |
 | --------------------------------------------------------- | ----------------------------------- |
 | No artifacts at all                                       | not started                         |
-| only exploration.md (no proposal.md)                     | explore only — awaiting proposal    |
-| proposal.md present, specs/ and design.md absent         | propose done — awaiting spec/design |
-| proposal.md + specs/ + design.md present, tasks.md absent | spec+design done — awaiting tasks  |
-| tasks.md present, verify-report.md absent                 | tasks done — ready for apply/verify |
-| verify-report.md present                                  | verify done — ready to archive      |
+| only explore (no proposal)                                | explore only — awaiting proposal    |
+| proposal present, spec and design absent                  | propose done — awaiting spec/design |
+| proposal + spec + design present, tasks absent            | spec+design done — awaiting tasks   |
+| tasks present, verify-report absent                       | tasks done — ready for apply/verify |
+| verify-report present                                     | verify done — ready to archive      |
 
-**4b — Detect structural anomalies (informational only, never blocks):**
-
-For each change directory:
-- **Orphan explore folder**: name starts with `explore-` AND only `exploration.md` is present (no `proposal.md`) — flag as `⚠ orphan explore folder`
-- **Double-dated name**: name matches `/^\d{4}-\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-/` — flag as `⚠ double-dated name`
-- **Missing proposal only**: no artifacts at all — flag as `⚠ empty`
-
-**4c — Group changes by action bucket:**
+**Group changes by action bucket:**
 
 ```
-READY TO ARCHIVE    : verify-report.md present
-AWAITING SPEC/DESIGN: proposal.md present, tasks.md absent, (specs/ or design.md absent)
-AWAITING APPLY      : tasks.md present, verify-report.md absent
-EXPLORE ONLY        : only exploration.md, no proposal.md
-ANOMALIES           : orphan explore folders, double-dated names, or empty dirs
+READY TO ARCHIVE    : verify-report present
+AWAITING SPEC/DESIGN: proposal present, tasks absent, (spec or design absent)
+AWAITING APPLY      : tasks present, verify-report absent
+EXPLORE ONLY        : only explore, no proposal
 ```
 
 ---
 
-### Step 5 — Render output
+### Step 3 — Render output
 
 Output format (grouped, no redundancy):
 
 ```
-● Active SDD Changes
+Active SDD Changes
 
-── Ready to Archive ──────────────────────────────────────
-  [change-name]   explore ✓  proposal ✓  spec ✓  design ✓  tasks ✓  verify ✓
+-- Ready to Archive --
+  [change-name]   explore ok  proposal ok  spec ok  design ok  tasks ok  verify ok
 
-── Awaiting Apply/Verify ─────────────────────────────────
-  [change-name]   explore ✓  proposal ✓  spec ✓  design ✓  tasks ✓  verify -
+-- Awaiting Apply/Verify --
+  [change-name]   explore ok  proposal ok  spec ok  design ok  tasks ok  verify -
 
-── Awaiting Spec/Design ──────────────────────────────────
-  [change-name]   explore -  proposal ✓  spec -  design -  tasks -  verify -
+-- Awaiting Spec/Design --
+  [change-name]   explore -  proposal ok  spec -  design -  tasks -  verify -
 
-── Explore Only (no proposal yet) ───────────────────────
-  [change-name]   explore ✓  proposal -
+-- Explore Only (no proposal yet) --
+  [change-name]   explore ok  proposal -
 
-── Anomalies ─────────────────────────────────────────────
-  [change-name]   ⚠ double-dated name — run /sdd-archive to fix on next archive
-  [change-name]   ⚠ orphan explore folder — consider /sdd-propose or delete manually
-
-Archived: [N] changes in openspec/changes/archive/
 Next actions:
   - [N] ready to archive → /sdd-archive <name>
   - [N] awaiting spec/design → /sdd-spec <name> + /sdd-design <name>
-  - [N] anomalies detected (see above)
 ```
 
 Rules for this format:
 - Each group header is shown only if the group has at least one entry
-- Artifact columns: show only `explore`, `proposal`, `spec`, `design`, `tasks`, `verify` — one line per change, space-separated
-- Use `✓` for present, `-` for absent
-- "Next actions" section is omitted if all groups are empty or only "Archived" has entries
+- Use `ok` for present, `-` for absent
+- "Next actions" section is omitted if all groups are empty
 - Do NOT repeat each change's phase in a separate list — the group it belongs to IS its phase
-- If `N` archived changes cannot be determined (archive/ absent), show `0`
 
 ---
 
-### Step 6 — Orchestrator state (absorbed from orchestrator-status)
+### Step 4 — Orchestrator state
 
 Read the project's `CLAUDE.md` and report:
-- Persistence mode: engram / openspec / hybrid / none
+- Persistence mode: engram / none
 - Skills registry count (from `## Skills` section)
 - Configuration source path
 
 Include this as a header section BEFORE the active changes output:
 
 ```
-● Orchestrator
-  Mode: [engram|openspec|hybrid|none]
+Orchestrator
+  Mode: [engram|none]
   Skills: [N] registered
   Config: [path to CLAUDE.md]
 ```
@@ -165,9 +121,6 @@ Include this as a header section BEFORE the active changes output:
 
 ## Rules
 
-- Read-only: I only inspect files, directories, and engram — no mutations
+- Read-only: I only inspect engram — no mutations
 - I never modify any files in this phase
-- If `openspec/changes/` does not exist, I report gracefully and suggest `/sdd-explore <topic>` or `/sdd-propose <change-name>`
-- Archived changes (under `archive/`) are counted but not listed in the active table
-- The `specs/` check is satisfied by the presence of the directory with at least one file inside
-- I do not attempt to parse file contents — presence/absence only
+- If no engram artifacts found, I report gracefully and suggest `/sdd-explore <topic>` or `/sdd-propose <change-name>`

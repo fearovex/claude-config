@@ -6,7 +6,7 @@ description: >
 format: procedural
 model: sonnet
 metadata:
-  version: "2.1"
+  version: "3.0"
 ---
 
 # sdd-verify
@@ -37,8 +37,7 @@ When the orchestrator launches this sub-agent, it resolves the skill path using:
 
 ```
 1. .claude/skills/sdd-verify/SKILL.md     (project-local — highest priority)
-2. openspec/config.yaml skill_overrides   (explicit redirect)
-3. ~/.claude/skills/sdd-verify/SKILL.md   (global catalog — fallback)
+2. ~/.claude/skills/sdd-verify/SKILL.md   (global catalog — fallback)
 ```
 
 Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md` for the full algorithm.
@@ -47,25 +46,17 @@ Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md`
 
 ### Step 1 — Load all artifacts
 
-**Mode detection (inline, non-blocking):**
-Read `artifact_store.mode` from orchestrator launch context.
-- If absent and Engram MCP is reachable → default to `engram`
-- If absent and Engram MCP is not reachable → default to `none`
-
 I read:
 
 - The tasks artifact — what was planned:
-  - **engram**: `mem_search(query: "sdd/{change-name}/tasks")` → `mem_get_observation(id)`.
-  - **openspec** / **hybrid**: `openspec/changes/<change-name>/tasks.md`
-  - **none**: tasks content passed inline from orchestrator.
+  - `mem_search(query: "sdd/{change-name}/tasks")` → `mem_get_observation(id)`.
+  - If not found and Engram not reachable: tasks content passed inline from orchestrator.
 - The spec artifact — what was required:
-  - **engram**: `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
-  - **openspec** / **hybrid**: `openspec/changes/<change-name>/specs/`
-  - **none**: spec content passed inline from orchestrator.
+  - `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
+  - If not found and Engram not reachable: spec content passed inline from orchestrator.
 - The design artifact — how it was designed:
-  - **engram**: `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
-  - **openspec** / **hybrid**: `openspec/changes/<change-name>/design.md`
-  - **none**: design content passed inline from orchestrator.
+  - `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
+  - If not found and Engram not reachable: design content passed inline from orchestrator.
 - The code files that were created/modified
 
 ### Step 2 — Completeness Check (Tasks)
@@ -148,12 +139,12 @@ I verify that the design decisions were followed:
 
 ### Step 6 — Run Tests
 
-I resolve test commands using a three-level priority model. I check `openspec/config.yaml` in order:
+I resolve test commands using a three-level priority model. I check `config.yaml (at project root)` in order:
 
 **Level 1 — `verify_commands` config key (highest priority — checked first):**
 
 ```
-if openspec/config.yaml exists and has key verify_commands:
+if config.yaml (at project root) exists and has key verify_commands:
     → use the listed commands in order
     → do NOT check level 2 or run auto-detection
     → for each command:
@@ -171,7 +162,7 @@ Commands are assumed non-destructive; the user is responsible for this.
 **Level 2 — `verify.test_commands` config key (checked when verify_commands is absent):**
 
 ```
-if openspec/config.yaml exists and has key verify.test_commands:
+if config.yaml (at project root) exists and has key verify.test_commands:
     if verify.test_commands is not a list:
         → emit WARNING: "verify.test_commands is not a list — treating as absent"
         → proceed to level 3 (auto-detection)
@@ -223,7 +214,7 @@ I detect the project's build/type-check command and execute it.
 **Config override check — `verify.build_command` and `verify.type_check_command` (checked before auto-detection):**
 
 ```
-if openspec/config.yaml exists and has key verify.build_command:
+if config.yaml (at project root) exists and has key verify.build_command:
     if verify.build_command is not a string:
         → emit WARNING: "verify.build_command is not a string — treating as absent"
         → proceed to auto-detection for build command
@@ -231,7 +222,7 @@ if openspec/config.yaml exists and has key verify.build_command:
         → use verify.build_command as the build/type-check command
         → skip the auto-detection table below for the build/type-check command
 
-if openspec/config.yaml exists and has key verify.type_check_command:
+if config.yaml (at project root) exists and has key verify.type_check_command:
     if verify.type_check_command is not a string:
         → emit WARNING: "verify.type_check_command is not a string — treating as absent"
         → proceed to auto-detection for type check command
@@ -274,7 +265,7 @@ This step is **only active** when a coverage threshold is configured. It is advi
 
 **Process:**
 
-1. I read `openspec/config.yaml` and look for `coverage.threshold` (e.g., `coverage: { threshold: 80 }`)
+1. I read `config.yaml (at project root)` and look for `coverage.threshold` (e.g., `coverage: { threshold: 80 }`)
 2. **If no threshold is configured**: I skip this step entirely and report "Coverage Validation: SKIPPED — no threshold configured"
 3. **If a threshold is configured**:
    a. I parse the coverage percentage from the Step 6 test output (looking for common coverage summary formats)
@@ -337,13 +328,11 @@ Abstract reasoning or code inspection alone MUST NOT suffice to mark a criterion
 
 **The `## Tool Execution` section is mandatory in every `verify-report.md` — even when tool execution was skipped.** When skipped, the section MUST still appear with: "Test Execution: SKIPPED — no test runner detected".
 
-I persist the verify report based on the active persistence mode:
+I persist the verify report to engram:
 
-**Write dispatch:**
-- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/verify-report`, `type: architecture`, `project: {project}`, content = full report markdown. Do NOT write any file.
-- **openspec**: Write `openspec/changes/<change-name>/verify-report.md`.
-- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem write.
-- **none**: Skip all write operations. Return report content inline only.
+Call `mem_save` with `topic_key: sdd/{change-name}/verify-report`, `type: architecture`, `project: {project}`, content = full report markdown. Do NOT write any file.
+
+If Engram MCP is not reachable: skip persistence. Return report content inline only.
 
 **Persisted artifact** (compact — only what sdd-archive and the orchestrator consume):
 
@@ -428,11 +417,7 @@ The conversational output MUST still include all detail sections from Steps 2-9 
 {
   "status": "ok|warning|failed",
   "summary": "Verification [change-name]: [verdict]. [N] critical, [M] warnings.",
-  "artifacts": "<mode-dependent — see write dispatch in Step 10>",
-  // engram   → ["engram:sdd/{change-name}/verify-report"]
-  // openspec → ["openspec/changes/<name>/verify-report.md"]
-  // hybrid   → ["engram:sdd/{change-name}/verify-report", "openspec/changes/<name>/verify-report.md"]
-  // none     → []
+  "artifacts": ["engram:sdd/{change-name}/verify-report"],
   "test_execution": {
     "runner": "[detected runner or null]",
     "command": "[command or null]",

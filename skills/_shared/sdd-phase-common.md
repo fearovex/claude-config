@@ -52,14 +52,6 @@ mem_save(
 
 `topic_key` enables upserts — saving again updates, not duplicates.
 
-### OpenSpec mode
-
-File was already written during the phase's main step. No additional action needed.
-
-### Hybrid mode
-
-Do BOTH: write the file to the filesystem AND call `mem_save` as above.
-
 ### None mode
 
 Return result inline only. Do not write any files or call `mem_save`.
@@ -81,7 +73,7 @@ Example:
 ```markdown
 **Status**: success
 **Summary**: Proposal created for `{change-name}`. Defined scope, approach, and rollback plan.
-**Artifacts**: Engram `sdd/{change-name}/proposal` | `openspec/changes/{change-name}/proposal.md`
+**Artifacts**: Engram `sdd/{change-name}/proposal`
 **Next**: sdd-spec or sdd-design
 **Risks**: None
 **Skill Resolution**: injected — 3 skills (react-19, typescript, tailwind-4)
@@ -96,11 +88,10 @@ When the orchestrator infers a change name from a user description:
 2. Remove stop words: `a, an, the, to, for, with, in, of, by, on, at, from, and, or, but, is, are, was, be, this, that, fix, add, update, showing, wrong, year, users, user`
 3. Tokenize on whitespace/non-alphanumeric, keep first 5 meaningful tokens
 4. Prefix with `YYYY-MM-DD-`, join with hyphens, truncate to 50 chars
-5. Collision avoidance: if slug exists (in engram via `mem_search` or in `openspec/changes/`), append `-2`, `-3`, etc.
+5. Collision avoidance: if slug exists in engram via `mem_search`, append `-2`, `-3`, etc.
 
-The slug becomes the artifact identifier in ALL modes:
+The slug becomes the artifact identifier:
 - **engram**: topic_key `sdd/{slug}/proposal`, `sdd/{slug}/spec`, etc.
-- **openspec**: directory `openspec/changes/{slug}/`
 
 ## F. Project Context Load (Step 0)
 
@@ -126,31 +117,6 @@ Loaded context is enrichment — it does NOT override explicit content in the pr
 
 This sub-step is **non-blocking**: any failure MUST produce at most an INFO-level note.
 
-If `openspec/specs/` directory does not exist: `INFO: openspec/specs/ not found — skipping` and skip.
+If `ai-context/features/` directory exists, load matching domain files as behavioral context using the filename-stem matching heuristic (split change name on hyphens, match stems against filenames). Cap at 3 matches. Otherwise skip.
 
-**Index-first lookup algorithm:**
-
-```
-STEP 1: Try index-first lookup
-  IF openspec/specs/index.yaml exists:
-    a) Parse index.yaml → read domains[] array
-    b) For each domain: score EXACT (1.0) keyword match or STEM (0.5) substring match
-    c) Collect scoring > 0, sort by (score desc, domain asc), cap at 3
-    d) Load openspec/specs/<domain>/spec.md for each matched domain
-    e) Log: "Spec context loaded from index: [domain/spec.md, ...]"
-    f) Return (do not fall through)
-
-  [If index present but no domain matched OR index absent]: fall through to STEP 2
-
-STEP 2: Stem-based directory matching (fallback)
-  a) List subdirs in openspec/specs/
-  b) Split change_name on "-" → stems; match if any stem (len > 1) appears in subdir name
-  c) Cap at 3 matches, load spec.md for each
-  d) Log fallback note
-
-[If no match]: INFO note, proceed without loaded specs.
-```
-
-Loaded specs are **authoritative behavioral contracts** (precedence over `ai-context/` for behavioral questions). Include loaded spec paths in artifacts list (read, not written).
-
-The full algorithm is documented above — cap at 3 domains, index-first then stem fallback.
+Loaded feature files are **authoritative behavioral contracts** (precedence over other context for behavioral questions). Include loaded file paths in artifacts list (read, not written).

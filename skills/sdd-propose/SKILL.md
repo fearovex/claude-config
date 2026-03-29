@@ -6,7 +6,7 @@ description: >
 format: procedural
 model: sonnet
 metadata:
-  version: "2.1"
+  version: "3.0"
 ---
 
 # sdd-propose
@@ -31,8 +31,7 @@ When the orchestrator launches this sub-agent, it resolves the skill path using:
 
 ```
 1. .claude/skills/sdd-propose/SKILL.md     (project-local — highest priority)
-2. openspec/config.yaml skill_overrides    (explicit redirect)
-3. ~/.claude/skills/sdd-propose/SKILL.md   (global catalog — fallback)
+2. ~/.claude/skills/sdd-propose/SKILL.md   (global catalog — fallback)
 ```
 
 Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md` for the full algorithm.
@@ -61,20 +60,20 @@ This step is **non-blocking**: any failure (missing directory, unreadable file, 
 
 5. **When files are loaded**: note the loaded paths in the Step 6 output summary and include them in the `artifacts` list (marked as read, not written).
 
-**Algorithm reference** (from design.md):
+**Algorithm reference**:
 
 ```
 stems = change_name.split("-").filter(s => s.length > 1)
 for each feature_file in ai-context/features/ (excluding _ prefix files):
   domain = feature_file.stem  (filename without .md)
-  if domain in change_name OR any stem in domain → match
+  if domain in change_name OR any stem in domain -> match
 ```
 
 **Examples**:
 
-- change `add-payments-gateway` → stems `[add, payments, gateway]` → matches `features/payments.md`
-- change `auth-token-refresh` → stems `[auth, token, refresh]` → matches `features/auth.md`
-- change `improve-project-audit` → stems `[improve, project, audit]` → no match → skip silently
+- change `add-payments-gateway` -> stems `[add, payments, gateway]` -> matches `features/payments.md`
+- change `auth-token-refresh` -> stems `[auth, token, refresh]` -> matches `features/auth.md`
+- change `improve-project-audit` -> stems `[improve, project, audit]` -> no match -> skip silently
 
 ### Step 0c — Spec context preload
 
@@ -84,12 +83,10 @@ Follow `skills/_shared/sdd-phase-common.md` **Section G** (Spec Context Preload)
 
 ### Step 1 — Read prior context
 
-I load the exploration artifact from the active persistence mode:
-- **engram**: `mem_search(query: "sdd/{change-name}/explore")` → `mem_get_observation(id)` for full content.
-- **openspec** / **hybrid**: Read `openspec/changes/<change-name>/exploration.md` if it exists.
-- **none**: Skip — no prior exploration available.
+I load the exploration artifact from engram:
+- `mem_search(query: "sdd/{change-name}/explore")` → `mem_get_observation(id)` for full content.
+- If not found: skip — no prior exploration available.
 
-If `openspec/config.yaml` exists, I read the project rules.
 If `ai-context/architecture.md` exists, I consult it for coherence.
 
 ### Step 2 — Understand the request in depth
@@ -100,43 +97,30 @@ If the request is ambiguous, I ask:
 - Are there known constraints (performance, compatibility, etc.)?
 - Are there parts that are explicitly OUT of scope?
 
-### Step 3 — Create the change directory (openspec/hybrid only)
+### Step 3 — Write proposal
 
-**Mode detection (inline, non-blocking):**
-Read `artifact_store.mode` from orchestrator launch context.
-- If absent and Engram MCP is reachable → default to `engram`
-- If absent and Engram MCP is not reachable → default to `none`
-
-- **engram** / **none**: Skip directory creation — no filesystem artifacts.
-- **openspec** / **hybrid**: Create `openspec/changes/<change-name>/` directory.
-
-### Step 4 — Write proposal.md
-
-#### Step 4a — Generate Supersedes section
+#### Step 3a — Generate Supersedes section
 
 Before writing the proposal, I scan for replacement/removal intent:
 
 1. Read the exploration artifact (if available) and check `## Branch Diff`, `## Prior Attempts`, and `## Contradiction Analysis` sections:
-   - **engram**: `mem_search(query: "sdd/{change-name}/explore")` → `mem_get_observation(id)`.
-   - **openspec** / **hybrid**: Read `openspec/changes/<change-name>/exploration.md`.
-   - **none**: Skip exploration input.
+   - `mem_search(query: "sdd/{change-name}/explore")` → `mem_get_observation(id)`.
+   - If not found: skip exploration input.
 2. Scan the user's description and any pre-seeded `## Context Notes` in the proposal for patterns: "remove X", "no longer X", "delete X", "replace X with Y".
 3. From the above, build the `## Supersedes` section:
    - **If nothing is being removed or replaced**: state `"None — this is a purely additive change."`
    - **If removals or replacements are found**: list each item under `### REMOVED`, `### REPLACED`, or `### CONTRADICTED` subsections as appropriate.
 4. **Validation**: if a Supersedes entry claims to "remove" something but describes adding, emit a `MUST_RESOLVE` warning and pause for user confirmation.
 
-#### Step 4b — Write proposal.md
+#### Step 3b — Persist proposal
 
-I persist the proposal artifact based on the active persistence mode:
+I persist the proposal artifact to engram:
 
-**Write dispatch:**
-- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/proposal`, `type: architecture`, `project: {project}`, content = full proposal markdown. Do NOT write any file.
-- **openspec**: Write `openspec/changes/<change-name>/proposal.md` with full proposal content.
-- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem write.
-- **none**: Skip all write operations. Return proposal content inline only.
+Call `mem_save` with `topic_key: sdd/{change-name}/proposal`, `type: architecture`, `project: {project}`, content = full proposal markdown. Do NOT write any file.
 
-Content format (applies to all write modes):
+If Engram MCP is not reachable: skip persistence. Return proposal content inline only.
+
+Content format:
 
 ```markdown
 # Proposal: [change-name]
@@ -223,15 +207,15 @@ Must be concrete: which files, which commands, which steps.]
 [Low (hours) / Medium (1-2 days) / High (several days)]
 ```
 
-### Step 5 — Preserve conversation context
+### Step 4 — Preserve conversation context
 
 This step is **non-blocking**: if no conversation context is available, skip silently.
 
-1. Scan the user's original request and any pre-seeded `## Context Notes` in proposal.md for:
+1. Scan the user's original request and any pre-seeded `## Context Notes` in proposal for:
    - Explicit removal/replacement intents ("remove X", "no longer needed", "delete Y")
    - Platform or environment constraints ("mobile must not", "not on web", "desktop only")
    - Cautions or provisional notes ("careful with Z", "provisional, pending W")
-2. If any of the above are found, append a `## Context` section to proposal.md:
+2. If any of the above are found, append a `## Context` section to proposal:
 
 ```markdown
 ## Context
@@ -253,15 +237,14 @@ Recorded from conversation at [YYYY-MM-DDTHH:MMZ]:
 
 3. If nothing notable is found: skip this section — do NOT add an empty `## Context` section.
 
-### Step 6 — Contradiction Resolution documentation
+### Step 5 — Contradiction Resolution documentation
 
-This step is **non-blocking**: only runs if contradictions were detected in exploration.md.
+This step is **non-blocking**: only runs if contradictions were detected in exploration.
 
 1. Read the exploration artifact's `## Contradiction Analysis` section:
-   - **engram**: `mem_search(query: "sdd/{change-name}/explore")` → `mem_get_observation(id)` → extract section.
-   - **openspec** / **hybrid**: Read `openspec/changes/<change-name>/exploration.md`.
-   - **none**: Skip — no exploration available.
-2. For each **CERTAIN** contradiction found, add a `## Contradiction Resolution` section to proposal.md documenting each one and its resolution approach:
+   - `mem_search(query: "sdd/{change-name}/explore")` → `mem_get_observation(id)` → extract section.
+   - If not found: skip — no exploration available.
+2. For each **CERTAIN** contradiction found, add a `## Contradiction Resolution` section to proposal documenting each one and its resolution approach:
 
 ```markdown
 ## Contradiction Resolution
@@ -275,22 +258,7 @@ This step is **non-blocking**: only runs if contradictions were detected in expl
 
 3. For each **UNCERTAIN** contradiction: do NOT add it here — those may be handled by the orchestrator before propose runs as part of a multi-phase flow. If propose runs via direct invocation, document the UNCERTAIN contradictions in `## Risks` instead.
 
-### Step 7 — PRD Shell Generation
-
-This step is **non-blocking**: any failure produces a warning in the output, never `status: blocked` or `status: failed`.
-
-**Note**: PRD shell generation only applies to **openspec** and **hybrid** modes. In **engram** or **none** mode, skip this step entirely — PRDs are filesystem-only artifacts.
-
-1. **Idempotency check**: if `openspec/changes/<change-name>/prd.md` already exists, skip this step entirely — leave the file untouched.
-2. **Template check**: if `docs/templates/prd-template.md` does not exist, log the warning `"PRD template not found — skipping PRD shell creation"` and skip.
-3. **Copy and fill frontmatter**: copy `docs/templates/prd-template.md` to `openspec/changes/<change-name>/prd.md` and fill the following frontmatter fields:
-   - `title`: derived from `<change-name>` (replace hyphens with spaces, title-case)
-   - `date`: today's date in `YYYY-MM-DD` format
-   - `related-change`: `openspec/changes/<change-name>/`
-4. **User note**: inform the user that `prd.md` is optional and intended for product-facing changes. It can be left blank or deleted if the change is purely technical.
-5. **Artifacts**: add `openspec/changes/<change-name>/prd.md` to the artifacts list **only** if it was created in this run (not if it already existed or was skipped).
-
-### Step 8 — Summary to orchestrator
+### Step 6 — Summary to orchestrator
 
 I return a clear executive summary:
 
@@ -312,11 +280,7 @@ Next step: specs + design (can run in parallel)
 {
   "status": "ok|warning|blocked",
   "summary": "Proposal [name]: [intent in one line]. Risk [level].",
-  "artifacts": "<mode-dependent — see write dispatch in Step 4b>",
-  // engram   → ["engram:sdd/{change-name}/proposal"]
-  // openspec → ["openspec/changes/<name>/proposal.md"]
-  // hybrid   → ["engram:sdd/{change-name}/proposal", "openspec/changes/<name>/proposal.md"]
-  // none     → []
+  "artifacts": ["engram:sdd/{change-name}/proposal"],
   "next_recommended": ["sdd-spec", "sdd-design"],
   "risks": ["[main risk if any]"]
 }
@@ -326,7 +290,7 @@ Next step: specs + design (can run in parallel)
 
 ## Rules
 
-- ALWAYS create `proposal.md` — it is the entry point for all subsequent phases
+- ALWAYS create the proposal — it is the entry point for all subsequent phases
 - Every proposal MUST have a rollback plan and success criteria
 - Success criteria must be MEASURABLE and VERIFIABLE (not vague)
 - Excluded scope is as important as included scope — it prevents scope creep

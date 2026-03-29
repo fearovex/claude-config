@@ -17,12 +17,12 @@ feature-domain-expert, domain invariants, domain context, feature doc
 
 ## Patterns
 
-### Pattern 1: Feature file vs. openspec spec — the critical distinction
+### Pattern 1: Feature file vs. SDD spec — the critical distinction
 
 These two file types serve fundamentally different purposes and MUST NOT duplicate each other's
 content:
 
-| Aspect | `ai-context/features/<domain>.md` | `openspec/specs/<domain>/spec.md` |
+| Aspect | `ai-context/features/<domain>.md` | SDD spec (engram artifact) |
 |--------|----------------------------------|----------------------------------|
 | **Purpose** | Permanent business domain knowledge | Behavioral delta spec for a specific change |
 | **Lifetime** | Lives forever — updated but never deleted | Created per change — eventually archived |
@@ -31,7 +31,7 @@ content:
 | **Who reads it** | `sdd-propose` Step 0, `sdd-spec` Step 0, human developers | `sdd-apply` (acceptance criteria), `sdd-verify` |
 | **Cross-change value** | High — encodes knowledge that predates and outlasts any single change | Low — describes behavior introduced or modified by one specific change |
 
-**Rule**: if you are writing GIVEN/WHEN/THEN scenarios, it belongs in `openspec/specs/`. If you
+**Rule**: if you are writing GIVEN/WHEN/THEN scenarios, it belongs in a SDD spec artifact. If you
 are writing a business rule that will still be true five SDD cycles from now, it belongs in
 `ai-context/features/`.
 
@@ -182,7 +182,7 @@ Below is an abbreviated illustration of the pattern each section should follow:
 | Entity        | Key Fields                         | Constraints                               |
 |---------------|------------------------------------|--------------------------------------------|
 | Skill         | directory name, SKILL.md, format   | format must be procedural|reference|anti-pattern |
-| SDD Change    | proposal.md, design.md, tasks.md   | stored under openspec/changes/<name>/      |
+| SDD Change    | proposal, design, tasks             | stored in engram as sdd/<name>/* artifacts |
 ```
 
 **Integration Points** (table of systems with direction and contract):
@@ -221,8 +221,8 @@ For the full worked example, read `ai-context/features/sdd-meta-system.md`.
 - `_template.md` and any file with a leading underscore are excluded from the domain preload
   heuristic. They MUST NOT be loaded by SDD phases.
 - Feature files encode permanent domain knowledge — they are updated but NEVER deleted or archived.
-  Do not confuse them with `openspec/specs/<domain>/spec.md`, which is created per change and
-  eventually archived.
+  Do not confuse them with SDD spec artifacts (stored in engram as `sdd/<change>/spec`), which are
+  created per change and eventually archived.
 - The domain preload step in `sdd-propose` and `sdd-spec` is non-blocking. A missing
   `ai-context/features/` directory or a non-matching slug MUST NOT produce a warning or failure.
   The phase always proceeds normally.
@@ -231,5 +231,5 @@ For the full worked example, read `ai-context/features/sdd-meta-system.md`.
   manual authoring.
 - `project-analyze` does NOT write to `ai-context/features/`. Feature files require domain expert
   judgment; they must not be auto-overwritten by a structural scan.
-- The `feature_docs:` block in `openspec/config.yaml` is reserved for V2 audit integration. Do not
+- The `feature_docs:` block in project config is reserved for V2 audit integration. Do not
   activate it in V1.

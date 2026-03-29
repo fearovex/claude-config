@@ -161,89 +161,12 @@ I process actions in order of severity. Each phase has a checkpoint.
 
 #### Phase 1 — Critical Corrections (block SDD)
 
-**Mode detection** (run once before 1.1–1.2):
-1. If `openspec/config.yaml` exists AND has `artifact_store.mode` → active mode = that value.
-2. If absent: check if Engram MCP is reachable (`mem_context`) → if yes: active mode = `engram`; if no: active mode = `none`.
-
-If active mode is `engram`: SKIP steps 1.1 and 1.2. Log `INFO: project uses engram mode — skipping openspec infrastructure creation`. Continue from 1.3.
-If active mode is `openspec`, `hybrid`, or `none`: proceed with 1.1 and 1.2 as written.
+**Mode detection** (run once):
+Check if Engram MCP is reachable (`mem_context`) → if yes: active mode = `engram`; if no: active mode = `none`.
 
 I execute in this order:
 
-**1.1 Initialize openspec/ if it does not exist**
-
-```yaml
-type: create_dir
-target: openspec/
-```
-
-Action: Create the `openspec/` directory with base structure:
-
-```
-openspec/
-├── config.yaml
-└── changes/
-    └── archive/
-        └── .gitkeep
-```
-
-**1.2 Create openspec/config.yaml if it does not exist**
-
-```yaml
-type: create_file
-target: openspec/config.yaml
-template: openspec_config
-```
-
-I read the project stack from `ai-context/stack.md` (or `package.json` if stack.md does not exist) and generate:
-
-```yaml
-project:
-  name: "[name from package.json/pyproject.toml]"
-  description: "[from README or inferred]"
-  root: "[absolute path to project]"
-  stack:
-    language: "[detected]"
-    framework: "[detected]"
-    database: "[detected or none]"
-    testing: "[detected]"
-  conventions:
-    naming: "[detected: camelCase|snake_case|PascalCase]"
-    structure: "[detected: feature|layer|monorepo]"
-
-artifact_store:
-  mode: openspec
-  changes_dir: openspec/changes
-  archive_dir: openspec/changes/archive
-
-rules:
-  proposal:
-    - "Must include measurable success criteria"
-    - "Must evaluate impact on existing functionality"
-    - "Must propose rollback plan if the change is high-risk"
-  specs:
-    - "Use Given/When/Then for behavior scenarios"
-    - "Include edge cases and error states"
-    - "Specify API contracts when applicable"
-  design:
-    - "Each design decision must have a justification"
-    - "Prefer existing project patterns over new ones"
-    - "Document discarded alternatives"
-  tasks:
-    - "Atomic tasks: one task = one file or one function"
-    - "Include file path in each task"
-    - "Define a verification criterion per task"
-  apply:
-    - "Follow conventions documented in ai-context/conventions.md"
-    - "Run tests before marking task complete"
-    - "Do not modify files not listed in the tasks"
-  verify:
-    - "Verify compliance with specs first"
-    - "Then verify adherence to technical design"
-    - "Check that there are no regressions in existing functionality"
-```
-
-**1.3 Create missing global SDD skills**
+**1.1 Create missing global SDD skills**
 
 ```yaml
 type: install_skill
@@ -252,7 +175,7 @@ target: "[skill-name]"
 
 If any global SDD skill is missing from `~/.claude/skills/`, I notify the user — I cannot create them automatically, but I indicate exactly what is missing and where they should be.
 
-**1.4 Update CLAUDE.md — add SDD section**
+**1.2 Update CLAUDE.md — add SDD section**
 
 ```yaml
 type: update_file
@@ -265,7 +188,7 @@ If CLAUDE.md does not mention `/sdd-*`, I add this section at the end of CLAUDE.
 ```markdown
 ## SDD — Spec-Driven Development
 
-This project uses SDD. Artifacts live in `openspec/`.
+This project uses SDD. Artifacts are persisted to Engram.
 
 | Command                    | Action                                      |
 | -------------------------- | ------------------------------------------- |
@@ -599,7 +522,7 @@ Files created:    [list]
 Files modified:   [list]
 
 SDD Status: [FULL / PARTIAL / NOT CONFIGURED]
-  - openspec/config.yaml: [✅ created | ✅ already existed | ❌ pending]
+  - Engram: [✅ reachable | ❌ not reachable]
   - Global SDD skills: [✅ complete | ⚠️ missing: list]
   - CLAUDE.md mentions /sdd-*: [✅ yes | ✅ added]
 
@@ -614,9 +537,9 @@ Changes recorded in: ai-context/changelog-ai.md
 
 ## Internal templates
 
-### Template: openspec_config
+### Template: SDD section
 
-See Step 2 — 1.2 above for the complete `openspec/config.yaml` template.
+See Step 2 — 1.2 above for the CLAUDE.md SDD section template.
 
 ### Template: changelog entry
 

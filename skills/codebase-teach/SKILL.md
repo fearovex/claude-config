@@ -37,11 +37,11 @@ For each file:
 - If absent: log `INFO: [filename] not found — proceeding without it.`
 - If present: extract `Last updated:` or `Last analyzed:` date. If date is older than 30 days: log `NOTE: [filename] last updated [date] — context may be stale. Consider running /memory-update or /project-analyze.`
 
-Also read `openspec/config.yaml` and extract `teach_max_files_per_context` if present:
+Also read project config file (`config.yaml` at project root) if it exists, and extract `teach_max_files_per_context` if present:
 - If present: `max_files = teach_max_files_per_context`
 - If absent: `max_files = 10` (default)
 
-Log: `"File cap per context: [max_files] (source: openspec/config.yaml)"` or `"File cap per context: 10 (default)"`
+Log: `"File cap per context: [max_files] (source: config.yaml)"` or `"File cap per context: 10 (default)"`
 
 ---
 
@@ -53,7 +53,7 @@ Identify bounded context candidates by scanning the project directory tree at de
 2. `app/` — subdirectories at depth 1
 3. `features/` — subdirectories at depth 1
 4. `domain/` — subdirectories at depth 1
-5. `openspec/specs/` — subdirectory names (each subdirectory is treated as a context name)
+5. `ai-context/features/` — existing feature file names (each file stem is treated as a context name)
 
 **Exclusion rules** — skip directories named: `shared`, `utils`, `common`, `lib`, `types`, `hooks`, `components`, `__tests__`, `test`, `tests`, `node_modules`, `.git`
 
@@ -252,7 +252,7 @@ If `ai-context/features/` was absent at run time, append to the Summary section:
 ## Rules
 
 - MUST NOT modify `ai-context/stack.md`, `ai-context/architecture.md`, `ai-context/conventions.md`, `ai-context/known-issues.md`, or `ai-context/changelog-ai.md`
-- MUST NOT modify any file under `openspec/` or `docs/`
+- MUST NOT modify any file under `docs/`
 - MUST NOT be invoked automatically by any other skill — user-initiated only
 - MUST skip any file or directory whose name begins with `_` in `ai-context/features/`
 - MUST preserve all human-authored content outside `[auto-updated]` markers when updating existing feature files

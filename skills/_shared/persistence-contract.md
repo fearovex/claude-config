@@ -2,51 +2,30 @@
 
 ## Mode Resolution
 
-The orchestrator passes `artifact_store.mode` with one of: `engram | openspec | hybrid | none`.
+The persistence mode is always `engram` when Engram MCP is reachable, otherwise `none`.
 
-Default resolution (when orchestrator does not explicitly set a mode):
+Default resolution:
 1. If Engram is available → use `engram`
 2. Otherwise → use `none`
 
-`openspec` and `hybrid` are NEVER used by default — only when explicitly passed.
-
-When falling back to `none`, recommend the user enable `engram` or `openspec`.
+When falling back to `none`, recommend the user enable `engram`.
 
 ## Mode Detection for Standalone Skills
 
-Skills that run outside the orchestrator pipeline (project-setup, project-audit, project-fix, project-onboard, codebase-teach, memory-*, sdd-status, sdd-spec-gc, config-export) do NOT receive `artifact_store.mode` from a launch context. They MUST detect the active mode themselves using this algorithm:
+Skills that run outside the orchestrator pipeline (project-setup, project-audit, project-fix, project-onboard, codebase-teach, memory-*, sdd-status, sdd-spec-gc, config-export) do NOT receive a mode from a launch context. They MUST detect the active mode themselves using this algorithm:
 
 ```
-1. Check if openspec/config.yaml exists AND has artifact_store.mode set
-   → If yes: use that value (engram | openspec | hybrid | none)
-2. If openspec/config.yaml is absent or has no artifact_store.mode:
-   → Check if Engram MCP is reachable (try mem_context or mem_search)
+1. Check if Engram MCP is reachable (try mem_context or mem_search)
    → If reachable: active_mode = "engram"
    → If not reachable: active_mode = "none"
 ```
-
-**Key rule**: The ABSENCE of `openspec/` does NOT mean the project is broken. It means the project MAY be using engram mode. Skills MUST NOT create `openspec/` infrastructure unless the detected mode is `openspec` or `hybrid`.
 
 ## Behavior Per Mode
 
 | Mode | Read from | Write to | Project files |
 |------|-----------|----------|---------------|
 | `engram` | Engram | Engram | Never |
-| `openspec` | Filesystem | Filesystem | Yes |
-| `hybrid` | Engram (primary) + Filesystem (fallback) | Both | Yes |
 | `none` | Orchestrator prompt context | Nowhere | Never |
-
-### Hybrid Mode
-
-Persists every artifact to BOTH Engram and OpenSpec simultaneously:
-- Engram: cross-session recovery, compaction survival, deterministic search
-- OpenSpec: human-readable files, version-controllable artifacts
-
-Write to Engram (per `engram-convention.md`) AND to filesystem (per `openspec-convention.md`) for every artifact.
-
-Read priority: Engram first; fall back to filesystem if Engram returns no results.
-Write behavior: both writes MUST succeed for the operation to be complete.
-Token cost warning: hybrid consumes MORE tokens per operation. Use only when you need both cross-session persistence AND local file artifacts.
 
 ## State Persistence (Orchestrator)
 
@@ -55,17 +34,12 @@ The orchestrator persists DAG state after each phase transition to enable SDD re
 | Mode | Persist State | Recover State |
 |------|--------------|---------------|
 | `engram` | `mem_save(topic_key: "sdd/{change-name}/state")` | `mem_search("sdd/*/state")` → `mem_get_observation(id)` |
-| `openspec` | Write `openspec/changes/{change-name}/state.yaml` | Read `openspec/changes/{change-name}/state.yaml` |
-| `hybrid` | Both: `mem_save` AND write `state.yaml` | Engram first; filesystem fallback |
 | `none` | Not possible — warn user | Not possible |
 
 ## Common Rules
 
 - `none` → do NOT create or modify any project files; return results inline only
 - `engram` → do NOT write any project files; persist to Engram and return observation IDs
-- `openspec` → write files ONLY to paths defined in `openspec-convention.md`
-- `hybrid` → persist to BOTH Engram AND filesystem; follow both conventions
-- NEVER force `openspec/` creation unless orchestrator explicitly passed `openspec` or `hybrid`
 - If unsure which mode to use, default to `none`
 
 ## Sub-Agent Context Rules
@@ -95,7 +69,6 @@ Do NOT return without saving what you learned. This is how the team builds persi
 
 SDD (with dependencies):
 ```
-Artifact store mode: {engram|openspec|hybrid|none}
 Read these artifacts before starting (search returns truncated previews):
   mem_search(query: "sdd/{change-name}/{type}", project: "{project}") → get ID
   mem_get_observation(id: {id}) → full content (REQUIRED)
@@ -114,8 +87,6 @@ If you return without calling mem_save, the next phase CANNOT find your artifact
 
 SDD (no dependencies):
 ```
-Artifact store mode: {engram|openspec|hybrid|none}
-
 PERSISTENCE (MANDATORY — do NOT skip):
 After completing your work, you MUST call:
   mem_save(

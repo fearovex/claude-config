@@ -100,7 +100,7 @@ I run all dimensions systematically, reading real files. Never assume.
 Check if the project is a `global-config` repo:
 
 - Condition A: `install.sh` + `sync.sh` exist at project root, OR
-- Condition B: `openspec/config.yaml` contains `framework: "Claude Code SDD meta-system"`
+- Condition B: project root contains `skills/` directory with SDD phase skills
 
 If detected as global-config:
 
@@ -231,21 +231,15 @@ I read whether the 8 files exist in `~/.claude/skills/`:
 
 If any is missing → ❌ CRITICAL (SDD cannot function without the phases).
 
-#### 3b. openspec/ in the project
+#### 3b. Engram availability
 
-**Mode detection** (run before openspec checks):
-1. If `openspec/config.yaml` exists AND has `artifact_store.mode` set → use that value as active mode.
-2. If absent: check if Engram MCP is reachable (call `mem_context`) → if yes: active mode = `engram`; if no: active mode = `none`.
-
-If active mode is `engram` or `none`: SKIP all openspec/ existence checks below. Log `INFO: project uses {mode} mode — openspec/ checks skipped` and proceed to 3c.
-If active mode is `openspec` or `hybrid`: run the checks as-is.
+Check if Engram MCP is reachable (call `mem_context`):
+- If reachable: active mode = `engram`. Log `INFO: project uses engram mode`.
+- If not reachable: active mode = `none`. Log `WARNING: Engram not reachable — SDD artifacts will not persist`.
 
 | Check                                                    | Severity                                         |
 | -------------------------------------------------------- | ------------------------------------------------ |
-| `openspec/` exists                                       | ❌ CRITICAL (SDD has nowhere to store artifacts) |
-| `openspec/config.yaml` exists                            | ❌ CRITICAL (orchestrator cannot start)          |
-| `config.yaml` has `artifact_store.mode` set to a valid value (`openspec`, `engram`, `hybrid`, `none`) | ⚠️ HIGH |
-| `config.yaml` has project name and stack                 | ℹ️ LOW                                           |
+| Engram MCP is reachable                                  | ⚠️ HIGH (SDD artifacts won't persist without it) |
 
 #### 3c. CLAUDE.md mentions SDD
 
@@ -256,7 +250,11 @@ If active mode is `openspec` or `hybrid`: run the checks as-is.
 
 #### 3d. Orphaned changes
 
-I read `openspec/changes/` (if it exists). An orphaned change is a folder in `changes/` that is NOT in `changes/archive/` and whose last modification was >14 days ago.
+I search engram for active SDD changes that appear stale (no activity in >14 days):
+```
+mem_search(query: "sdd/", project: "{project}")
+```
+Filter for changes with state artifacts whose `last_updated` is >14 days ago and that have no `archive-report`.
 
 I list:
 
@@ -282,8 +280,8 @@ Orphaned changes detected:
 
 #### 3f. Active changes conflict detection (D3 additive check)
 
-1. List all directories in `openspec/changes/` that are NOT under `openspec/changes/archive/` — these are active (non-archived) changes.
-2. For each active change directory that contains a `design.md`: read the `design.md` and locate the `## File Change Matrix` section (or equivalent table with a `File` column).
+1. Search engram for all active SDD changes (those without an `archive-report` topic_key). List their design artifacts.
+2. For each active change that has a design artifact: retrieve the design via `mem_get_observation` and locate the `## File Change Matrix` section (or equivalent table with a `File` column).
 3. Extract all file paths from the `File` column of that table.
 4. Normalize each extracted path: convert to lowercase and strip any leading `./` prefix.
 5. Skip this entire step (emit no finding) if fewer than two active changes have a `design.md`.
@@ -396,44 +394,32 @@ For each broken reference: I report the source file, approximate line, and the p
 
 **Checks:**
 
-#### 8a. openspec/config.yaml has testing section
+#### 8a. Project has testing configuration
 
 | Check                                             | Severity  |
 | ------------------------------------------------- | --------- |
-| `config.yaml` has `testing:` block                | ⚠️ HIGH   |
-| Defines `minimum_score_to_archive`                | ⚠️ HIGH   |
-| Defines `required_artifacts_per_change`           | ⚠️ MEDIUM |
-| Defines `verify_report_requirements`              | ⚠️ MEDIUM |
-| Has `test_project` or documented testing strategy | ℹ️ LOW    |
+| Project has test runner configured or detectable   | ⚠️ HIGH   |
+| Has documented testing strategy (in ai-context/)   | ⚠️ MEDIUM |
 
-#### 8b. Archived changes have verify-report.md
+#### 8b. Archived changes have verify-report
 
-For each folder in `openspec/changes/archive/`:
+Search engram for archive-report artifacts and check whether corresponding verify-report artifacts exist:
 
-- Does `verify-report.md` exist? If not → ⚠️ HIGH
-- Does it have at least one `[x]` item in its checklist? If not → ⚠️ HIGH
-- Does it mention what project/context was used to verify? If not → ℹ️ LOW
+- Does `verify-report` exist for each archived change? If not → ⚠️ HIGH
+- Does it mention tool execution results? If not → ⚠️ HIGH
 
 I report:
 
 ```
-Archived changes without verify-report.md: [list]
-Changes with empty verify-report.md or without [x]: [list]
+Archived changes without verify-report: [list]
 ```
 
 #### 8c. Active changes have verification criteria defined
 
-For each active folder in `openspec/changes/` (not archived):
+Search engram for active SDD changes (those with tasks but no archive-report):
 
-- If it has `tasks.md` → does it include a verification criteria section?
-- If it has `design.md` → does it define how the change will be tested?
-
-#### 8d. Verify rules in config.yaml are executable
-
-I read the `rules.verify` block of `openspec/config.yaml` and evaluate:
-
-- Are they objectively verifiable or empty phrases like "make sure it works"?
-- Does at least one rule mention `/project-audit` or a concrete metric?
+- If it has `tasks` → does the task plan include verification criteria?
+- If it has `design` → does the design define how the change will be tested?
 
 ---
 
@@ -577,7 +563,7 @@ Stack relevance check skipped — no stack source found
 
 #### Config-driven detection
 
-If `openspec/config.yaml` contains a `feature_docs:` key:
+If a project `config.yaml` exists and contains a `feature_docs:` key:
 
 - Read the `convention` field (`skill` | `markdown` | `mixed`)
 - Read the `paths` list (directories to scan for feature docs)
@@ -587,7 +573,7 @@ Use this configuration as the source of truth for feature names and doc location
 
 #### Heuristic detection fallback
 
-If no `feature_docs:` key is present in `openspec/config.yaml`, run the following heuristic algorithm:
+If no `feature_docs:` key is present in the project config, run the following heuristic algorithm:
 
 ```
 heuristic_sources = []
@@ -749,29 +735,21 @@ For each pattern:
 
 ### Dimension 13 — Spec Coverage
 
-**Objective**: Audit the health of the openspec/specs/ layer — verify that each domain directory has a spec.md and that path references within spec files still exist on disk. Informational only — no impact on the 100-point score.
+**Objective**: Audit the health of the spec layer — verify that spec artifacts in engram have valid path references. Informational only — no impact on the 100-point score.
 
-**Activation condition**: `OPENSPEC_SPECS_EXISTS=1` (from Phase A) AND the `openspec/specs/` directory is non-empty (contains at least one subdirectory).
+**Activation condition**: Engram is reachable AND `mem_search(query: "sdd/", project: "{project}")` returns spec artifacts.
 
-- If `OPENSPEC_SPECS_EXISTS=0` OR `openspec/specs/` is empty → emit INFO: "Spec Coverage check skipped — openspec/specs/ not found or empty" and skip all sub-checks. No findings are added to the FIX_MANIFEST.
+- If Engram is not reachable OR no spec artifacts found → emit INFO: "Spec Coverage check skipped — no spec artifacts found in engram" and skip all sub-checks. No findings are added to the FIX_MANIFEST.
 - If condition is met → proceed with the following checks.
 
-**D13-1. Per-domain spec.md existence check:**
-
-1. Use Glob or directory listing to identify all subdirectories of `openspec/specs/` — each represents a domain.
-2. For each domain directory:
-   - Check whether `openspec/specs/[domain]/spec.md` exists.
-   - If `spec.md` is missing: emit a MEDIUM finding — "Domain directory openspec/specs/[domain]/ exists but contains no spec.md file"
-   - Add to `required_actions.medium` in the FIX_MANIFEST with `type: create_file`, `target: openspec/specs/[domain]/spec.md`, `reason: "Domain directory exists but contains no spec.md file"`
-
-**D13-2. Per-spec path reference scan:**
+**D13-1. Per-spec path reference scan:**
 
 1. For each `spec.md` that exists (found in D13-1):
    - Read the file content.
    - Extract all path-like references: strings that look like file paths (contain `/` and no spaces, not inside URLs, not in fenced code block headers). Look for patterns like `src/[path]`, `lib/[path]`, `[dir]/[file].[ext]`.
    - For each extracted path, check whether the file or directory exists at `[project_root]/[path]`.
-   - If a referenced path does NOT exist: emit an INFO finding — "Spec openspec/specs/[domain]/spec.md references a path that no longer exists: [path]"
-   - Add to `violations[]` in the FIX_MANIFEST with `rule: "D13-stale-path-reference"`, `severity: "info"`, `file: openspec/specs/[domain]/spec.md`
+   - If a referenced path does NOT exist: emit an INFO finding — "Spec artifact references a path that no longer exists: [path]"
+   - Add to `violations[]` in the FIX_MANIFEST with `rule: "D13-stale-path-reference"`, `severity: "info"`, `file: "engram spec artifact"`
 2. INFO findings for stale paths are NOT added to `required_actions` — they are advisory only.
 
 **FIX_MANIFEST rule**: D13 MEDIUM findings (missing spec.md) go in `required_actions.medium` (actionable by /project-fix). D13 INFO findings (stale path references) go in `violations[]` only. D13 does NOT reduce the base 100-point score.
@@ -785,7 +763,7 @@ This dimension runs on every project-audit invocation. It reports character coun
 **Check 1 — CLAUDE.md budget:**
 1. Read `CLAUDE.md` at project root; count characters
 2. Determine project type:
-   - IF `openspec/config.yaml` exists AND `project.name: agent-config`: global budget = 20,000 chars
+   - IF project is detected as global-config (install.sh + sync.sh exist): global budget = 20,000 chars
    - ELSE: project budget = 5,000 chars
 3. IF character count > budget:
    → Add INFO finding: `"CLAUDE.md is [N] chars ([N-budget] over [budget] budget). Consider extracting content to skills (ADR-041)."`
@@ -892,9 +870,9 @@ skill_quality_actions:
 
 **SDD Readiness**: [FULL / PARTIAL / NOT CONFIGURED]
 
-- FULL: openspec/ exists, config.yaml valid, CLAUDE.md mentions /sdd-\*, global skills present
+- FULL: Engram reachable, CLAUDE.md mentions /sdd-*, global skills present
 - PARTIAL: Some SDD elements present but incomplete
-- NOT CONFIGURED: openspec/ does not exist
+- NOT CONFIGURED: Engram not reachable and no SDD references in CLAUDE.md
 
 ---
 
@@ -959,12 +937,10 @@ skill_quality_actions:
 | sdd-verify | ✅/❌ |
 | sdd-archive | ✅/❌ |
 
-**openspec/ in project:**
+**Engram availability:**
 | Check | Status |
 |-------|--------|
-| `openspec/` exists | ✅/❌ |
-| `openspec/config.yaml` exists | ✅/❌ |
-| Config valid | ✅/⚠️/❌ |
+| Engram MCP reachable | ✅/❌ |
 
 **CLAUDE.md mentions SDD:** ✅/❌
 
@@ -1027,9 +1003,9 @@ Drift entries: (when drift is present)
 
 ## Dimension 8 — Testing & Verification [OK|WARNING|CRITICAL]
 
-**openspec/config.yaml has testing block:** ✅/❌
+**Project has test runner:** ✅/❌
 
-**Archived changes without verify-report.md:**
+**Archived changes without verify-report:**
 [list or "none"]
 
 **Archived changes with empty verify-report.md (without [x]):**
@@ -1106,14 +1082,14 @@ _D12 findings are informational only — no score impact._
 
 ## Dimension 13 — Spec Coverage [OK|INFO|SKIPPED]
 
-**Condition**: openspec/specs/ exists and is non-empty — YES/NO
+**Condition**: Engram reachable and spec artifacts found — YES/NO
 **Domains detected**: [list of domain names]
 
 | Domain | spec.md found | Stale paths | Status   |
 | ------ | ------------- | ----------- | -------- |
 | [name] | ✅/❌         | [N]         | ✅/⚠️/❌ |
 
-[or: "Spec Coverage check skipped — openspec/specs/ not found or empty"]
+[or: "Spec Coverage check skipped — no spec artifacts found in engram"]
 
 _D13 findings are informational only — no score impact._
 
@@ -1162,7 +1138,7 @@ _This report was generated by `/project-audit` — do not modify the FIX_MANIFES
 | **CLAUDE.md**              | Exists + complete structure + accurate stack + SDD refs                                                                                                                                                                         | 20         |
 | **Memory — existence**     | All 5 files exist                                                                                                                                                                                                               | 15         |
 | **Memory — quality**       | Substantial content + coherent with code                                                                                                                                                                                        | 10         |
-| **SDD Orchestrator**       | Global skills + openspec/ + config.yaml + CLAUDE.md refs                                                                                                                                                                        | 20         |
+| **SDD Orchestrator**       | Global skills + Engram availability + CLAUDE.md refs                                                                                                                                                                             | 20         |
 | **Skills**                 | Registry accuracy + content depth = 10 pts; global tech skills coverage (D4c) = 10 pts                                                                                                                                          | 20         |
 | **Cross-references**       | No broken references                                                                                                                                                                                                            | 5          |
 | **Architecture**           | No critical violations in samples                                                                                                                                                                                               | 5          |
@@ -1171,7 +1147,7 @@ _This report was generated by `/project-audit` — do not modify the FIX_MANIFES
 | **Feature Docs Coverage**  | Informational only — no score deduction. Detects feature/skill documentation gaps.                                                                                                                                              | N/A        |
 | **Internal Coherence**     | Informational only — no score deduction. Validates count claims, section numbering, and frontmatter consistency within individual skill files.                                                                                  | N/A        |
 | **ADR Coverage**           | Informational only — no score deduction. Activated when CLAUDE.md references docs/adr/. Verifies README.md exists and each ADR file has a status field. HIGH/MEDIUM findings are actionable by /project-fix.                    | N/A        |
-| **Spec Coverage**          | Informational only — no score deduction. Activated when openspec/specs/ exists and is non-empty. Verifies spec.md exists per domain and spec path references are valid on disk. MEDIUM findings are actionable by /project-fix. | N/A        |
+| **Spec Coverage**          | Informational only — no score deduction. Activated when engram has spec artifacts. Verifies spec path references are valid on disk. MEDIUM findings are actionable by /project-fix. | N/A        |
 | **Budget Compliance**      | Informational only — no score deduction. Reports CLAUDE.md character count against ADR-041 governance budgets (20k global / 5k project). | N/A        |
 
 **Interpretation:**
@@ -1208,15 +1184,14 @@ _This report was generated by `/project-audit` — do not modify the FIX_MANIFES
 
    echo "CLAUDE_MD_EXISTS=$(f .claude/CLAUDE.md)"
    echo "ROOT_CLAUDE_MD_EXISTS=$(f CLAUDE.md)"
-   echo "OPENSPEC_EXISTS=$(d openspec)"
-   echo "CONFIG_YAML_EXISTS=$(f openspec/config.yaml)"
+   echo "ENGRAM_REACHABLE=<check via mem_context>"
    echo "INSTALL_SH_EXISTS=$(f install.sh)"
    echo "SYNC_SH_EXISTS=$(f sync.sh)"
 
    # Global-config detection for LOCAL_SKILLS_DIR
    if [ "$INSTALL_SH_EXISTS" = "1" ] && [ "$SYNC_SH_EXISTS" = "1" ]; then
      LOCAL_SKILLS_DIR="skills"
-   elif grep -q 'Claude Code SDD meta-system' "$PROJECT/openspec/config.yaml" 2>/dev/null; then
+   elif [ -d "$PROJECT/skills/_shared" ]; then
      LOCAL_SKILLS_DIR="skills"
    else
      LOCAL_SKILLS_DIR=".claude/skills"
@@ -1231,15 +1206,8 @@ _This report was generated by `/project-audit` — do not modify the FIX_MANIFES
    echo "CLAUDE_MD_LINES=$(lc CLAUDE.md)"
    echo "STACK_MD_LINES=$(lc ai-context/stack.md)"
 
-   # Orphaned changes (dirs in changes/ not in archive/, modified >14 days ago)
-   ORPHANED=""
-   if [ -d "$PROJECT/openspec/changes" ]; then
-     for dir in "$PROJECT/openspec/changes"/*/; do
-       name=$(basename "$dir")
-       [ "$name" = "archive" ] && continue
-       [ -z "$(find "$dir" -maxdepth 0 -not -newer "$PROJECT/openspec/changes" -mtime +14 2>/dev/null)" ] || \
-         ORPHANED="${ORPHANED:+$ORPHANED,}$name"
-     done
+   # Orphaned changes — detected via engram search for stale SDD state artifacts
+   ORPHANED="<detected via mem_search for sdd/*/state artifacts older than 14 days>"
    fi
    echo "ORPHANED_CHANGES=${ORPHANED:-NONE}"
 
@@ -1249,7 +1217,7 @@ _This report was generated by `/project-audit` — do not modify the FIX_MANIFES
      [ -f "$HOME/.claude/skills/sdd-$phase/SKILL.md" ] && SDD_COUNT=$((SDD_COUNT+1))
    done
    echo "SDD_SKILLS_PRESENT=$SDD_COUNT"
-   echo "FEATURE_DOCS_CONFIG_EXISTS=$(grep -l "feature_docs:" "$PROJECT/openspec/config.yaml" 2>/dev/null | wc -l | tr -d ' ')"
+   echo "FEATURE_DOCS_CONFIG_EXISTS=<check config.yaml at project root if it exists>"
    echo "ANALYSIS_REPORT_EXISTS=$(f analysis-report.md)"
    echo "ANALYSIS_REPORT_DATE=$(head -5 "$PROJECT/analysis-report.md" 2>/dev/null | grep 'Last analyzed:' | awk '{print $3}' || echo '')"
    echo "ROOT_SETTINGS_JSON_EXISTS=$(f settings.json)"
@@ -1257,14 +1225,13 @@ _This report was generated by `/project-audit` — do not modify the FIX_MANIFES
    echo "SETTINGS_LOCAL_JSON_EXISTS=$(f settings.local.json)"
    echo "ADR_DIR_EXISTS=$(d docs/adr)"
    echo "ADR_README_EXISTS=$(f docs/adr/README.md)"
-   echo "OPENSPEC_SPECS_EXISTS=$(d openspec/specs)"
+   echo "ENGRAM_HAS_SPECS=<check via mem_search for sdd/*/spec artifacts>"
    ```
 
    **Output key schema** (each key is a `key=value` line in stdout):
    - `CLAUDE_MD_EXISTS` — 1 if `.claude/CLAUDE.md` exists, 0 if absent
    - `ROOT_CLAUDE_MD_EXISTS` — 1 if root `CLAUDE.md` exists, 0 if absent
-   - `OPENSPEC_EXISTS` — 1 if `openspec/` directory exists, 0 if absent
-   - `CONFIG_YAML_EXISTS` — 1 if `openspec/config.yaml` exists, 0 if absent
+   - `ENGRAM_REACHABLE` — 1 if Engram MCP is reachable, 0 if not
    - `INSTALL_SH_EXISTS` — 1 if `install.sh` exists at project root, 0 if absent
    - `SYNC_SH_EXISTS` — 1 if `sync.sh` exists at project root, 0 if absent
    - `LOCAL_SKILLS_DIR` — string: `"skills"` (global-config detected via Condition A or B) or `".claude/skills"` (standard project)
@@ -1277,7 +1244,7 @@ _This report was generated by `/project-audit` — do not modify the FIX_MANIFES
    - `STACK_MD_LINES` — integer line count of `ai-context/stack.md` (0 if absent)
    - `ORPHANED_CHANGES` — comma-separated names of orphaned change dirs, or `NONE`
    - `SDD_SKILLS_PRESENT` — integer count of present `~/.claude/skills/sdd-*/SKILL.md` files (0–8)
-   - `FEATURE_DOCS_CONFIG_EXISTS` — 1 if `openspec/config.yaml` contains a `feature_docs:` key, 0 if absent or config not found
+   - `FEATURE_DOCS_CONFIG_EXISTS` — 1 if project config.yaml contains a `feature_docs:` key, 0 if absent
    - `ANALYSIS_REPORT_EXISTS` — 1 if `analysis-report.md` exists at project root, 0 if absent
    - `ANALYSIS_REPORT_DATE` — ISO date string from the `Last analyzed:` field of `analysis-report.md`, or empty string if absent
    - `ROOT_SETTINGS_JSON_EXISTS` — 1 if `settings.json` exists at project root, 0 if absent
@@ -1285,7 +1252,7 @@ _This report was generated by `/project-audit` — do not modify the FIX_MANIFES
    - `SETTINGS_LOCAL_JSON_EXISTS` — 1 if `settings.local.json` exists at project root, 0 if absent
    - `ADR_DIR_EXISTS` — 1 if `docs/adr/` directory exists, 0 if absent
    - `ADR_README_EXISTS` — 1 if `docs/adr/README.md` exists, 0 if absent
-   - `OPENSPEC_SPECS_EXISTS` — 1 if `openspec/specs/` directory exists, 0 if absent
+   - `ENGRAM_HAS_SPECS` — 1 if engram contains spec artifacts for this project, 0 if absent
 
    **Legacy commands/ detection (Phase A post-script check):**
 

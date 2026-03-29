@@ -50,8 +50,7 @@ When a skill is referenced (e.g., `~/.claude/skills/sdd-explore/SKILL.md`), the 
 
 ```
 1. .claude/skills/<name>/SKILL.md         (project-local — highest priority)
-2. openspec/config.yaml skill_overrides   (explicit redirect)
-3. ~/.claude/skills/<name>/SKILL.md       (global catalog — fallback)
+2. ~/.claude/skills/<name>/SKILL.md       (global catalog — fallback)
 ```
 
 See `docs/SKILL-RESOLUTION.md` for the full algorithm and config override format.

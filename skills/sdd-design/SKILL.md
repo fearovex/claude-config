@@ -7,7 +7,7 @@ format: procedural
 model: sonnet
 thinking: enabled
 metadata:
-  version: "2.1"
+  version: "3.0"
 ---
 
 # sdd-design
@@ -32,8 +32,7 @@ When the orchestrator launches this sub-agent, it resolves the skill path using:
 
 ```
 1. .claude/skills/sdd-design/SKILL.md     (project-local — highest priority)
-2. openspec/config.yaml skill_overrides   (explicit redirect)
-3. ~/.claude/skills/sdd-design/SKILL.md   (global catalog — fallback)
+2. ~/.claude/skills/sdd-design/SKILL.md   (global catalog — fallback)
 ```
 
 Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md` for the full algorithm.
@@ -48,21 +47,14 @@ Follow `skills/_shared/sdd-phase-common.md` **Section F** (Project Context Load)
 
 ### Step 1 — Read prior artifacts
 
-**Mode detection (inline, non-blocking):**
-Read `artifact_store.mode` from orchestrator launch context.
-- If absent and Engram MCP is reachable → default to `engram`
-- If absent and Engram MCP is not reachable → default to `none`
-
 I must read:
 
 - The proposal artifact:
-  - **engram**: `mem_search(query: "sdd/{change-name}/proposal")` → `mem_get_observation(id)`.
-  - **openspec** / **hybrid**: `openspec/changes/<change-name>/proposal.md`
-  - **none**: proposal content passed inline from orchestrator.
+  - `mem_search(query: "sdd/{change-name}/proposal")` → `mem_get_observation(id)`.
+  - If not found and Engram not reachable: proposal content passed inline from orchestrator.
 - The spec artifact:
-  - **engram**: `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
-  - **openspec** / **hybrid**: `openspec/changes/<change-name>/specs/` (all spec.md files)
-  - **none**: spec content passed inline from orchestrator.
+  - `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
+  - If not found and Engram not reachable: spec content passed inline from orchestrator.
 - `ai-context/architecture.md` if it exists
 - `ai-context/conventions.md` if it exists
 
@@ -94,21 +86,19 @@ This check applies to the Technical Decisions table, the Testing Strategy table,
 
 ### Step 3 — Create design.md
 
-I persist the design artifact based on the active persistence mode:
+I persist the design artifact to engram:
 
-**Write dispatch:**
-- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/design`, `type: architecture`, `project: {project}`, content = full design markdown. Do NOT write any file.
-- **openspec**: Write `openspec/changes/<change-name>/design.md`.
-- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem write.
-- **none**: Skip all write operations. Return design content inline only.
+Call `mem_save` with `topic_key: sdd/{change-name}/design`, `type: architecture`, `project: {project}`, content = full design markdown. Do NOT write any file.
 
-Content format (applies to all write modes):
+If Engram MCP is not reachable: skip persistence. Return design content inline only.
+
+Content format:
 
 ```markdown
 # Technical Design: [change-name]
 
 Date: [YYYY-MM-DD]
-Proposal: openspec/changes/[name]/proposal.md
+Proposal: engram:sdd/[name]/proposal
 
 ## General Approach
 
@@ -272,11 +262,7 @@ I return a clear executive summary to the orchestrator with all artifacts produc
 {
   "status": "ok|warning|blocked",
   "summary": "Design for [change-name]: [N] affected files, approach [brief description], risk [level].",
-  "artifacts": "<mode-dependent — see write dispatch in Step 3>",
-  // engram   → ["engram:sdd/{change-name}/design"]
-  // openspec → ["openspec/changes/<name>/design.md"]
-  // hybrid   → ["engram:sdd/{change-name}/design", "openspec/changes/<name>/design.md"]
-  // none     → []
+  "artifacts": ["engram:sdd/{change-name}/design"],
   "next_recommended": ["sdd-tasks (requires spec + design completed)"],
   "risks": ["[technical risk if found]"]
 }

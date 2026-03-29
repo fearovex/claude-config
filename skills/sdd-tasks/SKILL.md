@@ -6,7 +6,7 @@ description: >
 format: procedural
 model: sonnet
 metadata:
-  version: "2.1"
+  version: "3.0"
 ---
 
 # sdd-tasks
@@ -33,8 +33,7 @@ When the orchestrator launches this sub-agent, it resolves the skill path using:
 
 ```
 1. .claude/skills/sdd-tasks/SKILL.md     (project-local — highest priority)
-2. openspec/config.yaml skill_overrides  (explicit redirect)
-3. ~/.claude/skills/sdd-tasks/SKILL.md   (global catalog — fallback)
+2. ~/.claude/skills/sdd-tasks/SKILL.md   (global catalog — fallback)
 ```
 
 Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md` for the full algorithm.
@@ -49,26 +48,17 @@ Follow `skills/_shared/sdd-phase-common.md` **Section F** (Project Context Load)
 
 ### Step 1 — Read prior artifacts
 
-**Mode detection (inline, non-blocking):**
-Read `artifact_store.mode` from orchestrator launch context.
-- If absent and Engram MCP is reachable → default to `engram`
-- If absent and Engram MCP is not reachable → default to `none`
-
 I must read:
 
 - The design artifact (the file matrix and approach):
-  - **engram**: `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
-  - **openspec** / **hybrid**: `openspec/changes/<change-name>/design.md`
-  - **none**: design content passed inline from orchestrator.
+  - `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
+  - If not found and Engram not reachable: design content passed inline from orchestrator.
 - The spec artifact (the success criteria):
-  - **engram**: `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
-  - **openspec** / **hybrid**: `openspec/changes/<change-name>/specs/` (all spec.md files)
-  - **none**: spec content passed inline from orchestrator.
-- `openspec/config.yaml` if it exists (project rules — always filesystem)
+  - `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
+  - If not found and Engram not reachable: spec content passed inline from orchestrator.
 - The proposal artifact — specifically the `## Supersedes` section:
-  - **engram**: `mem_search(query: "sdd/{change-name}/proposal")` → `mem_get_observation(id)`.
-  - **openspec** / **hybrid**: `openspec/changes/<change-name>/proposal.md`
-  - **none**: proposal content passed inline from orchestrator.
+  - `mem_search(query: "sdd/{change-name}/proposal")` → `mem_get_observation(id)`.
+  - If not found and Engram not reachable: proposal content passed inline from orchestrator.
 
 ### Step 2 — Analyze dependencies between tasks
 
@@ -203,21 +193,19 @@ Placement rules:
   Question: Which Stripe invoice field should be used to record the payment failure date?
 ```
 
-I persist the task plan based on the active persistence mode:
+I persist the task plan to engram:
 
-**Write dispatch:**
-- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/tasks`, `type: architecture`, `project: {project}`, content = full tasks markdown. Do NOT write any file.
-- **openspec**: Write `openspec/changes/<change-name>/tasks.md`.
-- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem write.
-- **none**: Skip all write operations. Return task plan content inline only.
+Call `mem_save` with `topic_key: sdd/{change-name}/tasks`, `type: architecture`, `project: {project}`, content = full tasks markdown. Do NOT write any file.
 
-Content format (applies to all write modes):
+If Engram MCP is not reachable: skip persistence. Return task plan content inline only.
+
+Content format:
 
 ```markdown
 # Task Plan: [change-name]
 
 Date: [YYYY-MM-DD]
-Design: openspec/changes/[name]/design.md
+Design: engram:sdd/[name]/design
 
 ## Progress: 0/[total] tasks
 
@@ -243,7 +231,7 @@ Design: openspec/changes/[name]/design.md
 
 - [ ] 4.1 Create `tests/unit/auth.service.spec.ts` — unit tests for AuthService
 - [ ] 4.2 Create `tests/integration/auth.controller.spec.ts` — endpoint tests
-- [ ] 4.3 Verify scenario coverage from spec (review openspec/changes/[name]/specs/)
+- [ ] 4.3 Verify scenario coverage from spec (review engram:sdd/[name]/spec)
 
 ## Phase 5: Cleanup
 
@@ -296,11 +284,7 @@ Return ONLY this JSON block. Do NOT add free-form text, command suggestions, or 
 {
   "status": "ok|warning|blocked",
   "summary": "Plan for [change-name]: [N] phases, [M] total tasks. Estimate: [Low/Medium/High].",
-  "artifacts": "<mode-dependent — see write dispatch in Step 5>",
-  // engram   → ["engram:sdd/{change-name}/tasks"]
-  // openspec → ["openspec/changes/<name>/tasks.md"]
-  // hybrid   → ["engram:sdd/{change-name}/tasks", "openspec/changes/<name>/tasks.md"]
-  // none     → []
+  "artifacts": ["engram:sdd/{change-name}/tasks"],
   "next_recommended": ["sdd-apply"],
   "risks": ["[blocker if any]"]
 }

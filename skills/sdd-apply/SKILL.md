@@ -7,7 +7,7 @@ format: procedural
 model: sonnet
 thinking: enabled
 metadata:
-  version: "2.1"
+  version: "3.0"
 ---
 
 # sdd-apply
@@ -32,8 +32,7 @@ When the orchestrator launches this sub-agent, it resolves the skill path using:
 
 ```
 1. .claude/skills/sdd-apply/SKILL.md     (project-local — highest priority)
-2. openspec/config.yaml skill_overrides  (explicit redirect)
-3. ~/.claude/skills/sdd-apply/SKILL.md   (global catalog — fallback)
+2. ~/.claude/skills/sdd-apply/SKILL.md   (global catalog — fallback)
 ```
 
 Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md` for the full algorithm.
@@ -55,9 +54,8 @@ Before reading the change context, I load technology-specific skills to ensure t
 #### Scope guard
 
 I first check whether this is a documentation-only change by inspecting the File Change Matrix in the design artifact:
-- **engram**: `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
-- **openspec** / **hybrid**: `openspec/changes/<change-name>/design.md`
-- **none**: design content passed inline from orchestrator.
+- `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
+- If not found and Engram not reachable: design content passed inline from orchestrator.
 
 I scan every file listed in the matrix:
 
@@ -79,11 +77,11 @@ I detect the project technology stack using two sources in priority order:
 **Primary — `ai-context/stack.md`:**
 I read the file and extract all technology keywords (case-insensitive, free text).
 
-**Secondary — `openspec/config.yaml` `project.stack` key:**
-Used only when `ai-context/stack.md` is absent. I read `project.stack` and extract keywords from its values.
+**Secondary — project config file `config.yaml`:**
+If `ai-context/stack.md` is absent and a `config.yaml` exists at project root with a `project.stack` key, I read it and extract keywords from its values.
 
 If neither source is available:
-→ report: `"Tech skill preload: skipped (no stack source found — ai-context/stack.md absent and openspec/config.yaml has no project.stack)"`
+→ report: `"Tech skill preload: skipped (no stack source found — ai-context/stack.md absent)"`
 → skip remainder of Step 0
 
 #### Stack-to-Skill Mapping Table
@@ -111,15 +109,15 @@ I match detected keywords (case-insensitive substring match) against the followi
 
 This step initializes the in-memory retry counter that the task execution loop uses to enforce the circuit breaker. It MUST run after the scope guard (regardless of whether the scope guard triggered) and before Step 1.
 
-**Read `apply_max_retries` from `openspec/config.yaml`:**
+**Read `apply_max_retries` from project config (optional):**
 
 ```
-if openspec/config.yaml exists and has key apply_max_retries:
-    max_attempts = openspec/config.yaml.apply_max_retries
-    → log: "Retry limit: max_attempts = [value] (source: openspec/config.yaml)"
+if config.yaml exists at project root and has key apply_max_retries:
+    max_attempts = config.yaml.apply_max_retries
+    → log: "Retry limit: max_attempts = [value] (source: config.yaml)"
 else:
     max_attempts = 3   # default
-    → log: "Retry limit: max_attempts = 3 (default — apply_max_retries not set in openspec/config.yaml)"
+    → log: "Retry limit: max_attempts = 3 (default)"
 ```
 
 **Initialize attempt counter:**
@@ -148,12 +146,12 @@ This step MUST NOT produce `status: blocked` or `status: failed` under any circu
 ```
 Tech skill preload:
   - <skill-name> loaded (source: ai-context/stack.md)
-  - <skill-name> loaded (source: openspec/config.yaml)
+  - <skill-name> loaded (source: config.yaml)
   - <skill-name>: skipped (file not found at ~/.claude/skills/<skill-name>/SKILL.md)
 
 [or, if entire step skipped:]
 Tech skill preload: skipped (documentation-only change)
-Tech skill preload: skipped (no stack source found — ai-context/stack.md absent and openspec/config.yaml has no project.stack)
+Tech skill preload: skipped (no stack source found — ai-context/stack.md absent)
 ```
 
 The list of loaded skills is carried forward and included in the Step 2 detection output line:
@@ -163,26 +161,18 @@ The list of loaded skills is carried forward and included in the Step 2 detectio
 
 ### Step 1 — Read full context
 
-**Mode detection (inline, non-blocking):**
-Read `artifact_store.mode` from orchestrator launch context.
-- If absent and Engram MCP is reachable → default to `engram`
-- If absent and Engram MCP is not reachable → default to `none`
-
 I read in this order:
 
 1. The tasks artifact — which tasks are assigned:
-   - **engram**: `mem_search(query: "sdd/{change-name}/tasks")` → `mem_get_observation(id)`.
-   - **openspec** / **hybrid**: `openspec/changes/<change-name>/tasks.md`
-   - **none**: tasks content passed inline from orchestrator.
+   - `mem_search(query: "sdd/{change-name}/tasks")` → `mem_get_observation(id)`.
+   - If not found and Engram not reachable: tasks content passed inline from orchestrator.
 2. The spec artifact — the success criteria (WHAT it must do):
-   - **engram**: `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
-   - **openspec** / **hybrid**: `openspec/changes/<change-name>/specs/`
-   - **none**: spec content passed inline from orchestrator.
+   - `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
+   - If not found and Engram not reachable: spec content passed inline from orchestrator.
 3. The design artifact — how to implement it (technical decisions, interfaces):
-   - **engram**: `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
-   - **openspec** / **hybrid**: `openspec/changes/<change-name>/design.md`
-   - **none**: design content passed inline from orchestrator.
-4. `openspec/config.yaml` — project rules (always filesystem), including the optional `diagnosis_commands` key
+   - `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
+   - If not found and Engram not reachable: design content passed inline from orchestrator.
+4. Project config file (`config.yaml` at project root) — if it exists, read optional keys: `diagnosis_commands`, `rules`
 5. `ai-context/conventions.md` — code conventions
 6. Existing code files that I will modify or that serve as pattern references
 
@@ -191,7 +181,7 @@ I read in this order:
 Before implementing, I determine whether to use TDD (test-driven development) mode. I check three sources in priority order:
 
 **Source 1 — Explicit config (highest priority):**
-I read `openspec/config.yaml` and look for a `tdd` key:
+I read the project config file (`config.yaml` at project root, if it exists) and look for a `tdd` key:
 
 - `tdd: true` or `tdd.enabled: true` → TDD mode is **ON**. Report: `"TDD mode: ON (source: config)"`
 - `tdd: false` or `tdd.enabled: false` → TDD mode is **OFF**. Report: `"TDD mode: OFF (explicitly disabled in config)"`. Skip Sources 2 and 3.
@@ -226,7 +216,7 @@ I read every file I intend to modify in its current state. For tasks that create
 
 #### 4.2 — Run diagnostic commands
 
-I check `openspec/config.yaml` for a `diagnosis_commands` key:
+I check the project config file (`config.yaml` at project root) for a `diagnosis_commands` key:
 
 - **Present**: I run each listed command (expected to be read-only). I capture the output (or a summary) for inclusion in the `DIAGNOSIS` block. A command that exits non-zero is recorded as a failure; it MUST NOT block the Diagnosis Step — I note the failure in the Risk field and continue.
 - **Absent**: I use only auto-detected read-only commands relevant to the task (or none). I note `"diagnosis_commands: not configured"` in the block.
@@ -515,7 +505,7 @@ Before marking any code task `[x]`, I evaluate each criterion below. For each it
   "artifacts": [
     "src/services/auth.service.ts — created",
     "src/types/auth.types.ts — created",
-    "<tasks artifact — mode-dependent: engram:sdd/{change-name}/tasks (engram/hybrid) or openspec/changes/<name>/tasks.md (openspec/hybrid)> — updated"
+    "engram:sdd/{change-name}/tasks — updated"
   ],
   "deviations": ["DEVIATION in task 2.1: [description and reason]"],
   "next_recommended": ["sdd-apply (Phase 2) — if more phases remain", "/sdd-verify <change-name> — verify against specs before committing (run after all phases are complete)"],

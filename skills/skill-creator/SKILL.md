@@ -36,13 +36,13 @@ Adds an **existing skill from the global catalog** to the current project. Copie
 is_claude_config = (
   file_exists("install.sh")
   AND (
-    openspec/config.yaml declares project.name == "agent-config"
+    project root contains install.sh AND skills/_shared/
     OR basename(cwd) == "agent-config"
   )
 )
 
 has_project_context = (
-  dir_exists("openspec") OR dir_exists(".claude")
+  dir_exists(".claude")
 )
 
 if has_project_context AND NOT is_claude_config:

@@ -152,7 +152,7 @@ Apply the Shared STRIP Preamble above, then additionally strip:
 
 1. **SDD phase DAG and workflow** → Convert to a `## SDD Development Workflow` section written in declarative prose:
    - Describe each phase (explore, propose, spec, design, tasks, apply, verify, archive) and its artifacts
-   - Include the artifact storage paths (`openspec/changes/<change-name>/proposal.md`, `design.md`, `tasks.md`, `verify-report.md`, archive convention)
+   - Include the artifact types (proposal, spec, design, tasks, verify-report, archive-report) and explain they are persisted to engram
    - Do NOT include any slash command syntax — describe the phases as steps the developer initiates
 
 2. **SDD available commands table** → Replace with a `## Active SDD Coaching Instructions` section containing Copilot behavioral instructions:
@@ -161,7 +161,7 @@ Apply the Shared STRIP Preamble above, then additionally strip:
    When a developer mentions implementing a new feature, change, or fix:
    - Proactively ask: "Would you like to follow the SDD workflow for this change?"
    - If yes, guide them step by step: propose → (spec + design in parallel) → tasks → apply → verify → archive
-   - Before starting apply, confirm that proposal.md, design.md, and tasks.md exist under openspec/changes/<change-name>/
+   - Before starting apply, confirm that proposal, design, and tasks artifacts exist in the project's engram
    - Remind the developer to run verify after implementation and archive once confirmed
    ```
 
@@ -176,7 +176,7 @@ Apply the Shared STRIP Preamble above, then additionally strip:
 - Architecture decisions and rationale
 - Known issues and gotchas relevant to a developer working in the project
 - Key working principles (clean code, no over-engineering, tests as first-class citizens, etc.)
-- openspec/ artifact paths and SDD change directory structure
+- SDD artifact types and engram topic key patterns
 
 **FORMAT:**
 
@@ -220,7 +220,7 @@ You are transforming a Claude Code project configuration into a Google Gemini in
 Apply the Shared STRIP Preamble above, then additionally strip:
 
 - SDD phase DAG diagram
-- openspec/ artifact paths and SDD change directory references
+- SDD artifact storage details specific to Claude Code
 
 **ADAPT (do not strip wholesale):**
 
@@ -265,7 +265,7 @@ You are transforming a Claude Code project configuration into Cursor MDC rule fi
 Apply the Shared STRIP Preamble above, then additionally strip:
 
 - SDD phase DAG diagram
-- openspec/ artifact paths and SDD change directory references
+- SDD artifact storage details specific to Claude Code
 
 **OUTPUT STRUCTURE — split into exactly three domain files:**
 
@@ -370,7 +370,7 @@ Exported files are snapshots. Re-run /config-export after significant changes to
 - The `## SDD Development Workflow` and `## Active SDD Coaching Instructions` sections MUST always be present in the Copilot output (whether from project mode or bootstrap mode)
 - Dry-run preview MUST precede any file write — there is no flag to skip dry-run
 - Overwrite warnings MUST appear in the dry-run step (before user confirmation), not after
-- The skill MUST NOT modify `CLAUDE.md`, any `ai-context/` file, or any `openspec/` artifact — read-only with respect to all source files
+- The skill MUST NOT modify `CLAUDE.md` or any `ai-context/` file — read-only with respect to all source files
 - Directory creation (`.github/`, `.cursor/rules/`) MUST be silent — no output for directory creation unless it fails
 - The Claude target (`CLAUDE.md`) is NOT supported in V1 — respond with the defined rejection message; do not write any files for that target
 - All generated files MUST be UTF-8, no BOM
@@ -380,5 +380,5 @@ Exported files are snapshots. Re-run /config-export after significant changes to
 - Gemini output MUST be a single file at `GEMINI.md` at the project root — no subdirectories
 - The `globs` field in Cursor MDC files MUST use `""` when no meaningful pattern can be inferred — never guess
 - All content in generated files MUST be free of Claude Code-specific execution syntax: no Task tool invocations, no sub-agent patterns, no `~/.claude/skills/` file paths
-- Copilot MUST adapt SDD content (workflow, phases, artifacts) — stripping rules apply only to execution-layer Claude Code syntax; SDD methodology and openspec/ paths are RETAINED and adapted for all targets
+- Copilot MUST adapt SDD content (workflow, phases, artifacts) — stripping rules apply only to execution-layer Claude Code syntax; SDD methodology is RETAINED and adapted for all targets
 - No target receives a verbatim copy of `CLAUDE.md`

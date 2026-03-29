@@ -44,11 +44,11 @@ Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md`
 
 #### Step 0a — Load project context
 
-Follow `skills/_shared/sdd-phase-common.md` **Section E** (Project Context Load). Non-blocking.
+Follow `skills/_shared/sdd-phase-common.md` **Section F** (Project Context Load). Non-blocking.
 
 ### Step 0 sub-step — Spec context preload
 
-Follow `skills/_shared/sdd-phase-common.md` **Section F** (Spec Context Preload). Non-blocking.
+Follow `skills/_shared/sdd-phase-common.md` **Section G** (Spec Context Preload). Non-blocking.
 
 Before reading the change context, I load technology-specific skills to ensure their patterns and conventions are available throughout implementation.
 

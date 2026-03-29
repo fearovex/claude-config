@@ -302,10 +302,8 @@ Current catalog available in `~/.claude/skills/`:
 |-------|---------|
 | `project-setup` | Project setup with SDD |
 | `project-audit` | Configuration audit |
-| `project-update` | Configuration updates |
 | `skill-creator` | Skill creation |
-| `memory-init` | Generate ai-context/ from scratch |
-| `memory-update` | Update ai-context/ after session work |
+| `memory-manage` | Manage ai-context/ (init/update/maintain) |
 | `sdd-explore` | SDD exploration phase |
 | `sdd-propose` | SDD proposal phase |
 | `sdd-spec` | SDD specifications phase |

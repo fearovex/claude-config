@@ -88,7 +88,21 @@ Example:
 (other values: `fallback-registry`, `fallback-path`, or `none — no registry found`)
 ```
 
-## E. Project Context Load (Step 0)
+## E. Slug Generation Algorithm
+
+When the orchestrator infers a change name from a user description:
+
+1. Lowercase, strip whitespace
+2. Remove stop words: `a, an, the, to, for, with, in, of, by, on, at, from, and, or, but, is, are, was, be, this, that, fix, add, update, showing, wrong, year, users, user`
+3. Tokenize on whitespace/non-alphanumeric, keep first 5 meaningful tokens
+4. Prefix with `YYYY-MM-DD-`, join with hyphens, truncate to 50 chars
+5. Collision avoidance: if slug exists (in engram via `mem_search` or in `openspec/changes/`), append `-2`, `-3`, etc.
+
+The slug becomes the artifact identifier in ALL modes:
+- **engram**: topic_key `sdd/{slug}/proposal`, `sdd/{slug}/spec`, etc.
+- **openspec**: directory `openspec/changes/{slug}/`
+
+## F. Project Context Load (Step 0)
 
 This step is **non-blocking**: any failure MUST produce at most an INFO-level note. MUST NOT produce `status: blocked` or `status: failed`.
 
@@ -108,7 +122,7 @@ For each file:
 
 Loaded context is enrichment — it does NOT override explicit content in the proposal or design.
 
-## F. Spec Context Preload (Step 0 sub-step)
+## G. Spec Context Preload (Step 0 sub-step)
 
 This sub-step is **non-blocking**: any failure MUST produce at most an INFO-level note.
 
@@ -139,4 +153,4 @@ STEP 2: Stem-based directory matching (fallback)
 
 Loaded specs are **authoritative behavioral contracts** (precedence over `ai-context/` for behavioral questions). Include loaded spec paths in artifacts list (read, not written).
 
-See `docs/SPEC-CONTEXT.md` for the full convention reference.
+The full algorithm is documented above — cap at 3 domains, index-first then stem fallback.

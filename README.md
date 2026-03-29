@@ -13,7 +13,7 @@ Changes made here are deployed to `~/.claude/` (the Claude Code runtime director
 Only Claude's auto-memory is captured back via `sync.sh`.
 
 For the canonical reference on all commands, flow, and rules, read [CLAUDE.md](./CLAUDE.md).
-For a user-focused guide, see [User Guide](./docs/user-guide.md).
+For the canonical reference on all commands, flow, and rules, read [CLAUDE.md](./CLAUDE.md).
 
 ---
 
@@ -23,28 +23,21 @@ For a user-focused guide, see [User Guide](./docs/user-guide.md).
 agent-config/
 ├── CLAUDE.md              # Global orchestrator instructions (read by Claude at session start)
 ├── settings.json          # Claude Code user-level settings (MCP servers, permissions)
-├── settings.local.json    # Machine-local overrides — NOT committed
-├── install.sh             # One-way: repo → ~/.claude/  (new machine setup)
-├── sync.sh                # One-way: ~/.claude/memory/ → repo/memory/  (capture auto-memory)
-├── skills/                # Skill catalog
-│   ├── sdd-*/             # SDD phase skills (8 phases)
-│   ├── project-*/         # Meta-tool skills (setup, audit, fix)
-│   ├── memory-manage/     # Memory management (initialize, update, maintain ai-context/)
-│   ├── skill-creator/     # Skill scaffolding tool
-│   └── [tech-skills]/     # Technology catalog (react-19, nextjs-15, typescript, etc.)
+├── install.sh             # One-way: repo → ~/.claude/  (deploy to runtime)
+├── sync.sh                # One-way: ~/.claude/memory/ → repo/  (capture auto-memory)
+├── skills/                # Skill catalog (~33 skills)
+│   ├── _shared/           # Shared contracts (persistence, phase-common, conventions)
+│   ├── sdd-*/             # SDD phase skills (8 phases + init + status)
+│   ├── project-*/         # Meta-tool skills (setup, audit, fix, onboard)
+│   ├── memory-manage/     # ai-context/ management (init/update/maintain)
+│   ├── skill-creator/     # Skill scaffolding
+│   └── [tech-skills]/     # Technology patterns (react-19, nextjs-15, typescript, etc.)
 ├── hooks/                 # Claude Code event hooks
-├── memory/                # Claude auto-memory (per-project session notes)
-├── openspec/              # SDD artifacts for this repo itself
-│   ├── config.yaml        # SDD project configuration
-│   └── changes/           # Active and archived change specs
-│       └── archive/       # Completed changes (YYYY-MM-DD-name/)
-└── ai-context/            # Project memory layer
-    ├── stack.md
-    ├── architecture.md
-    ├── conventions.md
-    ├── known-issues.md
-    └── changelog-ai.md
+├── docs/                  # Reference docs (format-types, skill-resolution, templates)
+└── output-styles/         # Output persona (gentleman.md)
 ```
+
+**Persistence**: Engram (default) for cross-session memory. OpenSpec (fallback) for file-based artifacts. Both created in TARGET projects by `/project-setup` — not stored in this repo.
 
 ---
 

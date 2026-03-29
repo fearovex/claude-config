@@ -6,6 +6,8 @@ description: >
 format: procedural
 model: sonnet
 thinking: enabled
+metadata:
+  version: "2.1"
 ---
 
 # sdd-apply
@@ -113,7 +115,12 @@ Before reading the change context, I load technology-specific skills to ensure t
 
 #### Scope guard
 
-I first check whether this is a documentation-only change by inspecting the File Change Matrix in `openspec/changes/<change-name>/design.md`. I scan every file listed in the matrix:
+I first check whether this is a documentation-only change by inspecting the File Change Matrix in the design artifact:
+- **engram**: `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
+- **openspec** / **hybrid**: `openspec/changes/<change-name>/design.md`
+- **none**: design content passed inline from orchestrator.
+
+I scan every file listed in the matrix:
 
 ```
 scope_guard_triggered = true
@@ -229,12 +236,26 @@ The list of loaded skills is carried forward and included in the Step 2 detectio
 
 ### Step 1 — Read full context
 
+**Mode detection (inline, non-blocking):**
+Read `artifact_store.mode` from orchestrator launch context.
+- If absent and Engram MCP is reachable → default to `engram`
+- If absent and Engram MCP is not reachable → default to `none`
+
 I read in this order:
 
-1. `openspec/changes/<change-name>/tasks.md` — which tasks are assigned
-2. `openspec/changes/<change-name>/specs/` — the success criteria (WHAT it must do)
-3. `openspec/changes/<change-name>/design.md` — how to implement it (technical decisions, interfaces)
-4. `openspec/config.yaml` — project rules, including the optional `diagnosis_commands` key (see Step 4 — Diagnosis); key is optional, absent means auto-detection only, commands are expected to be read-only
+1. The tasks artifact — which tasks are assigned:
+   - **engram**: `mem_search(query: "sdd/{change-name}/tasks")` → `mem_get_observation(id)`.
+   - **openspec** / **hybrid**: `openspec/changes/<change-name>/tasks.md`
+   - **none**: tasks content passed inline from orchestrator.
+2. The spec artifact — the success criteria (WHAT it must do):
+   - **engram**: `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
+   - **openspec** / **hybrid**: `openspec/changes/<change-name>/specs/`
+   - **none**: spec content passed inline from orchestrator.
+3. The design artifact — how to implement it (technical decisions, interfaces):
+   - **engram**: `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
+   - **openspec** / **hybrid**: `openspec/changes/<change-name>/design.md`
+   - **none**: design content passed inline from orchestrator.
+4. `openspec/config.yaml` — project rules (always filesystem), including the optional `diagnosis_commands` key
 5. `ai-context/conventions.md` — code conventions
 6. Existing code files that I will modify or that serve as pattern references
 
@@ -567,7 +588,7 @@ Before marking any code task `[x]`, I evaluate each criterion below. For each it
   "artifacts": [
     "src/services/auth.service.ts — created",
     "src/types/auth.types.ts — created",
-    "openspec/changes/<name>/tasks.md — updated"
+    "<tasks artifact — mode-dependent: engram:sdd/{change-name}/tasks (engram/hybrid) or openspec/changes/<name>/tasks.md (openspec/hybrid)> — updated"
   ],
   "deviations": ["DEVIATION in task 2.1: [description and reason]"],
   "next_recommended": ["sdd-apply (Phase 2) — if more phases remain", "/sdd-verify <change-name> — verify against specs before committing (run after all phases are complete)"],

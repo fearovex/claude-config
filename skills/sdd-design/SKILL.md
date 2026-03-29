@@ -6,6 +6,8 @@ description: >
 format: procedural
 model: sonnet
 thinking: enabled
+metadata:
+  version: "2.1"
 ---
 
 # sdd-design
@@ -111,10 +113,21 @@ See `docs/SPEC-CONTEXT.md` for the full convention reference, load cap rationale
 
 ### Step 1 — Read prior artifacts
 
+**Mode detection (inline, non-blocking):**
+Read `artifact_store.mode` from orchestrator launch context.
+- If absent and Engram MCP is reachable → default to `engram`
+- If absent and Engram MCP is not reachable → default to `none`
+
 I must read:
 
-- `openspec/changes/<change-name>/proposal.md`
-- `openspec/changes/<change-name>/specs/` (all spec.md files)
+- The proposal artifact:
+  - **engram**: `mem_search(query: "sdd/{change-name}/proposal")` → `mem_get_observation(id)`.
+  - **openspec** / **hybrid**: `openspec/changes/<change-name>/proposal.md`
+  - **none**: proposal content passed inline from orchestrator.
+- The spec artifact:
+  - **engram**: `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
+  - **openspec** / **hybrid**: `openspec/changes/<change-name>/specs/` (all spec.md files)
+  - **none**: spec content passed inline from orchestrator.
 - `ai-context/architecture.md` if it exists
 - `ai-context/conventions.md` if it exists
 
@@ -146,7 +159,15 @@ This check applies to the Technical Decisions table, the Testing Strategy table,
 
 ### Step 3 — Create design.md
 
-I create `openspec/changes/<change-name>/design.md`:
+I persist the design artifact based on the active persistence mode:
+
+**Write dispatch:**
+- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/design`, `type: architecture`, `project: {project}`, content = full design markdown. Do NOT write any file.
+- **openspec**: Write `openspec/changes/<change-name>/design.md`.
+- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem write.
+- **none**: Skip all write operations. Return design content inline only.
+
+Content format (applies to all write modes):
 
 ```markdown
 # Technical Design: [change-name]
@@ -316,7 +337,11 @@ I return a clear executive summary to the orchestrator with all artifacts produc
 {
   "status": "ok|warning|blocked",
   "summary": "Design for [change-name]: [N] affected files, approach [brief description], risk [level].",
-  "artifacts": ["openspec/changes/<name>/design.md"],
+  "artifacts": "<mode-dependent — see write dispatch in Step 3>",
+  // engram   → ["engram:sdd/{change-name}/design"]
+  // openspec → ["openspec/changes/<name>/design.md"]
+  // hybrid   → ["engram:sdd/{change-name}/design", "openspec/changes/<name>/design.md"]
+  // none     → []
   "next_recommended": ["sdd-tasks (requires spec + design completed)"],
   "risks": ["[technical risk if found]"]
 }

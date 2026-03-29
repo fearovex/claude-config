@@ -5,6 +5,8 @@ description: >
   Trigger: /sdd-verify <change-name>, verify implementation, quality gate, validate change.
 format: procedural
 model: sonnet
+metadata:
+  version: "2.1"
 ---
 
 # sdd-verify
@@ -109,11 +111,25 @@ Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md`
 
 ### Step 1 — Load all artifacts
 
+**Mode detection (inline, non-blocking):**
+Read `artifact_store.mode` from orchestrator launch context.
+- If absent and Engram MCP is reachable → default to `engram`
+- If absent and Engram MCP is not reachable → default to `none`
+
 I read:
 
-- `openspec/changes/<change-name>/tasks.md` — what was planned
-- `openspec/changes/<change-name>/specs/` — what was required
-- `openspec/changes/<change-name>/design.md` — how it was designed
+- The tasks artifact — what was planned:
+  - **engram**: `mem_search(query: "sdd/{change-name}/tasks")` → `mem_get_observation(id)`.
+  - **openspec** / **hybrid**: `openspec/changes/<change-name>/tasks.md`
+  - **none**: tasks content passed inline from orchestrator.
+- The spec artifact — what was required:
+  - **engram**: `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
+  - **openspec** / **hybrid**: `openspec/changes/<change-name>/specs/`
+  - **none**: spec content passed inline from orchestrator.
+- The design artifact — how it was designed:
+  - **engram**: `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
+  - **openspec** / **hybrid**: `openspec/changes/<change-name>/design.md`
+  - **none**: design content passed inline from orchestrator.
 - The code files that were created/modified
 
 ### Step 2 — Completeness Check (Tasks)
@@ -338,7 +354,7 @@ I produce a Spec Compliance Matrix that cross-references every Given/When/Then s
 
 **Process:**
 
-1. I read all spec files in `openspec/changes/<change-name>/specs/`
+1. I read all spec content from the active persistence mode (same source as Step 1)
 2. For each spec file, I extract every Given/When/Then scenario
 3. For each scenario, I cross-reference against:
    - **Code implementation evidence** from Step 3 (Correctness Check)
@@ -385,7 +401,15 @@ Abstract reasoning or code inspection alone MUST NOT suffice to mark a criterion
 
 **The `## Tool Execution` section is mandatory in every `verify-report.md` — even when tool execution was skipped.** When skipped, the section MUST still appear with: "Test Execution: SKIPPED — no test runner detected".
 
-I create `openspec/changes/<change-name>/verify-report.md`:
+I persist the verify report based on the active persistence mode:
+
+**Write dispatch:**
+- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/verify-report`, `type: architecture`, `project: {project}`, content = full report markdown. Do NOT write any file.
+- **openspec**: Write `openspec/changes/<change-name>/verify-report.md`.
+- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem write.
+- **none**: Skip all write operations. Return report content inline only.
+
+Content format (applies to all write modes):
 
 ```markdown
 # Verification Report: [change-name]
@@ -523,7 +547,11 @@ Verifier: sdd-verify
 {
   "status": "ok|warning|failed",
   "summary": "Verification [change-name]: [verdict]. [N] critical, [M] warnings.",
-  "artifacts": ["openspec/changes/<name>/verify-report.md"],
+  "artifacts": "<mode-dependent — see write dispatch in Step 10>",
+  // engram   → ["engram:sdd/{change-name}/verify-report"]
+  // openspec → ["openspec/changes/<name>/verify-report.md"]
+  // hybrid   → ["engram:sdd/{change-name}/verify-report", "openspec/changes/<name>/verify-report.md"]
+  // none     → []
   "test_execution": {
     "runner": "[detected runner or null]",
     "command": "[command or null]",

@@ -5,6 +5,8 @@ description: >
   Trigger: /sdd-tasks <change-name>, task plan, break down implementation, task breakdown.
 format: procedural
 model: sonnet
+metadata:
+  version: "2.1"
 ---
 
 # sdd-tasks
@@ -112,12 +114,26 @@ See `docs/SPEC-CONTEXT.md` for the full convention reference, load cap rationale
 
 ### Step 1 — Read prior artifacts
 
+**Mode detection (inline, non-blocking):**
+Read `artifact_store.mode` from orchestrator launch context.
+- If absent and Engram MCP is reachable → default to `engram`
+- If absent and Engram MCP is not reachable → default to `none`
+
 I must read:
 
-- `openspec/changes/<change-name>/design.md` (the file matrix and approach)
-- `openspec/changes/<change-name>/specs/` (the success criteria)
-- `openspec/config.yaml` if it exists (project rules)
-- `openspec/changes/<change-name>/proposal.md` — specifically the `## Supersedes` section
+- The design artifact (the file matrix and approach):
+  - **engram**: `mem_search(query: "sdd/{change-name}/design")` → `mem_get_observation(id)`.
+  - **openspec** / **hybrid**: `openspec/changes/<change-name>/design.md`
+  - **none**: design content passed inline from orchestrator.
+- The spec artifact (the success criteria):
+  - **engram**: `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
+  - **openspec** / **hybrid**: `openspec/changes/<change-name>/specs/` (all spec.md files)
+  - **none**: spec content passed inline from orchestrator.
+- `openspec/config.yaml` if it exists (project rules — always filesystem)
+- The proposal artifact — specifically the `## Supersedes` section:
+  - **engram**: `mem_search(query: "sdd/{change-name}/proposal")` → `mem_get_observation(id)`.
+  - **openspec** / **hybrid**: `openspec/changes/<change-name>/proposal.md`
+  - **none**: proposal content passed inline from orchestrator.
 
 ### Step 2 — Analyze dependencies between tasks
 
@@ -252,7 +268,15 @@ Placement rules:
   Question: Which Stripe invoice field should be used to record the payment failure date?
 ```
 
-I create `openspec/changes/<change-name>/tasks.md`:
+I persist the task plan based on the active persistence mode:
+
+**Write dispatch:**
+- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/tasks`, `type: architecture`, `project: {project}`, content = full tasks markdown. Do NOT write any file.
+- **openspec**: Write `openspec/changes/<change-name>/tasks.md`.
+- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem write.
+- **none**: Skip all write operations. Return task plan content inline only.
+
+Content format (applies to all write modes):
 
 ```markdown
 # Task Plan: [change-name]
@@ -337,7 +361,11 @@ Return ONLY this JSON block. Do NOT add free-form text, command suggestions, or 
 {
   "status": "ok|warning|blocked",
   "summary": "Plan for [change-name]: [N] phases, [M] total tasks. Estimate: [Low/Medium/High].",
-  "artifacts": ["openspec/changes/<name>/tasks.md"],
+  "artifacts": "<mode-dependent — see write dispatch in Step 5>",
+  // engram   → ["engram:sdd/{change-name}/tasks"]
+  // openspec → ["openspec/changes/<name>/tasks.md"]
+  // hybrid   → ["engram:sdd/{change-name}/tasks", "openspec/changes/<name>/tasks.md"]
+  // none     → []
   "next_recommended": ["sdd-apply"],
   "risks": ["[blocker if any]"]
 }

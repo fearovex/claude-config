@@ -5,6 +5,8 @@ description: >
   Trigger: /sdd-spec <change-name>, write specs, functional requirements, specification phase.
 format: procedural
 model: sonnet
+metadata:
+  version: "2.1"
 ---
 
 # sdd-spec
@@ -131,10 +133,18 @@ See `docs/SPEC-CONTEXT.md` for the full convention reference, load cap rationale
 
 ### Step 1 — Read prior artifacts
 
+**Mode detection (inline, non-blocking):**
+Read `artifact_store.mode` from orchestrator launch context.
+- If absent and Engram MCP is reachable → default to `engram`
+- If absent and Engram MCP is not reachable → default to `none`
+
 I must read:
 
-- `openspec/changes/<change-name>/proposal.md` (the WHAT and WHY)
-- `openspec/specs/<domain>/spec.md` if it exists (current domain spec)
+- The proposal artifact (the WHAT and WHY):
+  - **engram**: `mem_search(query: "sdd/{change-name}/proposal")` → `mem_get_observation(id)` for full content.
+  - **openspec** / **hybrid**: `openspec/changes/<change-name>/proposal.md`
+  - **none**: proposal content passed inline from orchestrator.
+- `openspec/specs/<domain>/spec.md` if it exists (current domain spec — always filesystem)
 - `ai-context/architecture.md` if it exists (to understand the current system)
 
 #### Step 1 extended — Validate against Supersedes section
@@ -189,8 +199,15 @@ IF openspec/specs/index.yaml already exists: skip silently
 
 This sub-step runs ONCE per sdd-spec invocation, before writing any domain spec. It is non-blocking — any failure produces at most an INFO note.
 
-For each affected domain, I create or update:
-`openspec/changes/<change-name>/specs/<domain>/spec.md`
+For each affected domain, I persist the delta spec based on the active persistence mode:
+
+**Write dispatch:**
+- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/spec`, `type: architecture`, `project: {project}`, content = all domain specs concatenated (separated by `---`). Do NOT write any file.
+- **openspec**: Write `openspec/changes/<change-name>/specs/<domain>/spec.md` for each domain.
+- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem writes.
+- **none**: Skip all write operations. Return spec content inline only.
+
+Content format (applies to all write modes):
 
 #### If NO existing spec — Full spec:
 
@@ -317,10 +334,11 @@ For each requirement I include:
 {
   "status": "ok|warning|blocked",
   "summary": "Specs for [change-name]: [N] domains, [M] requirements, [K] scenarios.",
-  "artifacts": [
-    "openspec/changes/<name>/specs/<domain1>/spec.md",
-    "openspec/changes/<name>/specs/<domain2>/spec.md"
-  ],
+  "artifacts": "<mode-dependent — see write dispatch in Step 3>",
+  // engram   → ["engram:sdd/{change-name}/spec"]
+  // openspec → ["openspec/changes/<name>/specs/<domain1>/spec.md", "openspec/changes/<name>/specs/<domain2>/spec.md"]
+  // hybrid   → both engram + openspec refs
+  // none     → []
   "next_recommended": ["sdd-tasks (after sdd-design)"],
   "risks": []
 }

@@ -5,6 +5,8 @@ description: >
   Trigger: /sdd-explore <topic>, explore, investigate codebase, research feature, analyze before changing.
 format: procedural
 model: sonnet
+metadata:
+  version: "2.1"
 ---
 
 # sdd-explore
@@ -262,8 +264,22 @@ If you intend this as a one-off investigation, proceed as-is.
 
 This warning is informational only — writing proceeds regardless of the name.
 
-If invoked as `/sdd-explore <change-name>`, I save to:
-`openspec/changes/<change-name>/exploration.md`
+If invoked as `/sdd-explore <change-name>`, I persist the exploration artifact based on the active persistence mode.
+
+**Mode detection (inline, non-blocking):**
+Read `artifact_store.mode` from orchestrator launch context.
+- If absent and Engram MCP is reachable → default to `engram`
+- If absent and Engram MCP is not reachable → default to `none`
+
+**Write dispatch:**
+
+- **engram**: Call `mem_save` with `topic_key: sdd/{change-name}/explore`, `type: architecture`, `project: {project}`, content = full exploration markdown. Do NOT write any file.
+  - If no change name provided: log `INFO: no change name — skipping artifact persistence` and skip.
+- **openspec**: Write `openspec/changes/<change-name>/exploration.md` with full exploration content. No `mem_save` call.
+- **hybrid**: Perform BOTH the engram `mem_save` AND the openspec filesystem write.
+- **none**: Skip all write operations. Return exploration content inline only.
+
+Content format (applies to all write modes):
 
 ```markdown
 # Exploration: [topic]
@@ -345,7 +361,11 @@ Contradictions detected between user intent and existing context:
 {
   "status": "ok|warning|blocked",
   "summary": "Analysis of [topic]: [2-3 lines of the main finding]",
-  "artifacts": ["openspec/changes/<name>/exploration.md"],
+  "artifacts": "<mode-dependent — see write dispatch in Step 8>",
+  // engram   → ["engram:sdd/{change-name}/explore"]
+  // openspec → ["openspec/changes/<name>/exploration.md"]
+  // hybrid   → ["engram:sdd/{change-name}/explore", "openspec/changes/<name>/exploration.md"]
+  // none     → []
   "next_recommended": ["sdd-propose"],
   "risks": ["[risk if found]"]
 }

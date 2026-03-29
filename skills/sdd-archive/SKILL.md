@@ -5,6 +5,8 @@ description: >
   Trigger: /sdd-archive <change-name>, archive change, finalize SDD cycle, close change.
 format: procedural
 model: haiku
+metadata:
+  version: "2.1"
 ---
 
 # sdd-archive
@@ -52,13 +54,22 @@ Project-local skills override the global catalog. See `docs/SKILL-RESOLUTION.md`
 
 ### Step 1 — Verify it is archivable
 
+**Mode detection (inline, non-blocking):**
+Read `artifact_store.mode` from orchestrator launch context.
+- If absent and Engram MCP is reachable → default to `engram`
+- If absent and Engram MCP is not reachable → default to `none`
+
 #### Completeness Check
 
-Before reading `verify-report.md`, I check the change directory for required SDD artifacts using a two-tier severity model.
+Before reading the verify report, I check for required SDD artifacts using a two-tier severity model. The check method depends on the active mode:
 
-**CRITICAL artifacts** (block with no proceed option): `proposal.md`, `tasks.md`
+- **engram**: Check existence via `mem_search(query: "sdd/{change-name}/proposal")`, `mem_search(query: "sdd/{change-name}/tasks")`, etc. Artifact exists if search returns results.
+- **openspec** / **hybrid**: Check the change directory for files as described below.
+- **none**: Skip completeness check — no persisted artifacts to verify.
 
-**WARNING artifacts** (present two-option prompt): `design.md`, non-empty `specs/` directory (contains at least one `.md` file)
+**CRITICAL artifacts** (block with no proceed option): proposal, tasks
+
+**WARNING artifacts** (present two-option prompt): design, specs
 
 **Check order:**
 
@@ -103,7 +114,10 @@ List only the artifacts that are actually absent. Wait for the user to reply:
 
 ---
 
-I read `openspec/changes/<change-name>/verify-report.md` if it exists.
+I read the verify report artifact if it exists:
+- **engram**: `mem_search(query: "sdd/{change-name}/verify-report")` → `mem_get_observation(id)`.
+- **openspec** / **hybrid**: `openspec/changes/<change-name>/verify-report.md`
+- **none**: verify report content passed inline from orchestrator (or absent).
 
 If there are unresolved CRITICAL issues:
 
@@ -150,7 +164,12 @@ Continue? [y/n]
 
 ### Step 3 — Sync delta specs to master specs
 
-For each delta spec file in `openspec/changes/<name>/specs/`:
+I read the delta spec content from the active persistence mode:
+- **engram**: `mem_search(query: "sdd/{change-name}/spec")` → `mem_get_observation(id)`.
+- **openspec** / **hybrid**: Read files from `openspec/changes/<name>/specs/`
+- **none**: spec content passed inline from orchestrator.
+
+For each delta spec domain:
 
 #### If master spec exists (`openspec/specs/<domain>/spec.md`):
 
@@ -220,6 +239,10 @@ If the condition is met:
 4. **Non-blocking:** if `index.yaml` cannot be written (permission error, parse error), log a warning and continue. This step MUST NOT block the archive operation.
 
 ### Step 4 — Move to archive
+
+**Note**: In **engram** mode, there are no filesystem change directories to move. Instead, save an archive report to engram via `mem_save` with `topic_key: sdd/{change-name}/archive-report`. In **none** mode, skip this step entirely.
+
+For **openspec** and **hybrid** modes:
 
 **Pre-flight: strip embedded date from slug**
 
@@ -376,10 +399,11 @@ Memory: [updated | failed — reason]
 {
   "status": "ok|warning|failed",
   "summary": "Change [name] archived. [N] master specs updated. Memory: [updated|failed|skipped].",
-  "artifacts": [
-    "openspec/specs/<domain>/spec.md — updated",
-    "openspec/changes/archive/YYYY-MM-DD-<archive_slug>/ — created"
-  ],
+  "artifacts": "<mode-dependent>",
+  // engram   → ["openspec/specs/<domain>/spec.md — updated", "engram:sdd/{change-name}/archive-report"]
+  // openspec → ["openspec/specs/<domain>/spec.md — updated", "openspec/changes/archive/YYYY-MM-DD-<archive_slug>/ — created"]
+  // hybrid   → all of the above
+  // none     → ["openspec/specs/<domain>/spec.md — updated"]
   "next_recommended": [],
   "risks": []
 }

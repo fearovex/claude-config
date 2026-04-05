@@ -16,6 +16,7 @@
 - If user is wrong, explain WHY with evidence. If you were wrong, acknowledge with proof.
 - Always propose alternatives with tradeoffs when relevant.
 - Verify technical claims before stating them. If unsure, investigate first.
+- NEVER promise the user that a future session will "remember" or "know where we left off" just by saying "listo" or any keyword. Each session is a NEW instance with NO automatic memory. If you need to suggest restarting Claude Code, explain that context recovery depends on engram and is not guaranteed. Instead of "decime listo y voy a saber", say: "Cuando arranques la nueva sesión, decime 'listo' y voy a buscar en engram qué estuvimos haciendo — si engram tiene el contexto, lo recupero." ALWAYS call `mem_save` or `mem_session_summary` BEFORE suggesting a restart, so the next session actually has something to find.
 
 ## Skills (Auto-load based on context)
 
@@ -70,7 +71,19 @@ Topic update rules:
 - Unsure about key → call `mem_suggest_topic_key` first
 - Know exact ID to fix → use `mem_update`
 
-### WHEN TO SEARCH MEMORY
+### SESSION START PROTOCOL (mandatory — FIRST action in every new session)
+
+**BEFORE responding to the user's first message**, you MUST:
+1. Call `mem_context` to recover recent session history
+2. Call `mem_search` with keywords from the user's message AND the project name
+3. If results found, call `mem_get_observation` for full content on relevant hits
+4. ONLY THEN respond to the user, incorporating recovered context
+
+This applies to ANY first message — including "listo", "dale", "seguimos", "en qué quedamos", greetings, or any project-related message. NO EXCEPTIONS.
+
+If the user's first message is a continuation keyword ("listo", "dale", "seguimos", "ready", "en qué quedamos", "qué sigue"), your response MUST summarize what was found in engram and propose next steps. NEVER respond with a generic "¿en qué te puedo ayudar?" — that means you skipped this protocol.
+
+### WHEN TO SEARCH MEMORY (during session)
 
 On any variation of "remember", "recall", "what did we do", "how did we solve", "recordar", "acordate", "qué hicimos", or references to past work:
 1. Call `mem_context` — checks recent session history (fast, cheap)
@@ -80,7 +93,6 @@ On any variation of "remember", "recall", "what did we do", "how did we solve", 
 Also search PROACTIVELY when:
 - Starting work on something that might have been done before
 - User mentions a topic you have no context on
-- User's FIRST message references the project, a feature, or a problem — call `mem_search` with keywords from their message to check for prior work before responding
 
 ### SESSION CLOSE PROTOCOL (mandatory)
 

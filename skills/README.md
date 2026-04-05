@@ -138,5 +138,5 @@ Skills in this repository (global catalog):
 
 - **SDD**: `sdd-apply`, `sdd-archive`, `sdd-design`, `sdd-explore`, `sdd-init`, `sdd-propose`, `sdd-spec`, `sdd-status`, `sdd-tasks`, `sdd-verify`
 - **Infrastructure**: `project-audit`, `project-fix`, `project-onboard`, `project-setup`, `memory-manage`, `codebase-teach`, `feature-domain-expert`, `config-export`, `skill-creator`, `smart-commit`
-- **Workflow**: `branch-pr`, `issue-creation`, `judgment-day`
+- **Workflow**: `branch-pr`, `issue-creation`, `judgment-day`, `project-tracking`
 - **Technology**: `go-testing`, `nextjs-15`, `react-19`, `react-native`, `solid-ddd`, `tailwind-4`, `typescript`, `zustand-5`

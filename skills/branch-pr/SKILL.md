@@ -5,7 +5,6 @@ description: >
   Trigger: When creating a pull request, opening a PR, or preparing changes for review.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "2.0"
 ---
 

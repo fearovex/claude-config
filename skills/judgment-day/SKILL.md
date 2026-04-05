@@ -8,7 +8,6 @@ description: >
   "doble review", "juzgar", "que lo juzguen".
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.1"
 ---
 

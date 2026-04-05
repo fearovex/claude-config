@@ -5,7 +5,6 @@ description: >
   Trigger: When user wants to initialize SDD in a project, or says "sdd init", "iniciar sdd".
 license: MIT
 metadata:
-  author: gentleman-programming
   version: "3.0"
 ---
 

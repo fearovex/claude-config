@@ -5,7 +5,6 @@ description: >
   Trigger: When writing Go tests, using teatest, or adding test coverage.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
   version: "1.0"
 ---
 

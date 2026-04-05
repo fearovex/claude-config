@@ -332,6 +332,7 @@ Current catalog available in `~/.claude/skills/`:
 |-------|---------|
 | `branch-pr` | PR creation workflow |
 | `issue-creation` | GitHub issue creation workflow |
+| `project-tracking` | GitHub Project board + Issues backlog management |
 | `judgment-day` | Parallel adversarial review protocol |
 
 ### Technology

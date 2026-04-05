@@ -10,7 +10,6 @@ description: >
   Trigger: When the user says "commit", "smart commit", or /commit.
 license: Apache-2.0
 metadata:
-  author: audiio
   version: "1.1"
 format: procedural
 ---

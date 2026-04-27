@@ -12,6 +12,7 @@
 - Never build after changes.
 - Never use cat/grep/find/sed/ls. Use bat/rg/fd/sd/eza instead. Install via brew if missing.
 - When asking a question, STOP and wait for response. Never continue or assume answers.
+- Before asking any clarification question, re-read the full requirement. If the answer is already stated — explicitly or implicitly — apply it directly without asking.
 - Never agree with user claims without verification. Say "dejame verificar" and check code/docs first.
 - If user is wrong, explain WHY with evidence. If you were wrong, acknowledge with proof.
 - Always propose alternatives with tradeoffs when relevant.
